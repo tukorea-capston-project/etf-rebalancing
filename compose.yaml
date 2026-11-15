@@ -1,0 +1,40 @@
+# 개발용·테스트용 PostgreSQL. 루트의 .env 값을 사용한다.
+# 실행: docker compose up -d
+
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?.env에 POSTGRES_USER를 설정하세요}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?.env에 POSTGRES_PASSWORD를 설정하세요}
+      POSTGRES_DB: ${POSTGRES_DB:?.env에 POSTGRES_DB를 설정하세요}
+    ports:
+      - "15432:5432"
+    volumes:
+      # PostgreSQL 18 이미지는 /var/lib/postgresql 에 마운트한다 (17 이하의 /data 경로와 다름)
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  db-test:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?.env에 POSTGRES_USER를 설정하세요}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?.env에 POSTGRES_PASSWORD를 설정하세요}
+      POSTGRES_DB: ${POSTGRES_DB:?.env에 POSTGRES_DB를 설정하세요}
+    ports:
+      - "15433:5432"
+    # 테스트 DB는 데이터를 남기지 않는다 (컨테이너를 내리면 사라짐)
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  db-data:
