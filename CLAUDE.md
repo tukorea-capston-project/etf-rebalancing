@@ -97,6 +97,7 @@ DB (루트에서)
 - 분배금이 이미 반영된 수정주가(FinanceDataReader 가격, yfinance `Adj Close`)를 KRX 종가와 섞어 쓰지 않는다. 분배금이 두 번 반영된다.
 - 백테스트에는 수수료와 슬리피지를 반영한다.
 - 비용 가정치는 코드에 하드코딩하지 않고 설정값으로 분리한다.
+- 상세(체결 가정, 세금, 성과 지표, 비교 기준)는 `docs/backtest.md`.
 
 ## 모의투자 / KIS
 - KIS는 모의투자 도메인만 쓴다. REST는 `https://openapivts.koreainvestment.com:29443`, WebSocket은 `ws://ops.koreainvestment.com:31000`이다.
