@@ -11,24 +11,9 @@
 
 ## 구성 요소
 
-```
-[브라우저 (팀원 PC, Tailscale)]
-     │ HTTPS  https://<기기명>.<tailnet명>.ts.net
-     ▼
-[AWS EC2] ─────────────────────────────────────────────────────────────
-│  리버스 프록시 ── 정적 파일(React 빌드 결과)
-│       │ /api
-│       ▼
-│  API 서버 (FastAPI) ─────┐                    ┌──── 워커 (예약 작업 + 백테스트 대기열)
-│       │                  ▼                    ▼            │
-│       │            PostgreSQL 18 (공용 개발 DB, Docker)      │
-│       │                                                    │
-│       ├── LLM PC Ollama (Tailscale) : 전략 변환            ├── KRX Open API : 시세
-│       ├── KIS : 자격 증명 등록 시 검증                     ├── yfinance : 분배금
-│       └── AWS KMS : 자격 증명 암복호화                     ├── KIS : 주문, 체결·잔고 확인
-│                                                            └── AWS KMS : 자격 증명 복호화
-───────────────────────────────────────────────────────────────────────
-```
+![시스템 구성도](diagrams/system.drawio.svg)
+
+편집 방법과 로고 출처는 아래 "다이어그램" 섹션에 있다.
 
 | 구성 요소 | 역할 | 실행 위치 |
 |---|---|---|
@@ -84,6 +69,176 @@
 
 - LLM 서버에 연결할 수 없거나 타임아웃이 나면 원인이 드러나는 오류를 돌려준다(`docs/infra.md`).
 
+## 다이어그램
+
+실선은 확정된 내용, 점선과 "미정" 표시는 아직 정하지 않은 내용이다. 설계가 바뀌면 다이어그램도 함께 고친다.
+
+### 시스템 구성도
+
+그림은 위 "구성 요소" 섹션에 있다.
+
+- 파일은 `docs/diagrams/system.drawio.svg`다. GitHub에서는 그림으로 보이고, draw.io에서 열면 그대로 편집할 수 있다.
+- 편집: [app.diagrams.net](https://app.diagrams.net)(브라우저), VS Code의 Draw.io Integration 확장, 또는 draw.io 데스크톱 앱에서 연다. 저장할 때 형식을 `.drawio.svg`로 유지한다.
+- 로고는 파일 안에 포함되어 있다. 출처: 각 사의 공식 사이트(한국투자증권, KRX, Yahoo Finance, Ollama), Simple Icons(Tailscale), draw.io 내장 AWS 아이콘(KMS), 팀 로고 모음(FastAPI, PostgreSQL, React, AWS EC2, Docker). 로고의 상표권은 각 사에 있다.
+
+### 컴포넌트 관계도
+
+`backend/app/`의 폴더가 서로 무엇을 부르는지 보여 준다. 화살표는 "부른다(의존한다)"는 뜻이다.
+
+```mermaid
+flowchart TB
+    FE["프론트엔드 (React)"] -->|"HTTPS /api"| routers
+
+    subgraph ENTRY["진입점"]
+        direction LR
+        routers["API 서버 프로세스<br/>각 도메인 router.py"]
+        worker["워커 프로세스 (EC2에서 1개)<br/>worker/ 시각표 · 백테스트 대기열"]
+    end
+
+    subgraph DOM["도메인 로직: 각 폴더의 service.py (DB는 모두 core를 거쳐 PostgreSQL에 접근)"]
+        auth["auth<br/>사용자 · 세션"]
+        backtest["backtest<br/>시뮬레이션 · 성과 지표"]
+        trading["trading<br/>KIS 주문 · 자격 증명<br/>모드 · 안전장치"]
+        market["market_data<br/>시세 · 분배금 · 영업일"]
+        macro["거시판단 · news · disclosure<br/>(미정, 이슈 12)"]
+        portfolio["portfolio<br/>계산일 판정 · 리밸런싱<br/>주문 수량"]
+        strategy["strategy<br/>자연어 → 전략<br/>스키마 · 버전"]
+    end
+
+    subgraph EXT["설정 파일 · 외부 시스템"]
+        direction LR
+        cfg[("backend/config/*.yaml<br/>화이트리스트 · 분배금 보정")]
+        ollama(["Ollama"])
+        kis(["KIS Open API"])
+        kms(["AWS KMS"])
+        krx(["KRX Open API"])
+        yf(["yfinance"])
+    end
+
+    routers --> auth
+    routers --> strategy
+    routers -->|"접수 · 결과 조회"| backtest
+    routers -->|"자격 증명 · 모드 · 긴급 중지"| trading
+
+    worker -->|"수집"| market
+    worker -->|"계산"| portfolio
+    worker -->|"주문"| trading
+    worker -->|"대기열 실행"| backtest
+    worker -.-> macro
+
+    backtest --> portfolio
+    backtest --> market
+    backtest --> strategy
+    portfolio --> strategy
+    trading -->|"이상 감지"| strategy
+    macro -.->|"제안"| strategy
+
+    strategy --> ollama
+    strategy --> cfg
+    market --> cfg
+    market --> krx
+    market --> yf
+    trading --> kis
+    trading --> kms
+```
+
+### 시퀀스: 자연어 → 전략 변환
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as 사용자
+    participant FE as 프론트엔드
+    participant API as API 서버<br/>(strategy)
+    participant LLM as Ollama<br/>(LLM PC)
+    participant DB as PostgreSQL
+
+    U->>FE: 자연어로 전략 입력
+    FE->>API: 변환 요청 (세션 쿠키)
+    API->>API: 세션 확인
+    API->>LLM: 입력 + 전략 스키마 (타임아웃)
+    LLM-->>API: 구조화된 출력
+    API->>API: Pydantic 스키마 검증 · 화이트리스트 확인
+
+    loop 빠진 값이 있는 동안
+        API-->>FE: 되묻기 + 선택지 3개 정도
+        U->>FE: 답변
+        FE->>API: 답변 전달
+        API->>LLM: 대화 내용 + 스키마
+        LLM-->>API: 구조화된 출력
+        API->>API: 스키마 검증
+    end
+
+    alt 스키마로 표현할 수 없는 요청
+        API-->>FE: 근사치 + 원래 요청과 다른 점 표시
+    else 표현 가능
+        API-->>FE: 전략 초안
+    end
+
+    U->>FE: 확인
+    FE->>API: 확정 요청
+    API->>DB: 전략 저장 (첫 버전, 목표 비중 = 기준 비중 SAA)
+    API-->>FE: 확정 완료
+
+    Note over API,LLM: 연결 실패·타임아웃이면 "LLM 서버에 연결할 수 없음"을 돌려준다
+    Note over API,DB: 미정: 검증 실패 시 처리, 대화 상태 보관 위치
+```
+
+### 시퀀스: 일일 자동 운용 (워커)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant W as 워커 (EC2)
+    participant DB as PostgreSQL
+    participant KRX as KRX Open API
+    participant YF as yfinance
+    participant KMS as AWS KMS
+    participant KIS as KIS Open API
+    participant N as 알림<br/>(채널 미정)
+
+    rect rgb(238, 244, 252)
+        Note over W,YF: 시세·분배금 수집 (market_data) · 매 영업일, KRX 갱신(다음 영업일 08시경) 이후
+        W->>KRX: 미수집·실패 날짜의 ETF 일별매매정보
+        KRX-->>W: 전체 ETF 시세
+        W->>YF: 대상 ETF 분배금 전체 이력
+        YF-->>W: 분배금
+        W->>DB: 대상 ETF 시세 · 분배금(보정 YAML 적용) · 수집 이력 저장
+    end
+
+    rect rgb(240, 248, 240)
+        Note over W,DB: 리밸런싱 계산 (portfolio) · 계산일 장 마감 후
+        W->>DB: 사용자별 운용 전략 · 보유 현황 조회
+        Note over W,KIS: 계산일 종가 출처 미정 (이슈 13)
+        W->>W: 계산일 판정
+        opt 계산일
+            W->>W: 목표 금액 · 주문 수량 계산
+            W->>DB: 주문 계획 저장
+        end
+    end
+
+    rect rgb(252, 244, 236)
+        Note over W,N: 주문 (trading) · 다음 영업일, 시각 미정 (이슈 13) · 정지 상태인 사용자는 건너뜀
+        W->>DB: 주문 계획 · 자격 증명(암호문) 조회
+        W->>KMS: 자격 증명 복호화
+        W->>KIS: 잔고 조회 (접근 토큰 캐시 사용)
+        W->>W: 이상 감지 · 실전이면 서버 스위치 확인
+        alt 이상 감지 또는 서버 스위치 꺼짐
+            W->>DB: 정지 상태와 사유 기록 (주문은 하나도 보내지 않음)
+            W-)N: 정지 알림
+        else 통과
+            W->>KIS: 매도 주문
+            Note over W,KIS: 매도 체결 확인 방법 미정 (이슈 13)
+            W->>KIS: 매수 주문
+            W->>KIS: 체결 확인 (방법 미정, 이슈 13)
+            W->>DB: 주문 · 체결 결과 저장
+            W-)N: 주문 결과 알림
+        end
+    end
+
+    Note over W,KIS: 분배금 입금 확인 후 재투자 흐름은 미정 (이슈 13)
+```
+
 ## 미정
 
 - 리버스 프록시 구현: Caddy(`*.ts.net` 인증서 자동 발급) 또는 `tailscale serve`
@@ -94,4 +249,4 @@
 - 계산일 종가 출처, 주문·체결 확인·분배금 재투자 시각: #13
 - 거시판단 작업과 뉴스·공시 수집: #12
 - 알림 채널: `docs/trading.md`
-- 다이어그램(시스템 구성도, 컴포넌트 관계도, 핵심 흐름 시퀀스, ERD)
+- ERD: 테이블 구조(전략 Pydantic 모델 #10, 각 도메인 `models.py`)가 정해진 뒤 그린다
