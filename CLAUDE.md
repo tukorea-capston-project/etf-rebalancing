@@ -93,6 +93,7 @@ DB (루트에서)
 - 타입 체크: `uv run pyright`
 - 마이그레이션 생성: `uv run alembic revision --autogenerate -m "<변경 내용>"`
 - 마이그레이션 적용: `uv run alembic upgrade head`
+- 시세·분배금 수집: `uv run python -m app.market_data` (공용 개발 DB에는 담당 팀원만 실행. `docs/market-data.md`)
 
 프론트엔드 (`frontend/`에서)
 - 의존성 설치: `npm install`
