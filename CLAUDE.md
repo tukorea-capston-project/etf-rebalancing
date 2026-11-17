@@ -13,9 +13,23 @@
   - Node.js 26을 쓴다. `frontend/package.json`의 `engines`와 `frontend/.npmrc`의 `engine-strict=true`로 버전을 고정한다.
 - 프론트엔드 품질 도구: Vitest(테스트), Oxlint(린트), Prettier(포맷)
 - 증권사 API: 한국투자증권 KIS Open API (모의투자)
-- LLM: Ollama로 실행하는 로컬 Qwen 계열 모델 (팀원 최저 사양 16GB 기준, 7~8B급)
+- LLM: Ollama로 실행하는 로컬 Qwen 계열 모델 (팀원 최저 사양 16GB 기준, 7~8B급). AWS에서는 돌리지 않는다.
   <!-- TODO: 정확한 모델 태그(예: ollama pull <모델명>) 확정 후 기입 -->
-- 데이터 저장소: 팀원 각자 로컬 PostgreSQL 18. 코드에서는 SQLModel로 접근한다.
+- 데이터 저장소: PostgreSQL 18. 공용 개발 DB는 AWS EC2에 두고, 테스트 DB는 각자 로컬에서 띄운다. 코드에서는 SQLModel로 접근한다.
+- 서버: AWS EC2 한 대에 백엔드와 공용 개발 DB를 둔다. EC2, LLM PC, 팀원 PC는 Tailscale 사설망으로 연결한다.
+
+# 실행 환경
+
+상세(구성도, Tailscale 설정, 시연 체크리스트)는 `docs/infra.md`.
+
+- DB 포트(`15432`)와 Ollama 포트(`11434`)는 인터넷에 열지 않는다. Tailscale 사설망으로만 접근한다.
+- LLM 호출 주소는 `.env`의 `OLLAMA_BASE_URL` 하나로 정한다. 코드에 주소를 하드코딩하지 않는다.
+  - 개발: 각자 PC에서 백엔드를 띄우고 자기 PC의 Ollama(`http://localhost:11434`)를 호출한다. LLM PC가 없어도 개발할 수 있다.
+  - AWS 백엔드: LLM PC 한 대만 호출한다. LLM PC가 꺼져 있을 때 팀원 PC로 대체하지 않는다.
+- LLM PC의 Ollama는 그 PC의 Tailscale 주소(`100.x.y.z`)에만 바인딩한다(`OLLAMA_HOST=100.x.y.z:11434`). Ollama API에는 인증이 없다. `OLLAMA_HOST=0.0.0.0`은 같은 와이파이(LAN)에도 노출되므로 쓰지 않는다.
+- Tailscale 접근 정책(ACL)은 기본값(모든 기기 간 허용)을 쓰지 않는다. LLM PC의 `11434`에는 EC2만 접근할 수 있게 막는다.
+- 개발 PC와 LLM PC는 모두 같은 모델 태그를 쓴다. 모델이 다르면 스키마 검증 결과가 PC마다 달라진다.
+- LLM 호출에는 타임아웃을 두고, 연결할 수 없으면 원인이 드러나는 오류를 돌려준다. LLM이 꺼져 있어도 전략 변환 외의 기능은 동작해야 한다.
 
 # 프로젝트 구조
 
@@ -28,7 +42,7 @@
   - `trading/`: KIS 모의투자
   - `market_data/`, `news/`, `disclosure/`: 시세·뉴스(감성 분석)·공시 수집. 백엔드의 DB 모델과 설정을 그대로 쓴다.
   - 시세 수집은 출처별 구현을 분리해, 나머지 코드를 고치지 않고 출처만 교체할 수 있게 한다.
-  - 백테스트용 과거 시세는 KRX Open API의 ETF 일별매매정보에서 수집한다. 팀원마다 각자의 KRX 인증키를 쓴다.
+  - 백테스트용 과거 시세는 KRX Open API의 ETF 일별매매정보에서 수집한다. 공용 DB에는 한 곳(지금은 담당 팀원, 나중에는 AWS 서버)에서만 수집하고, KRX 인증키는 수집하는 쪽의 것을 쓴다.
     - 호출 1회에 기준일자(`basDd`) 하나의 전체 ETF 데이터가 온다. 기간 데이터는 날짜를 바꿔 가며 반복 호출한다.
     - 인증키당 하루 호출 한도는 10,000회이고, 데이터는 2010년 이후부터 있다.
     - 응답 필드는 모두 문자열이다. 가격·거래량 등 숫자 필드는 변환해서 저장하고, 종목코드(`ISU_CD`)는 문자열 그대로 둔다.
@@ -45,18 +59,21 @@
 - DB 접속 정보, KIS 모의투자 앱키, KRX Open API 인증키 등 비밀값은 `.env`에 두고 pydantic-settings로 읽는다. `.env`는 커밋하지 않고, 필요한 키 목록은 값을 비운 `.env.example`로 커밋한다.
 - 테이블 구조 변경은 SQLModel 모델을 수정한 뒤 Alembic 마이그레이션을 생성하는 방식으로만 한다. 마이그레이션 파일은 커밋하고, DB에서 테이블을 직접 수정하지 않는다.
 - 새 기능 폴더에 `models.py`를 만들면 `backend/alembic/env.py`에서 import해야 한다. import하지 않으면 Alembic autogenerate가 그 테이블을 인식하지 못한다.
-- PostgreSQL은 개발용·테스트용 모두 루트의 `compose.yaml`로 실행한다. 각자 직접 설치하지 않는다.
-- 자동 테스트는 Compose에 정의된 테스트 전용 PostgreSQL 서비스에서 돌린다. 개발용 DB에서는 테스트를 돌리지 않는다.
-- `backend/tests/conftest.py`는 앱이 설정을 읽기 전에 `POSTGRES_PORT`를 테스트 DB 포트(15433)로 덮어쓴다. 이 동작을 없애거나 우회하지 않는다.
+- 공용 개발 DB는 AWS EC2에서 Docker로 실행한다. 팀원 PC에서는 테스트 DB를, 필요하면 로컬 개발 DB도 루트의 `compose.yaml`로 실행한다. PostgreSQL을 직접 설치하지 않는다.
+  - 공용 개발 DB를 쓰려면 `.env`의 `POSTGRES_HOST`에 EC2의 Tailscale 주소를 넣는다. 로컬 개발 DB를 쓰려면 `localhost`를 넣는다.
+- 공용 개발 DB에는 main에 머지된 마이그레이션만 적용한다. 머지 전 마이그레이션은 로컬 개발 DB에서 확인한다. 공용 DB를 머지 전 스키마로 바꾸면 다른 팀원의 백엔드가 깨진다.
+- 자동 테스트는 Compose에 정의된 테스트 전용 PostgreSQL 서비스(각자 로컬)에서 돌린다. 공용·로컬 개발 DB에서는 테스트를 돌리지 않는다.
+- `backend/tests/conftest.py`는 앱이 설정을 읽기 전에 `POSTGRES_HOST`를 `localhost`로, `POSTGRES_PORT`를 테스트 DB 포트(15433)로 덮어쓴다. 이 동작을 없애거나 우회하지 않는다.
 - DB 비밀번호는 `.env`의 `POSTGRES_PASSWORD` 한 곳에만 쓴다. 접속 주소는 `backend/app/core/config.py`가 `POSTGRES_*` 값으로 만든다. `.env`에 `DATABASE_URL`을 따로 두지 않는다.
-- 포트는 개발 DB `15432`, 테스트 DB `15433`이다. 직접 설치한 PostgreSQL의 기본 포트 5432와 충돌하지 않게 하려는 것이다.
+- 포트는 개발 DB `15432`(AWS·로컬 동일), 테스트 DB `15433`이다. 직접 설치한 PostgreSQL의 기본 포트 5432와 충돌하지 않게 하려는 것이다.
 
 # 명령어
 
 처음 설정: 루트의 `.env.example`을 복사해 `.env`를 만들고 값을 채운다.
 
 DB (루트에서)
-- 개발·테스트 DB 실행: `docker compose up -d`
+- 테스트 DB만 실행: `docker compose up -d db-test`
+- 로컬 개발 DB까지 실행: `docker compose up -d`
 
 백엔드 (`backend/`에서)
 - 의존성 설치: `uv sync`
@@ -86,7 +103,7 @@ DB (루트에서)
 
 ## 투자 대상
 - 투자 대상은 사전 정의된 ETF 목록(화이트리스트) 안에서만 고른다.
-- 화이트리스트는 저장소에 커밋된 설정 파일로 관리한다. DB는 팀원마다 따로라서, 목록을 DB에만 두면 팀원 간에 어긋난다.
+- 화이트리스트는 저장소에 커밋된 설정 파일로 관리한다. 목록을 DB에만 두면 변경이 리뷰·이력으로 남지 않고, 테스트 DB나 로컬 개발 DB와도 어긋난다.
 - 화이트리스트 파일은 `backend/config/` 아래에 YAML 형식으로 둔다.
 - 종목코드는 코드 전체에서 항상 6자리 문자열로 다룬다. YAML에서는 반드시 따옴표로 감싼다(`"012450"`). 따옴표가 없으면 PyYAML이 `012450`을 8진수 `5416`으로 읽는다.
 
