@@ -1,5 +1,6 @@
-# 개발용·테스트용 PostgreSQL. 루트의 .env 값을 사용한다.
-# 실행: docker compose up -d
+# 팀원 PC용 PostgreSQL. 루트의 .env 값을 사용한다.
+# 평소 개발은 AWS의 공용 개발 DB를 쓴다. 여기의 db는 머지 전 스키마 변경 확인 등에 쓰는 로컬 개발 DB(선택)다.
+# 실행: 테스트 DB만 docker compose up -d db-test / 로컬 개발 DB까지 docker compose up -d
 
 services:
   db:
