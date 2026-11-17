@@ -3,11 +3,11 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from alembic import context
-from app.core.config import get_settings
-
 # 새 기능 폴더에 DB 모델(models.py)을 만들면 여기서 import해야 autogenerate가 테이블을 인식한다.
 # 예: import app.strategy.models (사용하지 않는 import 경고는 noqa F401로 끈다)
+import app.market_data.models  # noqa: F401
+from alembic import context
+from app.core.config import get_settings
 
 config = context.config
 # alembic 설정은 configparser라 '%'를 '%%'로 바꿔야 한다 (인코딩된 비밀번호에 '%'가 들어갈 수 있음).
