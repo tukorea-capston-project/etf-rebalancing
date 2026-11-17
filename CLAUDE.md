@@ -1,7 +1,9 @@
 # 프로젝트 개요
 
 사용자의 자연어 입력으로 투자 전략을 완성하고, 그 전략에 따라 국내 ETF 포트폴리오를 리밸런싱하는 시스템.
-운영 범위는 **백테스트 + 모의투자**까지다.
+운영 범위는 **백테스트 + 모의투자 + 실전투자**다.
+여러 사용자가 각자 자기 KIS 계좌를 등록해 쓰는 실제 서비스를 가정해 설계한다. 실제로 서비스하지는 않으며(졸업작품), 개발·시연은 팀원 계정과 팀원 본인 계좌로만 한다.
+프로세스 구성(리버스 프록시, API 서버, 워커)과 작업 실행 방식은 `docs/architecture.md`.
 
 # 기술 스택
 
@@ -12,17 +14,21 @@
 - 프론트엔드: React + Vite + TypeScript, 패키지 매니저는 npm
   - Node.js 26을 쓴다. `frontend/package.json`의 `engines`와 `frontend/.npmrc`의 `engine-strict=true`로 버전을 고정한다.
 - 프론트엔드 품질 도구: Vitest(테스트), Oxlint(린트), Prettier(포맷)
-- 증권사 API: 한국투자증권 KIS Open API (모의투자)
+- 증권사 API: 한국투자증권 KIS Open API (모의투자·실전투자)
 - LLM: Ollama로 실행하는 로컬 Qwen 계열 모델 (팀원 최저 사양 16GB 기준, 7~8B급). AWS에서는 돌리지 않는다.
   <!-- TODO: 정확한 모델 태그(예: ollama pull <모델명>) 확정 후 기입 -->
 - 데이터 저장소: PostgreSQL 18. 공용 개발 DB는 AWS EC2에 두고, 테스트 DB는 각자 로컬에서 띄운다. 코드에서는 SQLModel로 접근한다.
 - 서버: AWS EC2 한 대에 백엔드와 공용 개발 DB를 둔다. EC2, LLM PC, 팀원 PC는 Tailscale 사설망으로 연결한다.
+- 비밀값 암호화: KIS 자격 증명의 암호화 마스터키는 AWS KMS에 둔다(팀원 PC는 로컬 키).
 
 # 실행 환경
 
 상세(구성도, Tailscale 설정, 시연 체크리스트)는 `docs/infra.md`.
 
+- 서비스(프론트엔드와 API)는 인터넷에 공개하지 않는다. Tailscale 사설망 안에서 EC2의 `*.ts.net` 인증서로 HTTPS 제공하며, 프론트엔드와 API는 같은 오리진이다.
 - DB 포트(`15432`)와 Ollama 포트(`11434`)는 인터넷에 열지 않는다. Tailscale 사설망으로만 접근한다.
+- 예약 작업(시세 수집, 리밸런싱 계산, 주문 등)과 백테스트 대기열은 워커 프로세스에서만 실행하고, 워커는 EC2에서 하나만 띄운다. API 서버는 예약 작업을 돌리지 않는다. 팀원 PC의 API 서버도 공용 DB에 붙으므로, 예약 작업이 API 서버에 있으면 수집·주문이 여러 곳에서 중복 실행된다.
+- 인증은 서버 세션(DB 저장) + `HttpOnly`·`Secure` 쿠키다. 상세는 `docs/auth.md`.
 - LLM 호출 주소는 `.env`의 `OLLAMA_BASE_URL` 하나로 정한다. 코드에 주소를 하드코딩하지 않는다.
   - 개발: 각자 PC에서 백엔드를 띄우고 자기 PC의 Ollama(`http://localhost:11434`)를 호출한다. LLM PC가 없어도 개발할 수 있다.
   - AWS 백엔드: LLM PC 한 대만 호출한다. LLM PC가 꺼져 있을 때 팀원 PC로 대체하지 않는다.
@@ -36,10 +42,12 @@
 - 모노레포다. `backend/`(FastAPI, uv 프로젝트)와 `frontend/`(React + Vite)를 한 저장소에 두고, `compose.yaml`과 `.env.example`은 루트에 둔다.
 - 백엔드 코드는 `backend/app/` 아래에 기능(도메인)별 폴더로 나눈다.
   - `core/`: 설정, DB 연결
+  - `auth/`: 사용자, 세션, 로그인
+  - `worker/`: 워커 진입점. 예약 작업 시각표와 백테스트 대기열 처리만 두고, 실제 로직은 각 도메인의 `service.py`를 부른다. 도메인 폴더가 아니므로 아래 `router.py`/`models.py`/`service.py` 구성의 예외다.
   - `strategy/`: 자연어 → 전략 변환, 전략 스키마
   - `portfolio/`: 포트폴리오, 리밸런싱
   - `backtest/`: 백테스트
-  - `trading/`: KIS 모의투자
+  - `trading/`: KIS 모의·실전투자 주문, KIS 자격 증명
   - `market_data/`, `news/`, `disclosure/`: 시세·뉴스(감성 분석)·공시 수집. 백엔드의 DB 모델과 설정을 그대로 쓴다.
   - 시세 수집은 출처별 구현을 분리해, 나머지 코드를 고치지 않고 출처만 교체할 수 있게 한다.
   - 백테스트용 과거 시세는 KRX Open API의 ETF 일별매매정보에서 수집한다. 공용 DB에는 한 곳(지금은 담당 팀원, 나중에는 AWS 서버)에서만 수집하고, KRX 인증키는 수집하는 쪽의 것을 쓴다.
@@ -56,7 +64,8 @@
 
 # 데이터베이스와 설정
 
-- DB 접속 정보, KIS 모의투자 앱키, KRX Open API 인증키 등 비밀값은 `.env`에 두고 pydantic-settings로 읽는다. `.env`는 커밋하지 않고, 필요한 키 목록은 값을 비운 `.env.example`로 커밋한다.
+- DB 접속 정보, KRX Open API 인증키 등 서버 비밀값은 `.env`에 두고 pydantic-settings로 읽는다. `.env`는 커밋하지 않고, 필요한 키 목록은 값을 비운 `.env.example`로 커밋한다.
+- KIS 앱키·시크릿·계좌번호는 사용자의 것이므로 `.env`에 두지 않는다. 사용자별로 등록받아 DB에 암호화해 저장한다.
 - 테이블 구조 변경은 SQLModel 모델을 수정한 뒤 Alembic 마이그레이션을 생성하는 방식으로만 한다. 마이그레이션 파일은 커밋하고, DB에서 테이블을 직접 수정하지 않는다.
 - 새 기능 폴더에 `models.py`를 만들면 `backend/alembic/env.py`에서 import해야 한다. import하지 않으면 Alembic autogenerate가 그 테이블을 인식하지 못한다.
 - 공용 개발 DB는 AWS EC2에서 Docker로 실행한다. 팀원 PC에서는 테스트 DB를, 필요하면 로컬 개발 DB도 루트의 `compose.yaml`로 실행한다. PostgreSQL을 직접 설치하지 않는다.
@@ -117,13 +126,18 @@ DB (루트에서)
 - 비용 가정치는 코드에 하드코딩하지 않고 설정값으로 분리한다.
 - 상세(체결 가정, 세금, 성과 지표, 비교 기준)는 `docs/backtest.md`.
 
-## 모의투자 / KIS
-- KIS는 모의투자 도메인만 쓴다. REST는 `https://openapivts.koreainvestment.com:29443`, WebSocket은 `ws://ops.koreainvestment.com:31000`이다.
-- 실전투자 도메인(`openapi.koreainvestment.com:9443`, WebSocket 포트 `21000`)은 시세 조회를 포함해 어떤 용도로도 쓰지 않는다.
-- 실전투자용 앱키·시크릿·계좌번호는 발급하거나 보관하지 않으며 `.env`에도 두지 않는다.
-- KIS 클라이언트의 주소는 코드에서 모의투자 주소로 고정한다. 설정값이 실전 주소이면 서버가 시작되지 않도록 검사한다.
-- 접근 토큰은 캐시해서 재사용하고 요청마다 새로 발급하지 않는다. 토큰 유효기간은 1일이고, 재발급은 1분에 1회로 제한되며, 발급할 때마다 알림톡이 발송된다.
-- 모의투자는 REST 호출 제한이 낮다. 호출 간격을 조절하고, 초당 호출 초과 오류(`EGW00201`)가 나면 재시도한다.
+## 모의·실전투자 / KIS
+- KIS 주소는 모드별로 두 개뿐이다. 코드 상수로 고정하고 모드로 고르며, 설정값으로 주소를 받지 않는다.
+  - 모의: REST `https://openapivts.koreainvestment.com:29443`, WebSocket `ws://ops.koreainvestment.com:31000`
+  - 실전: REST `https://openapi.koreainvestment.com:9443`, WebSocket `ws://ops.koreainvestment.com:21000`
+- 모드는 사용자가 프론트엔드에서 전환한다. 실전 전환 조건(서버 실전 스위치, 실전 자격 증명 검증, 비밀번호 재입력, 경고 확인)은 백엔드가 검사한다.
+- 서버 실전 스위치 `REAL_TRADING_ENABLED`는 기본 `false`이고 AWS 서버에서만 켠다. 켜려면 마스터키가 KMS여야 하며, 아니면 서버가 시작되지 않는다.
+- KIS 자격 증명 원문은 API 응답, 로그, 예외 메시지, 알림에 남기지 않는다.
+- 실전도 사람의 승인 없이 자동 주문한다. 금액 상한은 두지 않는다. 대신 주문 직전 이상 감지에 걸리면 그 회차 주문을 보내지 않고 자동 주문을 정지한 뒤 알리며, 사용자별 긴급 중지 버튼을 둔다.
+- 접근 토큰은 사용자·모드별로 캐시해서 재사용하고 요청마다 새로 발급하지 않는다. 토큰 유효기간은 1일이고, 재발급은 1분에 1회로 제한되며, 발급할 때마다 알림톡이 발송된다.
+- 호출 간격을 조절하고, 초당 호출 초과 오류(`EGW00201`)가 나면 재시도한다. 모의투자는 호출 제한이 더 낮다.
+- 자동 테스트는 KIS를 실제로 호출하지 않는다.
+- 상세(모드 전환, 자격 증명 저장, 안전장치, 알림)는 `docs/trading.md`.
 
 # 협업 규칙
 
