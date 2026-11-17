@@ -67,6 +67,16 @@ class Settings(BaseSettings):
     # KRX Open API
     krx_api_key: str = ""
 
+    # 시세·분배금 수집 (docs/market-data.md)
+    krx_request_interval_seconds: float = 0.5  # KRX 호출 간격
+    # 한 번 실행할 때의 최대 KRX 호출 수 (인증키당 하루 한도 10,000)
+    krx_max_calls_per_run: int = 9000
+    # 이 기간(일) 안의 빈 목록은 휴장일로 확정하지 않고 대기로 둔다
+    krx_pending_days: int = 14
+    # 네트워크 오류(연결 실패·타임아웃)에만 적용한다. KRX 오류 응답은 재시도하지 않는다.
+    market_data_timeout_seconds: float = 30
+    market_data_max_retries: int = 3  # 1·2·4초 간격으로 다시 시도
+
     @property
     def database_url(self) -> str:
         """SQLAlchemy 접속 주소. 비밀번호의 특수문자는 자동으로 인코딩된다."""
