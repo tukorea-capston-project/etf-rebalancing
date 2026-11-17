@@ -8,6 +8,7 @@ dependencies = [
     "fastapi[standard]>=0.163.0",
     "psycopg[binary]>=3.3.9",
     "pydantic-settings>=2.16.3",
+    "pyyaml>=6.0.3",
     "sqlmodel>=0.0.50",
 ]
 
@@ -28,4 +29,5 @@ dev = [
     "pyright>=1.1.414",
     "pytest>=9.2.0",
     "ruff>=0.17.5",
+    "types-pyyaml>=6.0.12.20261113",
 ]
