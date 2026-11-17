@@ -35,7 +35,8 @@
     - NAV, 기초지수 종가도 함께 제공된다. 분배금 필드는 없다.
   - 분배금 이력은 yfinance(Yahoo Finance)에서 수집한다. 티커 형식은 `<종목코드>.KS`이다.
     - yfinance의 분배금 날짜는 지급기준일이 아니라 분배락일(지급기준일 하루 전 영업일)이다.
-    - 비공식 출처라 누락이 있을 수 있다. 화이트리스트 ETF마다 최근 분배금 몇 건을 KIND 공시나 SEIBro와 대조해 누락 여부를 확인한다.
+    - 비공식 출처라 누락이 있을 수 있다. 틀린 값은 DB가 아니라 저장소의 보정 YAML(`backend/config/distribution_overrides.yaml`)로 고친다.
+  - 수집 대상, 수집 이력, 신규 ETF 처리 등 상세는 `docs/market-data.md`.
 - 각 기능 폴더는 `router.py`(API), `models.py`(DB 모델), `service.py`(로직)로 구성한다. `api/`, `services/` 같은 계층별 폴더는 만들지 않는다.
 - 마이그레이션은 `backend/alembic/`, 테스트는 `backend/tests/`에 둔다.
 
