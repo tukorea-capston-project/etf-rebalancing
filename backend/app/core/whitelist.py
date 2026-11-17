@@ -16,6 +16,17 @@ WHITELIST_PATH = Path(__file__).resolve().parents[2] / "config" / "etf_whitelist
 CODE_PATTERN = re.compile(r"[0-9A-Z]{6}")
 
 
+def check_code(value: Any) -> str:
+    """YAML에서 읽은 종목코드를 검증한다. 보정 YAML 등 다른 설정 파일도 같이 쓴다."""
+    # 따옴표 없이 쓰면 PyYAML이 숫자(8진수 포함)로 읽어 int가 들어온다.
+    if not isinstance(value, str) or not CODE_PATTERN.fullmatch(value):
+        raise ValueError(
+            "종목코드는 따옴표로 감싼 6자리 문자열(숫자·영문 대문자)이어야 한다: "
+            f"{value!r}"
+        )
+    return value
+
+
 class WhitelistEtf(BaseModel):
     code: str
     name: str
@@ -23,14 +34,8 @@ class WhitelistEtf(BaseModel):
 
     @field_validator("code", mode="before")
     @classmethod
-    def _code_must_be_quoted_6_digits(cls, value: Any) -> Any:
-        # 따옴표 없이 쓰면 PyYAML이 숫자(8진수 포함)로 읽어 int가 들어온다.
-        if not isinstance(value, str) or not CODE_PATTERN.fullmatch(value):
-            raise ValueError(
-                "종목코드는 따옴표로 감싼 6자리 문자열(숫자·영문 대문자)이어야 한다: "
-                f"{value!r}"
-            )
-        return value
+    def _check_code(cls, value: Any) -> str:
+        return check_code(value)
 
 
 class WhitelistCategory(BaseModel):
