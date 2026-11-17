@@ -1,18 +1,43 @@
 """애플리케이션 설정. 저장소 루트의 .env에서 읽는다."""
 
+from dataclasses import dataclass
+from enum import StrEnum
 from functools import lru_cache
 from pathlib import Path
+from typing import Literal, Self
 
-from pydantic import SecretStr, field_validator
+from pydantic import SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from sqlalchemy import URL
 
 # backend/app/core/config.py 기준으로 저장소 루트
 ROOT_DIR = Path(__file__).resolve().parents[3]
 
-# KIS는 모의투자 도메인만 사용한다. 실전투자 도메인은 어떤 용도로도 쓰지 않는다.
-KIS_MOCK_REST_URL = "https://openapivts.koreainvestment.com:29443"
-KIS_MOCK_WS_URL = "ws://ops.koreainvestment.com:31000"
+
+class KisMode(StrEnum):
+    """KIS 주문 모드. 사용자마다 하나를 고른다."""
+
+    MOCK = "mock"
+    REAL = "real"
+
+
+@dataclass(frozen=True)
+class KisEndpoints:
+    rest_url: str
+    ws_url: str
+
+
+# KIS 주소는 이 두 개만 쓴다. 설정값(.env)으로 주소를 받지 않는다.
+KIS_ENDPOINTS: dict[KisMode, KisEndpoints] = {
+    KisMode.MOCK: KisEndpoints(
+        rest_url="https://openapivts.koreainvestment.com:29443",
+        ws_url="ws://ops.koreainvestment.com:31000",
+    ),
+    KisMode.REAL: KisEndpoints(
+        rest_url="https://openapi.koreainvestment.com:9443",
+        ws_url="ws://ops.koreainvestment.com:21000",
+    ),
+}
 
 
 class Settings(BaseSettings):
@@ -30,13 +55,14 @@ class Settings(BaseSettings):
     # 개발 DB 포트. 테스트 실행 시에는 conftest.py가 15433(테스트 DB)으로 바꾼다.
     postgres_port: int = 15432
 
-    # KIS 모의투자
-    kis_app_key: str = ""
-    kis_app_secret: str = ""
-    kis_account_no: str = ""  # 계좌번호 앞 8자리
-    kis_account_product_code: str = "01"  # 계좌 상품코드 뒤 2자리 (주식 종합계좌는 01)
-    kis_rest_url: str = KIS_MOCK_REST_URL
-    kis_ws_url: str = KIS_MOCK_WS_URL
+    # 서버 실전 스위치. false면 실전 주문을 보내지 않고 실전 전환도 막는다. AWS 서버에서만 켠다.
+    real_trading_enabled: bool = False
+
+    # KIS 자격 증명 암호화 마스터키. KIS 앱키·계좌는 .env가 아니라 사용자별로 DB에 암호화해 저장한다.
+    # local: 팀원 PC(개발·테스트), kms: AWS 서버
+    credential_key_provider: Literal["local", "kms"] = "local"
+    credential_local_key: SecretStr = SecretStr("")
+    kms_key_id: str = ""
 
     # KRX Open API
     krx_api_key: str = ""
@@ -53,23 +79,15 @@ class Settings(BaseSettings):
             database=self.postgres_db,
         ).render_as_string(hide_password=False)
 
-    @field_validator("kis_rest_url")
-    @classmethod
-    def _kis_rest_must_be_mock(cls, value: str) -> str:
-        if value.rstrip("/") != KIS_MOCK_REST_URL:
+    @model_validator(mode="after")
+    def _check_credential_key(self) -> Self:
+        if self.credential_key_provider == "kms" and not self.kms_key_id:
+            raise ValueError("CREDENTIAL_KEY_PROVIDER=kms이면 KMS_KEY_ID가 필요하다")
+        if self.real_trading_enabled and self.credential_key_provider != "kms":
             raise ValueError(
-                f"KIS REST 주소는 모의투자 주소({KIS_MOCK_REST_URL})만 허용한다: {value}"
+                "REAL_TRADING_ENABLED=true는 CREDENTIAL_KEY_PROVIDER=kms일 때만 허용한다"
             )
-        return value.rstrip("/")
-
-    @field_validator("kis_ws_url")
-    @classmethod
-    def _kis_ws_must_be_mock(cls, value: str) -> str:
-        if value.rstrip("/") != KIS_MOCK_WS_URL:
-            raise ValueError(
-                f"KIS WebSocket 주소는 모의투자 주소({KIS_MOCK_WS_URL})만 허용한다: {value}"
-            )
-        return value.rstrip("/")
+        return self
 
 
 @lru_cache

@@ -25,6 +25,20 @@
 - PostgreSQL은 EC2 안에서 Docker로 실행한다. 포트는 로컬과 같은 `15432`를 써서, 팀원은 `.env`의 `POSTGRES_HOST`만 바꾸면 된다.
 - 보안그룹에서 `15432`(DB)는 열지 않는다. Tailscale은 인바운드 포트를 열지 않아도 연결되므로, 팀원은 사설망으로 DB에 접속한다.
 - 공용 개발 DB에는 main에 머지된 마이그레이션만 적용한다. 머지 전 스키마 변경은 로컬 개발 DB(`docker compose up -d`)에서 확인한다.
+- 실전 주문은 EC2 백엔드에서만 낸다. `REAL_TRADING_ENABLED=true`는 EC2의 `.env`에만 둔다.
+
+## KIS 자격 증명 암호화
+
+사용자 KIS 자격 증명은 DB에 암호화해 저장한다. 상세는 `docs/trading.md`.
+
+| 실행 위치 | 마스터키 | `.env` |
+|---|---|---|
+| AWS EC2 | AWS KMS | `CREDENTIAL_KEY_PROVIDER=kms`, `KMS_KEY_ID` |
+| 팀원 PC | 로컬 키 | `CREDENTIAL_KEY_PROVIDER=local`, `CREDENTIAL_LOCAL_KEY` |
+
+- EC2에는 IAM 역할(인스턴스 프로파일)을 붙여 KMS 키를 쓰게 한다. 액세스 키를 `.env`에 두지 않는다.
+- IAM 역할에는 그 KMS 키 하나에 대한 암호화·복호화·데이터 키 생성 권한만 준다.
+- 팀원 PC에는 KMS 권한을 주지 않는다. 그래서 공용 개발 DB의 자격 증명은 팀원 PC 백엔드에서 복호화되지 않는다.
 
 ## Tailscale
 
@@ -96,3 +110,4 @@ LLM 호출 주소는 `.env`의 `OLLAMA_BASE_URL` 하나로 정한다. 코드는 
 - EC2 인스턴스 사양, 공용 DB 백업 방식
 - Tailscale 접근 정책 파일의 구체적 내용
 - 모델 태그
+- KMS 키 생성과 IAM 정책의 구체적 내용
