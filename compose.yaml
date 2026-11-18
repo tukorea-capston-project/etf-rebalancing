@@ -1,25 +1,9 @@
-# 팀원 PC용 PostgreSQL. 루트의 .env 값을 사용한다.
-# 평소 개발은 AWS의 공용 개발 DB를 쓴다. 여기의 db는 머지 전 스키마 변경 확인 등에 쓰는 로컬 개발 DB(선택)다.
-# 실행: 테스트 DB만 docker compose up -d db-test / 로컬 개발 DB까지 docker compose up -d
+# 팀원 PC용 테스트 DB. 루트의 .env 값을 사용한다.
+# 평소 개발은 EC2의 서비스 DB(Tailscale)를 쓰고, 로컬 개발 DB는 두지 않는다. EC2 운영용 Compose는 deploy/compose.yaml.
+# 테스트 DB는 자동 테스트와 머지 전 스키마 변경 확인에 쓴다 (docs/infra.md).
+# 실행: docker compose up -d db-test
 
 services:
-  db:
-    image: postgres:18
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:?.env에 POSTGRES_USER를 설정하세요}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?.env에 POSTGRES_PASSWORD를 설정하세요}
-      POSTGRES_DB: ${POSTGRES_DB:?.env에 POSTGRES_DB를 설정하세요}
-    ports:
-      - "15432:5432"
-    volumes:
-      # PostgreSQL 18 이미지는 /var/lib/postgresql 에 마운트한다 (17 이하의 /data 경로와 다름)
-      - db-data:/var/lib/postgresql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
   db-test:
     image: postgres:18
     environment:
@@ -29,6 +13,7 @@ services:
     ports:
       - "15433:5432"
     # 테스트 DB는 데이터를 남기지 않는다 (컨테이너를 내리면 사라짐)
+    # PostgreSQL 18 이미지는 /var/lib/postgresql 에 마운트한다 (17 이하의 /data 경로와 다름)
     tmpfs:
       - /var/lib/postgresql
     healthcheck:
@@ -36,6 +21,3 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
-
-volumes:
-  db-data:
