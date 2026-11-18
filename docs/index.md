@@ -18,7 +18,7 @@
 
 ## 운영 범위
 
-**백테스트 → 모의투자 → 실전투자** 순서로 진행함. 여러 사용자가 각자 KIS 계좌를 등록해 쓰는 서비스를 가정해 설계함.
+**백테스트 → 모의투자 → 실전투자** 순서로 진행함. 여러 사용자가 각자 KIS 계좌를 등록해 쓰는 실제 서비스로 배포할 수 있게 만드는 것이 목표임.
 
 ## 기술 스택
 
@@ -30,14 +30,16 @@
 | LLM | Ollama로 실행하는 로컬 Qwen 계열 모델 |
 | 증권사 API | 한국투자증권 KIS Open API |
 | 시세 데이터 | KRX Open API(일별 시세), yfinance(분배금) |
-| 서버 | AWS EC2, Tailscale 사설망 |
+| 서버 | AWS EC2(Docker Compose), CloudFront + S3(프론트엔드) |
+| LLM 연결 | Tailscale 사설망(EC2 ↔ LLM PC) |
+| CI/CD | GitHub Actions, GHCR |
 
 ## 문서
 
 ### 시스템
 
 - [시스템 아키텍처](architecture.md) — 프로세스 구성(API 서버, 워커)과 작업 실행 방식
-- [인프라·실행 환경](infra.md) — 서버, 사설망, 시연 환경
+- [인프라·실행 환경](infra.md) — 서버, HTTPS, 사설망, 배포(CI/CD), 시연 환경
 - [사용자·인증 설계](auth.md) — 로그인, 세션
 
 ### 도메인 설계
