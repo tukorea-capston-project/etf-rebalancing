@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "policy_id": "default",
+  "version": 1,
+  "status": "초안",
+  "decided_on": null,
+  "decision_note": null,
+  "dialog": { "required_slots": ["risk_level", "horizon_months"], "max_question_rounds": 3, "max_llm_retries": 2 },
+  "defaults": {
+    "mode": "백테스트",
+    "capital_krw": 10000000,
+    "rebalance": { "method": "혼합", "cycle": "분기", "band_abs": 0.05, "band_rel": 0.25 },
+    "backtest": {
+      "start": null,
+      "end": null,
+      "fee_rate": 0.00015,
+      "slippage": 0.0005,
+      "risk_free_rate": 0.03,
+      "fill_price": "다음영업일시가",
+      "price_basis": "실제종가",
+      "reinvest_distributions": true,
+      "tax_model": "ETF유형별",
+      "benchmarks": [{ "type": "무리밸런싱" }, { "type": "ETF보유", "etf_code": "069500" }, { "type": "기준비중" }]
+    }
+  },
+  "rebalance": { "band_check": "주1회", "on_band_breach": "해당자산만되돌림" },
+  "fixed_rules": { "contribution": "부족자산우선", "distribution": "같은ETF재투자" },
+  "allocation": {
+    "share_weights": { "조금": 1, "보통": 2, "많이": 3 },
+    "default_share": "보통",
+    "max_weight_per_etf": 0.5,
+    "max_etfs": 10,
+    "min_weight_per_etf": 0.05,
+    "weight_step": 0.01
+  },
+  "suggestion_limit": { "base": "기준비중", "abs": 0.1, "rel": 0.5 },
+  "regime": {
+    "turning_down_months": 2,
+    "hold_days": 2,
+    "jump_penalty": null,
+    "max_change_per_adjustment": 0.05,
+    "adjustments": [
+      {
+        "rule_id": "regime_up_semis",
+        "when": { "economy": "좋아짐", "semiconductor": "늘어남" },
+        "raise": { "tags": ["반도체IT"] },
+        "take_from": { "asset_classes": ["주식"], "exclude_tags": ["반도체IT"] },
+        "amount": 0.03,
+        "reason": "초안: 반도체 수출 증가가 국내 반도체 업종 이익으로 이어진다는 가정. 주식 총비중은 유지하고 주식 안에서만 옮겨 위험 수준을 바꾸지 않음"
+      },
+      {
+        "rule_id": "regime_down_defense",
+        "when": { "economy": "나쁨", "semiconductor": "줄어듦" },
+        "raise": { "asset_classes": ["채권", "현금성"] },
+        "take_from": { "asset_classes": ["주식"] },
+        "amount": 0.05,
+        "reason": "초안: 침체 국면에서 국채가 상대 강세라는 선행 연구(legime.md). 한 번 조정 상한과 같은 폭"
+      }
+    ]
+  },
+  "mood": {
+    "vkospi_percentile_days": 250,
+    "flow_change_days": 20,
+    "zscore_days": 250,
+    "theme_surge_z": 2.0,
+    "jump_penalty": null,
+    "greed": { "action": "리밸런싱제안", "risk_asset_gap": 0.02 },
+    "fear": { "action": "계획외매도경고", "triggers": ["전략중지", "직접비중축소"] },
+    "risk_asset_classes": ["주식", "원자재", "리츠"]
+  }
+}
