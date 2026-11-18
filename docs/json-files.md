@@ -11,14 +11,13 @@
 
 ## 파일 간 연결
 
-```
-catalog.json ─┐
-policy.json  ─┼─▶ draft.json ─▶ portfolio.json ◀─ suggestion.json ◀─ market.json
-              │      ▲                                   ▲               ▲
-              │  parse_request                    suggestion_text   evidence_check
-              │                                                     bok_policy
-              │                                                     news_mood
-```
+| 파일 | 만드는 재료 | LLM 출력 | 다음으로 가는 곳 |
+|---|---|---|---|
+| `catalog.json`, `policy.json` | 저장소 설정 | - | `draft.json` |
+| `draft.json` | 사용자 메시지, 카탈로그, 정책 | `parse_request` | `portfolio.json` |
+| `portfolio.json` | 확정된 `draft.json`, 수락된 `suggestion.json` | - | - |
+| `market.json` | 경기·업종·분위기 지표 | `evidence_check`, `bok_policy`, `news_mood` | `suggestion.json` |
+| `suggestion.json` | `market.json`, `portfolio.json` | `suggestion_text` | `portfolio.json` (새 revision) |
 
 - 모든 상태 파일에 `schema_version`이 있음. JSON 구조 자체의 버전임
 - `catalog_version`, `policy_version`은 그 데이터를 만들 때 쓴 설정 버전임. 설정이 바뀌어도 예전 데이터가 어떤 기준으로 만들어졌는지 추적 가능함
@@ -87,18 +86,14 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일. LLM 출�
 | `conflicts`, `warnings` | 요청끼리 충돌하는 부분, 사용자에게 보여 줄 경고 |
 | `confirm_text` | 사용자에게 보여 줄 확인 문장 |
 
-칸 하나는 다음 형태임.
+칸 하나는 다음 필드로 이루어짐. 예시는 "2년 뒤에" → 기간 24개월.
 
-```json
-{ "value": 24, "source": "사용자발화", "quote": "2년 뒤에", "ref": "t1" }
-```
-
-| 필드 | 설명 |
-|---|---|
-| `value` | 칸의 값 |
-| `source` | 값의 출처. `사용자발화`, `질문답변`, `템플릿`, `기본값` |
-| `quote` | 근거가 된 사용자 원문. 사용자가 말한 게 아니면 `null` |
-| `ref` | 근거 위치. 메시지 ID(`t1`), 질문 ID(`q1`), 템플릿 이름(`안정추구형`) |
+| 필드 | 설명 | 예시 |
+|---|---|---|
+| `value` | 칸의 값 | `24` |
+| `source` | 값의 출처. `사용자발화`, `질문답변`, `템플릿`, `기본값` | `사용자발화` |
+| `quote` | 근거가 된 사용자 원문. 사용자가 말한 게 아니면 `null` | `2년 뒤에` |
+| `ref` | 근거 위치. 메시지 ID(`t1`), 질문 ID(`q1`), 템플릿 이름(`안정추구형`) | `t1` |
 
 ### portfolio.json — 확정된 포트폴리오
 
