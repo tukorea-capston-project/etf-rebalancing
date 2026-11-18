@@ -23,18 +23,21 @@
       "horizon_months": { "value": 24, "source": "사용자발화", "quote": "2년 뒤에", "ref": "t1" },
       "risk_level": { "value": "안정추구형", "source": "질문답변", "quote": null, "ref": "q1" },
       "capital_krw": { "value": 1000000, "source": "사용자발화", "quote": "100만원", "ref": "t1" },
-      "monthly_contribution_krw": { "value": null, "source": "기본값", "quote": null, "ref": null }
+      "monthly_contribution_krw": { "value": null, "source": "기본값", "quote": null, "ref": null },
+      "monthly_contribution_day": { "value": null, "source": "기본값", "quote": null, "ref": null }
     },
-    "blocks": [
-      { "block_id": "us_core", "option": "sp500", "share": "보통", "weight": null, "source": "사용자발화", "quote": "S&P 그거 넣어주시고", "ref": "t1" },
-      { "block_id": "kr_sector", "option": "semiconductor", "share": "조금", "weight": null, "source": "사용자발화", "quote": "반도체도 조금", "ref": "t1" },
-      { "block_id": "kr_bond", "option": "10y", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
-      { "block_id": "us_bond", "option": "30y", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
-      { "block_id": "cash_like", "option": "cd", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" }
+    "etfs": [
+      { "etf_code": "360750", "share": "보통", "weight": null, "source": "사용자발화", "quote": "S&P 그거 넣어주시고", "ref": "t1" },
+      { "etf_code": "395270", "share": "조금", "weight": null, "source": "사용자발화", "quote": "반도체도 조금", "ref": "t1" },
+      { "etf_code": "148070", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
+      { "etf_code": "453850", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
+      { "etf_code": "357870", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" }
     ],
     "rules": {
       "rebalance_cycle": { "value": "분기", "source": "기본값", "quote": null, "ref": null },
-      "rebalance_method": { "value": "혼합", "source": "기본값", "quote": null, "ref": null }
+      "rebalance_method": { "value": "혼합", "source": "기본값", "quote": null, "ref": null },
+      "rebalance_day": { "value": 1, "source": "기본값", "quote": null, "ref": null },
+      "rebalance_start_month": { "value": 1, "source": "기본값", "quote": null, "ref": null }
     }
   },
   "missing": [],

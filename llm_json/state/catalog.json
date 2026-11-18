@@ -21,136 +21,100 @@
     { "words": ["조금만", "살짝", "약간"], "slot": "share", "value": "조금" },
     { "words": ["위주로", "많이", "중심으로"], "slot": "share", "value": "많이" }
   ],
-  "blocks": [
-    {
-      "block_id": "kr_core",
-      "label": "국내 주식 시장 전체",
-      "asset_class": "주식",
-      "options": [
-        { "option": "kospi200", "label": "코스피200", "aliases": ["코스피200", "코스피 200", "KOSPI200"], "etfs": ["069500"], "tags": [] },
-        { "option": "kospi", "label": "코스피 전체", "aliases": ["코스피", "한국 주식"], "etfs": ["226490"], "tags": [] },
-        { "option": "top10", "label": "대형주 집중", "aliases": ["대형주", "TOP10"], "etfs": ["292150"], "tags": [] },
-        { "option": "kosdaq150", "label": "코스닥150", "aliases": ["코스닥"], "etfs": ["229200"], "tags": [] }
-      ]
-    },
-    {
-      "block_id": "us_core",
-      "label": "미국 주식 시장",
-      "asset_class": "주식",
-      "options": [
-        { "option": "sp500", "label": "미국 S&P500", "aliases": ["S&P", "에스앤피", "S&P500", "미국 주식"], "etfs": ["360750"], "tags": [] },
-        { "option": "nasdaq100", "label": "미국 나스닥100", "aliases": ["나스닥", "미국 기술주"], "etfs": ["133690"], "tags": [] }
-      ]
-    },
-    {
-      "block_id": "kr_sector",
-      "label": "국내 업종",
-      "asset_class": "주식",
-      "options": [
-        { "option": "semiconductor", "label": "반도체", "aliases": ["반도체"], "etfs": ["395270"], "tags": ["반도체IT"] },
-        { "option": "it", "label": "IT 종합", "aliases": ["IT", "정보기술"], "etfs": ["266370"], "tags": ["반도체IT"] }
-      ]
-    },
-    {
-      "block_id": "kr_bond",
-      "label": "국내 국고채",
-      "asset_class": "채권",
-      "options": [
-        { "option": "3y", "label": "국고채 3년", "aliases": ["단기 국채", "3년물"], "etfs": ["114260"], "tags": [] },
-        { "option": "10y", "label": "국고채 10년", "aliases": ["10년 국채", "국채"], "etfs": ["148070"], "tags": [] },
-        { "option": "30y", "label": "국고채 30년", "aliases": ["30년 국채", "장기 국채"], "etfs": ["439870"], "tags": [] }
-      ]
-    },
-    {
-      "block_id": "us_bond",
-      "label": "미국 국채",
-      "asset_class": "채권",
-      "options": [
-        { "option": "10y", "label": "미국채 10년", "aliases": ["미국 10년 국채"], "etfs": ["305080"], "tags": [] },
-        { "option": "30y", "label": "미국채 30년", "aliases": ["미국 장기채", "미국 30년 국채"], "etfs": ["453850"], "tags": [] }
-      ]
-    },
-    {
-      "block_id": "cash_like",
-      "label": "현금성 대기 자금",
-      "asset_class": "현금성",
-      "options": [
-        { "option": "cd", "label": "CD금리", "aliases": ["현금", "파킹", "CD"], "etfs": ["357870"], "tags": [] },
-        { "option": "short_bond", "label": "단기채", "aliases": ["단기채"], "etfs": ["214980"], "tags": [] }
-      ]
-    },
-    {
-      "block_id": "gold",
-      "label": "금",
-      "asset_class": "원자재",
-      "options": [{ "option": "gold", "label": "금 현물", "aliases": ["금", "골드"], "etfs": ["411060"], "tags": [] }]
-    }
+  "whitelist": "backend/config/etf_whitelist.yaml",
+  "categories": [
+    { "category": "domestic_equity_index", "asset_class": "주식" },
+    { "category": "domestic_equity_sector", "asset_class": "주식" },
+    { "category": "domestic_equity_theme", "asset_class": "주식" },
+    { "category": "domestic_equity_group", "asset_class": "주식" },
+    { "category": "equity_style", "asset_class": "주식" },
+    { "category": "foreign_equity_country", "asset_class": "주식" },
+    { "category": "foreign_equity_sector_theme", "asset_class": "주식" },
+    { "category": "domestic_bond", "asset_class": "채권" },
+    { "category": "foreign_bond", "asset_class": "채권" },
+    { "category": "cash_equivalent", "asset_class": "현금성" },
+    { "category": "currency", "asset_class": "통화" },
+    { "category": "commodity", "asset_class": "원자재" },
+    { "category": "reit", "asset_class": "리츠" }
   ],
+  "categories_note": "고를 수 있는 ETF는 화이트리스트 전체다. 분류·이름은 화이트리스트를 따르고, 여기서는 분류별 자산군만 정한다. 화이트리스트의 모든 분류가 여기 있어야 한다",
+  "aliases": {
+    "069500": ["코스피200", "코스피 200", "KOSPI200"],
+    "226490": ["코스피", "한국 주식"],
+    "292150": ["대형주", "TOP10"],
+    "229200": ["코스닥"],
+    "395270": ["반도체"],
+    "266370": ["IT", "정보기술"],
+    "244580": ["바이오"],
+    "091170": ["은행"],
+    "305720": ["2차전지", "배터리"],
+    "466930": ["자동차"],
+    "466920": ["조선"],
+    "449450": ["방산"],
+    "315960": ["고배당"],
+    "360750": ["S&P", "에스앤피", "S&P500", "미국 주식"],
+    "133690": ["나스닥", "미국 기술주"],
+    "241180": ["일본 주식", "니케이"],
+    "283580": ["중국 주식"],
+    "453810": ["인도 주식"],
+    "245710": ["베트남 주식"],
+    "114260": ["단기 국채", "3년물"],
+    "148070": ["10년 국채", "국채"],
+    "439870": ["30년 국채", "장기 국채"],
+    "438330": ["회사채"],
+    "305080": ["미국 10년 국채"],
+    "453850": ["미국 장기채", "미국 30년 국채"],
+    "468380": ["하이일드"],
+    "357870": ["현금", "파킹", "CD"],
+    "214980": ["단기채"],
+    "261240": ["달러"],
+    "411060": ["금", "골드"],
+    "144600": ["은"],
+    "261220": ["원유"],
+    "329200": ["리츠", "부동산"]
+  },
+  "aliases_note": "자연어로 ETF를 고를 때 쓰는 별칭. 별칭 하나는 ETF 하나로만 이어진다. 별칭이 없는 ETF는 화이트리스트 이름으로 찾는다",
   "risk_templates": [
     {
       "risk_level": "안정형",
       "groups": [
-        {
-          "asset_class": "주식",
-          "target": 0.1,
-          "default_blocks": [{ "block_id": "kr_core", "option": "kospi200" }, { "block_id": "us_core", "option": "sp500" }]
-        },
-        { "asset_class": "채권", "target": 0.6, "default_blocks": [{ "block_id": "kr_bond", "option": "10y" }, { "block_id": "us_bond", "option": "30y" }] },
-        { "asset_class": "현금성", "target": 0.3, "default_blocks": [{ "block_id": "cash_like", "option": "cd" }] }
+        { "asset_class": "주식", "target": 0.1, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.6, "default_etfs": ["148070", "453850"] },
+        { "asset_class": "현금성", "target": 0.3, "default_etfs": ["357870"] }
       ],
       "reason": "초안: 원금 손실을 피하려는 성향. 주식 최소, 현금성 비중이 큼"
     },
     {
       "risk_level": "안정추구형",
       "groups": [
-        {
-          "asset_class": "주식",
-          "target": 0.3,
-          "default_blocks": [{ "block_id": "kr_core", "option": "kospi200" }, { "block_id": "us_core", "option": "sp500" }]
-        },
-        { "asset_class": "채권", "target": 0.6, "default_blocks": [{ "block_id": "kr_bond", "option": "10y" }, { "block_id": "us_bond", "option": "30y" }] },
-        { "asset_class": "현금성", "target": 0.1, "default_blocks": [{ "block_id": "cash_like", "option": "cd" }] }
+        { "asset_class": "주식", "target": 0.3, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.6, "default_etfs": ["148070", "453850"] },
+        { "asset_class": "현금성", "target": 0.1, "default_etfs": ["357870"] }
       ],
       "reason": "초안: 타깃데이트 펀드 글라이드패스의 보수적인 끝(주식 약 30%) 근처"
     },
     {
       "risk_level": "위험중립형",
       "groups": [
-        {
-          "asset_class": "주식",
-          "target": 0.5,
-          "default_blocks": [{ "block_id": "kr_core", "option": "kospi200" }, { "block_id": "us_core", "option": "sp500" }]
-        },
-        {
-          "asset_class": "채권",
-          "target": 0.45,
-          "default_blocks": [{ "block_id": "kr_bond", "option": "10y" }, { "block_id": "us_bond", "option": "30y" }]
-        },
-        { "asset_class": "현금성", "target": 0.05, "default_blocks": [{ "block_id": "cash_like", "option": "cd" }] }
+        { "asset_class": "주식", "target": 0.5, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.45, "default_etfs": ["148070", "453850"] },
+        { "asset_class": "현금성", "target": 0.05, "default_etfs": ["357870"] }
       ],
       "reason": "초안: 주식·채권 반반 근처의 균형 배분"
     },
     {
       "risk_level": "적극투자형",
       "groups": [
-        {
-          "asset_class": "주식",
-          "target": 0.7,
-          "default_blocks": [{ "block_id": "kr_core", "option": "kospi200" }, { "block_id": "us_core", "option": "sp500" }]
-        },
-        { "asset_class": "채권", "target": 0.3, "default_blocks": [{ "block_id": "kr_bond", "option": "10y" }, { "block_id": "us_bond", "option": "30y" }] }
+        { "asset_class": "주식", "target": 0.7, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.3, "default_etfs": ["148070", "453850"] }
       ],
       "reason": "초안: 주식 70% 근처"
     },
     {
       "risk_level": "공격투자형",
       "groups": [
-        {
-          "asset_class": "주식",
-          "target": 0.9,
-          "default_blocks": [{ "block_id": "kr_core", "option": "kospi200" }, { "block_id": "us_core", "option": "sp500" }]
-        },
-        { "asset_class": "채권", "target": 0.1, "default_blocks": [{ "block_id": "kr_bond", "option": "10y" }, { "block_id": "us_bond", "option": "30y" }] }
+        { "asset_class": "주식", "target": 0.9, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.1, "default_etfs": ["148070", "453850"] }
       ],
       "reason": "초안: 글라이드패스의 공격적인 끝(주식 약 90%) 근처"
     }

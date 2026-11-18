@@ -5,12 +5,13 @@
     "horizon_months": { "quote": "2년 뒤에", "value": 24 },
     "risk_level": null,
     "capital_krw": { "quote": "100만원", "value": 1000000 },
-    "monthly_contribution_krw": null
+    "monthly_contribution_krw": null,
+    "monthly_contribution_day": null
   },
-  "blocks": [
-    { "quote": "S&P 그거 넣어주시고", "block_id": "us_core", "option": "sp500", "share": null, "weight": null },
-    { "quote": "반도체도 조금", "block_id": "kr_sector", "option": "semiconductor", "share": "조금", "weight": null }
+  "etfs": [
+    { "quote": "S&P 그거 넣어주시고", "etf_code": "360750", "share": null, "weight": null },
+    { "quote": "반도체도 조금", "etf_code": "395270", "share": "조금", "weight": null }
   ],
-  "rules": { "rebalance_cycle": null, "rebalance_method": null },
+  "rules": { "rebalance_cycle": null, "rebalance_method": null, "rebalance_day": null, "rebalance_start_month": null },
   "out_of_scope": [{ "quote": "삼성전자도요", "reason": "개별종목" }]
 }

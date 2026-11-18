@@ -19,12 +19,35 @@
       },
       "bok_llm_output_id": "llm_bok_20261127"
     },
-    "semiconductor": {
-      "state": "늘어남",
-      "prev_state": "늘어남",
-      "changed": false,
-      "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
-      "indicators": { "semi_exports_yoy": { "value": 0.214, "period": "2026-11", "released_at": "2026-12-01", "source": "관세청" } }
+    "sectors": {
+      "반도체IT": {
+        "state": "늘어남",
+        "prev_state": "늘어남",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": 0.214, "period": "2026-11", "released_at": "2026-12-01", "source": "관세청" }
+      },
+      "2차전지": {
+        "state": "줄어듦",
+        "prev_state": "줄어듦",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": -0.063, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
+      },
+      "자동차": {
+        "state": "늘어남",
+        "prev_state": "늘어남",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": 0.035, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
+      },
+      "조선": {
+        "state": "늘어남",
+        "prev_state": "늘어남",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": 0.152, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
+      }
     },
     "market_model": { "type": "점프모형", "fit_window": "확장", "probs": { "상승": 0.7, "하락": 0.3 } }
   },

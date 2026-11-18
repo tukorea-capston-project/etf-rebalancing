@@ -12,7 +12,8 @@
     {
       "candidate_id": "c1",
       "trigger": "레짐",
-      "rule_id": "regime_up_semis",
+      "rule_id": "regime_up_sector",
+      "sector": "반도체IT",
       "changes": [{ "etf_code": "395270", "from": 0.1, "to": 0.13 }, { "etf_code": "360750", "from": 0.2, "to": 0.17 }],
       "total_change": 0.03,
       "title": "반도체 비중을 조금 늘리기",
