@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "market_state_id": "ms_20261201",
+  "as_of": "2026-12-01",
+  "policy_version": 1,
+  "regime": {
+    "updated_at": "2026-12-01T18:00:00+09:00",
+    "economy": {
+      "state": "좋아짐",
+      "prev_state": "꺾임",
+      "changed": true,
+      "check": { "verdict": "확인됨", "hold_until": null, "llm_output_ids": ["llm_ec_20261201_econ"] },
+      "indicators": {
+        "leading_index_direction": { "value": 1, "period": "2026-10", "released_at": "2026-11-28", "source": "KOSIS" },
+        "base_rate_change": { "value": 0.0, "period": "2026-11", "released_at": "2026-11-27", "source": "ECOS" },
+        "ktb_yield_change": { "value": -0.012, "period": "2026-11", "released_at": "2026-12-01", "source": "ECOS" },
+        "usdkrw_change": { "value": 0.004, "period": "2026-11", "released_at": "2026-12-01", "source": "ECOS" },
+        "exports_yoy": { "value": 0.081, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
+      },
+      "bok_llm_output_id": "llm_bok_20261127"
+    },
+    "sectors": {
+      "반도체IT": {
+        "state": "늘어남",
+        "prev_state": "늘어남",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": 0.214, "period": "2026-11", "released_at": "2026-12-01", "source": "관세청" }
+      },
+      "2차전지": {
+        "state": "줄어듦",
+        "prev_state": "줄어듦",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": -0.063, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
+      },
+      "자동차": {
+        "state": "늘어남",
+        "prev_state": "늘어남",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": 0.035, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
+      },
+      "조선": {
+        "state": "늘어남",
+        "prev_state": "늘어남",
+        "changed": false,
+        "check": { "verdict": "변화없음", "hold_until": null, "llm_output_ids": [] },
+        "indicator": { "value": 0.152, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
+      }
+    },
+    "market_model": { "type": "점프모형", "fit_window": "확장", "probs": { "상승": 0.7, "하락": 0.3 } }
+  },
+  "mood": {
+    "updated_at": "2026-12-01T18:00:00+09:00",
+    "state": "보통",
+    "prev_state": "보통",
+    "changed": false,
+    "days_in_state": 12,
+    "model": { "type": "점프모형", "jump_penalty": null, "fit_window": "확장", "probs": { "공포": 0.1, "보통": 0.75, "탐욕": 0.15 } },
+    "indicators": {
+      "vkospi_pct_1y": { "value": 0.42, "period": "2026-12-01", "released_at": "2026-12-01", "source": "KRX" },
+      "margin_loan_z": { "value": 0.8, "period": "2026-11-30", "released_at": "2026-12-01", "source": "FreeSIS" },
+      "deposits_z": { "value": 0.3, "period": "2026-11-30", "released_at": "2026-12-01", "source": "FreeSIS" },
+      "news_score_mean": { "value": 0.6, "period": "2026-12-01", "released_at": "2026-12-01", "source": "빅카인즈+LLM", "n": 48 },
+      "theme_count_z": { "value": 1.1, "theme": "AI·반도체", "period": "2026-12-01", "released_at": "2026-12-01", "source": "빅카인즈+LLM" }
+    },
+    "economy_state": "좋아짐",
+    "news_llm_output_ids": ["llm_news_20261201_0001"]
+  }
+}

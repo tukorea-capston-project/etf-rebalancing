@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "draft_id": "dr_20261113_0001",
+  "base_portfolio_id": null,
+  "catalog_version": 1,
+  "policy_version": 1,
+  "created_at": "2026-11-13T20:00:00+09:00",
+  "updated_at": "2026-11-13T20:01:10+09:00",
+  "status": "확인대기",
+  "question_rounds": 1,
+  "turns": [
+    {
+      "turn_id": "t1",
+      "text": "100만원 있는데 2년 뒤에 전세금 보탤 돈이에요. S&P 그거 넣어주시고 반도체도 조금 넣어주세요. 삼성전자도요",
+      "at": "2026-11-13T20:00:00+09:00",
+      "llm_output_id": "llm_pr_20261113_0001"
+    }
+  ],
+  "slots": {
+    "intent": "포트폴리오생성",
+    "profile": {
+      "goal": { "value": "주택자금", "source": "사용자발화", "quote": "전세금 보탤 돈", "ref": "t1" },
+      "horizon_months": { "value": 24, "source": "사용자발화", "quote": "2년 뒤에", "ref": "t1" },
+      "risk_level": { "value": "안정추구형", "source": "질문답변", "quote": null, "ref": "q1" },
+      "capital_krw": { "value": 1000000, "source": "사용자발화", "quote": "100만원", "ref": "t1" },
+      "monthly_contribution_krw": { "value": null, "source": "기본값", "quote": null, "ref": null },
+      "monthly_contribution_day": { "value": null, "source": "기본값", "quote": null, "ref": null }
+    },
+    "etfs": [
+      { "etf_code": "360750", "share": "보통", "weight": null, "source": "사용자발화", "quote": "S&P 그거 넣어주시고", "ref": "t1" },
+      { "etf_code": "395270", "share": "조금", "weight": null, "source": "사용자발화", "quote": "반도체도 조금", "ref": "t1" },
+      { "etf_code": "148070", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
+      { "etf_code": "453850", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
+      { "etf_code": "357870", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" }
+    ],
+    "rules": {
+      "rebalance_cycle": { "value": "분기", "source": "기본값", "quote": null, "ref": null },
+      "rebalance_method": { "value": "혼합", "source": "기본값", "quote": null, "ref": null },
+      "rebalance_day": { "value": 1, "source": "기본값", "quote": null, "ref": null },
+      "rebalance_start_month": { "value": 1, "source": "기본값", "quote": null, "ref": null }
+    }
+  },
+  "missing": [],
+  "questions": [
+    {
+      "question_id": "q1",
+      "question_key": "risk_level",
+      "asked_at": "2026-11-13T20:00:05+09:00",
+      "answer": { "value": "안정추구형", "via": "선택지", "at": "2026-11-13T20:01:10+09:00" }
+    }
+  ],
+  "out_of_scope": [{ "quote": "삼성전자도요", "reason": "개별종목", "ref": "t1" }],
+  "conflicts": [],
+  "warnings": [],
+  "confirm_text": "안정추구형, 24개월 뒤 주택자금, 100만원으로 이해했어요. 주식 30%는 미국 S&P500과 국내 반도체(조금)로, 나머지는 국고채 10년·미국채 30년·CD금리로 채웠어요. 삼성전자 같은 개별 종목은 담을 수 없어요."
+}

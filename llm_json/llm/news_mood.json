@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "ref": "d1", "quote": "11월 수출이 전년 대비 8.1% 늘었다", "market_related": true, "score": 1, "theme": "없음" },
+    { "ref": "d2", "quote": "AI 반도체 관련주에 개인 매수세가 몰리며", "market_related": true, "score": 2, "theme": "AI·반도체" },
+    { "ref": "d3", "quote": "주말 나들이 인파로 고속도로 정체", "market_related": false, "score": null, "theme": "없음" }
+  ]
+}

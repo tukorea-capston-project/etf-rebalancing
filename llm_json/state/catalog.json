@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "catalog_id": "default",
+  "version": 1,
+  "status": "초안",
+  "decided_on": null,
+  "decision_note": null,
+  "intents": ["포트폴리오생성", "포트폴리오수정", "단순질문", "범위밖", "부적절"],
+  "out_of_scope_reasons": ["개별종목", "가상자산", "레버리지인버스", "시세예측", "유니버스밖ETF", "기타"],
+  "goals": ["노후", "주택자금", "목돈마련", "교육비", "기타"],
+  "risk_levels": ["안정형", "안정추구형", "위험중립형", "적극투자형", "공격투자형"],
+  "shares": ["조금", "보통", "많이"],
+  "rebalance_cycles": ["월", "분기", "반기", "연"],
+  "rebalance_methods": ["주기", "밴드", "혼합"],
+  "expressions": [
+    { "words": ["안전하게", "잃기 싫", "원금"], "slot": "risk_level", "value": "안정형" },
+    { "words": ["적당히", "무난하게"], "slot": "risk_level", "value": "위험중립형" },
+    { "words": ["공격적으로", "크게 벌"], "slot": "risk_level", "value": "공격투자형" },
+    { "words": ["노후", "은퇴"], "slot": "goal", "value": "노후" },
+    { "words": ["전세", "내 집", "집 살"], "slot": "goal", "value": "주택자금" },
+    { "words": ["조금만", "살짝", "약간"], "slot": "share", "value": "조금" },
+    { "words": ["위주로", "많이", "중심으로"], "slot": "share", "value": "많이" }
+  ],
+  "whitelist": "backend/config/etf_whitelist.yaml",
+  "categories": [
+    { "category": "domestic_equity_index", "asset_class": "주식" },
+    { "category": "domestic_equity_sector", "asset_class": "주식" },
+    { "category": "domestic_equity_theme", "asset_class": "주식" },
+    { "category": "domestic_equity_group", "asset_class": "주식" },
+    { "category": "equity_style", "asset_class": "주식" },
+    { "category": "foreign_equity_country", "asset_class": "주식" },
+    { "category": "foreign_equity_sector_theme", "asset_class": "주식" },
+    { "category": "domestic_bond", "asset_class": "채권" },
+    { "category": "foreign_bond", "asset_class": "채권" },
+    { "category": "cash_equivalent", "asset_class": "현금성" },
+    { "category": "currency", "asset_class": "통화" },
+    { "category": "commodity", "asset_class": "원자재" },
+    { "category": "reit", "asset_class": "리츠" }
+  ],
+  "categories_note": "고를 수 있는 ETF는 화이트리스트 전체다. 분류·이름은 화이트리스트를 따르고, 여기서는 분류별 자산군만 정한다. 화이트리스트의 모든 분류가 여기 있어야 한다",
+  "aliases": {
+    "069500": ["코스피200", "코스피 200", "KOSPI200"],
+    "226490": ["코스피", "한국 주식"],
+    "292150": ["대형주", "TOP10"],
+    "229200": ["코스닥"],
+    "395270": ["반도체"],
+    "266370": ["IT", "정보기술"],
+    "244580": ["바이오"],
+    "091170": ["은행"],
+    "305720": ["2차전지", "배터리"],
+    "466930": ["자동차"],
+    "466920": ["조선"],
+    "449450": ["방산"],
+    "315960": ["고배당"],
+    "360750": ["S&P", "에스앤피", "S&P500", "미국 주식"],
+    "133690": ["나스닥", "미국 기술주"],
+    "241180": ["일본 주식", "니케이"],
+    "283580": ["중국 주식"],
+    "453810": ["인도 주식"],
+    "245710": ["베트남 주식"],
+    "114260": ["단기 국채", "3년물"],
+    "148070": ["10년 국채", "국채"],
+    "439870": ["30년 국채", "장기 국채"],
+    "438330": ["회사채"],
+    "305080": ["미국 10년 국채"],
+    "453850": ["미국 장기채", "미국 30년 국채"],
+    "468380": ["하이일드"],
+    "357870": ["현금", "파킹", "CD"],
+    "214980": ["단기채"],
+    "261240": ["달러"],
+    "411060": ["금", "골드"],
+    "144600": ["은"],
+    "261220": ["원유"],
+    "329200": ["리츠", "부동산"]
+  },
+  "aliases_note": "자연어로 ETF를 고를 때 쓰는 별칭. 별칭 하나는 ETF 하나로만 이어진다. 별칭이 없는 ETF는 화이트리스트 이름으로 찾는다",
+  "risk_templates": [
+    {
+      "risk_level": "안정형",
+      "groups": [
+        { "asset_class": "주식", "target": 0.1, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.6, "default_etfs": ["148070", "453850"] },
+        { "asset_class": "현금성", "target": 0.3, "default_etfs": ["357870"] }
+      ],
+      "reason": "초안: 원금 손실을 피하려는 성향. 주식 최소, 현금성 비중이 큼"
+    },
+    {
+      "risk_level": "안정추구형",
+      "groups": [
+        { "asset_class": "주식", "target": 0.3, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.6, "default_etfs": ["148070", "453850"] },
+        { "asset_class": "현금성", "target": 0.1, "default_etfs": ["357870"] }
+      ],
+      "reason": "초안: 타깃데이트 펀드 글라이드패스의 보수적인 끝(주식 약 30%) 근처"
+    },
+    {
+      "risk_level": "위험중립형",
+      "groups": [
+        { "asset_class": "주식", "target": 0.5, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.45, "default_etfs": ["148070", "453850"] },
+        { "asset_class": "현금성", "target": 0.05, "default_etfs": ["357870"] }
+      ],
+      "reason": "초안: 주식·채권 반반 근처의 균형 배분"
+    },
+    {
+      "risk_level": "적극투자형",
+      "groups": [
+        { "asset_class": "주식", "target": 0.7, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.3, "default_etfs": ["148070", "453850"] }
+      ],
+      "reason": "초안: 주식 70% 근처"
+    },
+    {
+      "risk_level": "공격투자형",
+      "groups": [
+        { "asset_class": "주식", "target": 0.9, "default_etfs": ["069500", "360750"] },
+        { "asset_class": "채권", "target": 0.1, "default_etfs": ["148070", "453850"] }
+      ],
+      "reason": "초안: 글라이드패스의 공격적인 끝(주식 약 90%) 근처"
+    }
+  ],
+  "horizon_warnings": [
+    {
+      "under_months": 60,
+      "risk_levels": ["적극투자형", "공격투자형"],
+      "text": "주식 비중이 70% 이상인 구성은 5년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요.",
+      "reason": "잠정: KOSPI200(2000~)은 3년 보유해도 손실 확률 24%, 5년 9%"
+    },
+    {
+      "under_months": 36,
+      "risk_levels": ["위험중립형"],
+      "text": "주식 비중이 절반인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요.",
+      "reason": "잠정: 주식 50% 템플릿 근사의 1년 보유 손실 확률 24%, 하위 5% -13%"
+    }
+  ],
+  "questions": [
+    {
+      "question_key": "risk_level",
+      "kind": "고르기",
+      "text": "투자한 돈이 한 달 만에 10% 줄어들면 어떻게 하실 것 같아요?",
+      "choices": [
+        { "label": "바로 전부 판다", "value": "안정형" },
+        { "label": "일부를 판다", "value": "안정추구형" },
+        { "label": "그대로 둔다", "value": "위험중립형" },
+        { "label": "조금 더 산다", "value": "적극투자형" },
+        { "label": "많이 더 산다", "value": "공격투자형" }
+      ]
+    },
+    {
+      "question_key": "horizon_months",
+      "kind": "고르기",
+      "text": "이 돈은 언제쯤 쓰실 계획인가요?",
+      "choices": [{ "label": "1년 안", "value": 12 }, { "label": "3년 안", "value": 36 }, { "label": "5년 안", "value": 60 }, { "label": "10년 이상", "value": 120 }]
+    }
+  ]
+}
