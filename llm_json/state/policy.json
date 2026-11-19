@@ -1,15 +1,16 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "policy_id": "default",
-  "version": 1,
+  "version": 2,
   "status": "초안",
   "decided_on": null,
   "decision_note": null,
-  "dialog": { "required_slots": ["risk_level", "horizon_months"], "max_question_rounds": 3, "max_llm_retries": 2 },
+  "dialog": { "max_question_rounds": 3, "max_llm_retries": 2, "on_unresolved": "나중발화기준조정" },
   "defaults": {
     "mode": "백테스트",
     "capital_krw": 10000000,
-    "rebalance": { "method": "혼합", "cycle": "분기", "day": 1, "start_month": 1, "band_abs": 0.05, "band_rel": 0.25 },
+    "asset_classes": { "주식": 0.6, "채권": 0.4 },
+    "asset_classes_note": "잠정. 사용자가 자산군·ETF 비중을 말하지 않았을 때 씀. HRP를 자산군 밖까지 돌리면 채권·현금성이 거의 전부를 가져가므로 꼭 필요함",
     "backtest": {
       "start": null,
       "end": null,
@@ -20,20 +21,96 @@
       "price_basis": "실제종가",
       "reinvest_distributions": true,
       "tax_model": "ETF유형별",
-      "benchmarks": [{ "type": "무리밸런싱" }, { "type": "ETF보유", "etf_code": "069500" }, { "type": "기준비중" }]
-    }
+      "benchmarks": [{ "type": "무리밸런싱" }, { "type": "ETF보유", "etf_code": "069500" }]
+    },
+    "backtest_modes": ["거시판단", "고정비중"]
   },
-  "rebalance": { "band_check": { "밴드": "주1회", "혼합": "주기리밸런싱일" }, "on_band_breach": "해당자산만되돌림" },
-  "fixed_rules": { "contribution": "부족자산우선", "distribution": "같은ETF재투자" },
-  "allocation": {
-    "share_weights": { "조금": 1, "보통": 2, "많이": 3 },
+  "construction": {
+    "weighting": "HRP",
+    "compare_weightings": ["역변동성", "동일비중"],
+    "scope": "자산군안",
+    "lookback_days": null,
+    "min_history_days": null,
+    "representative": { "order": ["낮은변동성", "거래량"], "prefer_user_etf": true },
+    "share_multipliers": { "조금": 0.5, "보통": 1.0, "많이": 1.5 },
     "default_share": "보통",
-    "max_weight_per_etf": 0.5,
-    "max_etfs": 10,
-    "min_weight_per_etf": 0.05,
-    "weight_step": 0.01
+    "limits": { "max_weight_per_etf": 0.5, "min_weight_per_etf": 0.05, "max_etfs": 10, "weight_step": 0.01 },
+    "budget": ["사용자", "defaults.asset_classes"],
+    "regenerate": "사용자수정시",
+    "note": "HRP는 처음 생성과 백테스트 시작일에만 씀(같은 로직, 기준 시점만 다름). 동적 리밸런싱에는 쓰지 않음. lookback·min_history는 미정"
   },
-  "suggestion_limit": { "enabled": true, "base": "기준비중", "abs": 0.1, "rel": 0.5 },
+  "checks": [
+    { "check_id": "out_of_scope", "level": "차단", "action": "담지않고이유알림" },
+    { "check_id": "weight_sum", "level": "조정", "action": "비율유지하며합계맞춤" },
+    { "check_id": "max_weight_per_etf", "level": "조정", "action": "한도로줄이고나머지재배분" },
+    { "check_id": "min_weight_per_etf", "level": "조정", "action": "최소비중으로올림" },
+    { "check_id": "max_etfs", "level": "조정", "action": "비중작은생성ETF부터뺌" },
+    { "check_id": "weight_conflict", "level": "확인", "question_key": "weight_conflict" },
+    {
+      "check_id": "horizon_risk",
+      "level": "경고",
+      "when": { "horizon_months_under": 36, "risk_asset_over": 0.0 },
+      "text": "주식이 {위험자산 비중}인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요.",
+      "reason": "잠정: 기준값(기간, 위험자산 비중)을 손실 확률로 다시 정해야 함"
+    },
+    { "check_id": "same_cluster", "level": "경고", "text": "{ETF들}은 거의 같이 움직여서 나눠 담는 효과가 작아요." }
+  ],
+  "rebalance": {
+    "check": "매일장마감후",
+    "inner_band": { "abs": 0.05, "rel": 0.25, "on_breach": "해당자산만되돌림" },
+    "outer_band": { "abs": 0.1, "rel": 0.5, "on_breach": "국면재평가" },
+    "repeat_breach": { "count": null, "window_days": null, "on_breach": "국면재평가" },
+    "note": "정적 층. 밴드 폭은 절대 폭과 상대 폭 중 좁은 쪽. 값은 잠정, repeat_breach는 미정"
+  },
+  "fixed_rules": { "contribution": "부족자산우선", "distribution": "같은ETF재투자" },
+  "dynamic": {
+    "monitoring": "매일장마감후",
+    "monthly_indicators": "발표일갱신",
+    "min_check": "분기첫영업일",
+    "signals": [
+      {
+        "signal_id": "economy_state",
+        "indicator": "regime.economy.state",
+        "enter": "상태변화",
+        "exit": null,
+        "confirm_days": null,
+        "status": "예시"
+      },
+      {
+        "signal_id": "market_down_prob",
+        "indicator": "regime.market_model.probs.하락",
+        "enter": 0.7,
+        "exit": 0.5,
+        "confirm_days": 3,
+        "status": "예시"
+      }
+    ],
+    "signals_note": "어떤 지표를 쓰고 진입·해제 기준과 확인 기간을 얼마로 할지는 거시판단 로직에서 정함(추후). 진입·해제 기준을 다르게 두고 확인 기간을 채워야 전환해서 휩쏘를 막음",
+    "near_threshold": { "margin": null, "max_hold_days": null, "action": "밴드리밸런싱보류" },
+    "limit": { "base": "기준비중", "abs": 0.1, "rel": 0.5, "on_exceed": "한도까지만", "new_etf": null },
+    "limit_note": "new_etf: 동적 전환으로 종목을 새로 넣거나 뺄 때의 한도. 기준 비중이 0%라 지금 방식을 쓸 수 없어 미정",
+    "lock_user_weights": true,
+    "target": "기준비중+국면조정",
+    "adjustments": [
+      {
+        "rule_id": "regime_up_sector",
+        "status": "예시",
+        "when": { "economy": "좋아짐", "sector": "늘어남" },
+        "raise": { "sector": "해당업종" },
+        "take_from": { "asset_classes": ["주식"], "exclude_sector": "해당업종" },
+        "amount": 0.03
+      },
+      {
+        "rule_id": "regime_down_defense",
+        "status": "예시",
+        "when": { "economy": "나쁨" },
+        "raise": { "asset_classes": ["채권", "현금성"] },
+        "take_from": { "asset_classes": ["주식"] },
+        "amount": 0.05
+      }
+    ],
+    "adjustments_note": "국면별 목표 종목·비중 규칙. 누적하지 않고 매번 기준 비중 + 지금 국면의 조정으로 다시 계산함. 거시판단 로직이 정해지면 바뀜"
+  },
   "regime": {
     "states": { "economy": ["좋아짐", "꺾임", "나쁨"], "sector": ["늘어남", "줄어듦"] },
     "sectors": [
@@ -52,36 +129,10 @@
         "indicator": { "name": "자동차 수출 증감률(전년 동월 대비)", "source": "산업통상자원부" },
         "etfs": ["466930", "138540"]
       },
-      {
-        "sector_id": "조선",
-        "indicator": { "name": "선박 수출 증감률(전년 동월 대비)", "source": "산업통상자원부" },
-        "etfs": ["466920"]
-      }
+      { "sector_id": "조선", "indicator": { "name": "선박 수출 증감률(전년 동월 대비)", "source": "산업통상자원부" }, "etfs": ["466920"] }
     ],
     "sector_note": "초안: 매달 나오는 업황 지표가 있는 국내 업종만 레짐 대상으로 둔다. 화이트리스트의 나머지 ETF(지수·채권·해외·업종 지표가 없는 업종 등)는 경기 상태로만 판단한다",
-    "turning_down_months": 2,
-    "hold_days": 2,
-    "jump_penalty": null,
-    "max_change_per_adjustment": 0.05,
-    "adjustments": [
-      {
-        "rule_id": "regime_up_sector",
-        "scope": "업종별",
-        "when": { "economy": "좋아짐", "sector": "늘어남" },
-        "raise": { "sector": "해당업종" },
-        "take_from": { "asset_classes": ["주식"], "exclude_sector": "해당업종" },
-        "amount": 0.03,
-        "reason": "초안: 업황 지표가 늘어나는 업종의 이익 개선을 가정. 포트폴리오가 그 업종 ETF를 담고 있을 때만 적용하고, 주식 안에서만 옮겨 위험 수준을 바꾸지 않음"
-      },
-      {
-        "rule_id": "regime_down_defense",
-        "when": { "economy": "나쁨" },
-        "raise": { "asset_classes": ["채권", "현금성"] },
-        "take_from": { "asset_classes": ["주식"] },
-        "amount": 0.05,
-        "reason": "초안: 침체 국면에서 국채가 상대 강세라는 선행 연구(regime.md). 한 번 조정 상한과 같은 폭"
-      }
-    ]
+    "jump_penalty": null
   },
   "mood": {
     "vkospi_percentile_days": 250,
@@ -89,8 +140,7 @@
     "zscore_days": 250,
     "theme_surge_z": 2.0,
     "jump_penalty": null,
-    "greed": { "action": "리밸런싱제안", "risk_asset_gap": 0.02 },
     "fear": { "action": "계획외매도경고", "triggers": ["전략중지", "직접비중축소"] },
-    "risk_asset_classes": ["주식", "원자재", "리츠"]
+    "note": "비중을 바꾸지 않고 알림만 줌. 존치 여부 미정"
   }
 }

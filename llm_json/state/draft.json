@@ -1,13 +1,13 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "draft_id": "dr_20261113_0001",
   "base_portfolio_id": null,
-  "catalog_version": 1,
-  "policy_version": 1,
+  "catalog_version": 2,
+  "policy_version": 2,
   "created_at": "2026-11-13T20:00:00+09:00",
-  "updated_at": "2026-11-13T20:01:10+09:00",
+  "updated_at": "2026-11-13T20:00:05+09:00",
   "status": "확인대기",
-  "question_rounds": 1,
+  "question_rounds": 0,
   "turns": [
     {
       "turn_id": "t1",
@@ -21,36 +21,84 @@
     "profile": {
       "goal": { "value": "주택자금", "source": "사용자발화", "quote": "전세금 보탤 돈", "ref": "t1" },
       "horizon_months": { "value": 24, "source": "사용자발화", "quote": "2년 뒤에", "ref": "t1" },
-      "risk_level": { "value": "안정추구형", "source": "질문답변", "quote": null, "ref": "q1" },
       "capital_krw": { "value": 1000000, "source": "사용자발화", "quote": "100만원", "ref": "t1" },
       "monthly_contribution_krw": { "value": null, "source": "기본값", "quote": null, "ref": null },
       "monthly_contribution_day": { "value": null, "source": "기본값", "quote": null, "ref": null }
     },
+    "asset_classes": [
+      { "asset_class": "주식", "value": 0.6, "source": "기본값", "quote": null, "ref": null },
+      { "asset_class": "채권", "value": 0.4, "source": "기본값", "quote": null, "ref": null }
+    ],
     "etfs": [
       { "etf_code": "360750", "share": "보통", "weight": null, "source": "사용자발화", "quote": "S&P 그거 넣어주시고", "ref": "t1" },
       { "etf_code": "395270", "share": "조금", "weight": null, "source": "사용자발화", "quote": "반도체도 조금", "ref": "t1" },
-      { "etf_code": "148070", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
-      { "etf_code": "453850", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" },
-      { "etf_code": "357870", "share": "보통", "weight": null, "source": "템플릿", "quote": null, "ref": "안정추구형" }
+      { "etf_code": "114260", "share": null, "weight": null, "source": "생성", "quote": null, "ref": "construction" },
+      { "etf_code": "148070", "share": null, "weight": null, "source": "생성", "quote": null, "ref": "construction" }
     ],
-    "rules": {
-      "rebalance_cycle": { "value": "분기", "source": "기본값", "quote": null, "ref": null },
-      "rebalance_method": { "value": "혼합", "source": "기본값", "quote": null, "ref": null },
-      "rebalance_day": { "value": 1, "source": "기본값", "quote": null, "ref": null },
-      "rebalance_start_month": { "value": 1, "source": "기본값", "quote": null, "ref": null }
-    }
+    "etfs_note": "weight는 사용자가 직접 말한 비중만 담음. 계산된 비중은 construction.result"
   },
-  "missing": [],
-  "questions": [
+  "questions": [],
+  "issues": [
     {
-      "question_id": "q1",
-      "question_key": "risk_level",
-      "asked_at": "2026-11-13T20:00:05+09:00",
-      "answer": { "value": "안정추구형", "via": "선택지", "at": "2026-11-13T20:01:10+09:00" }
+      "issue_id": "i1",
+      "check_id": "out_of_scope",
+      "level": "차단",
+      "reason": "개별종목",
+      "quote": "삼성전자도요",
+      "ref": "t1",
+      "options": null,
+      "resolution": null
+    },
+    {
+      "issue_id": "i2",
+      "check_id": "horizon_risk",
+      "level": "경고",
+      "reason": null,
+      "quote": "2년 뒤에",
+      "ref": "t1",
+      "options": null,
+      "resolution": null
     }
   ],
-  "out_of_scope": [{ "quote": "삼성전자도요", "reason": "개별종목", "ref": "t1" }],
-  "conflicts": [],
-  "warnings": [],
-  "confirm_text": "안정추구형, 24개월 뒤 주택자금, 100만원으로 이해했어요. 주식 30%는 미국 S&P500과 국내 반도체(조금)로, 나머지는 국고채 10년·미국채 30년·CD금리로 채웠어요. 삼성전자 같은 개별 종목은 담을 수 없어요."
+  "construction": {
+    "case": { "weight_given": false, "etf_given": true },
+    "as_of": "2026-11-13",
+    "lookback_days": null,
+    "weighting": "HRP",
+    "asset_classes": [
+      {
+        "asset_class": "주식",
+        "budget": 0.6,
+        "fixed": [],
+        "candidates": "사용자ETF",
+        "clusters": [
+          { "cluster_id": "주식-1", "etfs": ["360750"], "representative": "360750", "reason": "사용자 선택" },
+          { "cluster_id": "주식-2", "etfs": ["395270"], "representative": "395270", "reason": "사용자 선택" }
+        ],
+        "hrp": { "360750": 0.74, "395270": 0.26 },
+        "after_share": { "360750": 0.85, "395270": 0.15 }
+      },
+      {
+        "asset_class": "채권",
+        "budget": 0.4,
+        "fixed": [],
+        "candidates": "화이트리스트",
+        "clusters": [
+          { "cluster_id": "채권-1", "etfs": ["114260"], "representative": "114260", "reason": "묶음에서 변동성 가장 낮음" },
+          { "cluster_id": "채권-2", "etfs": ["148070", "439870"], "representative": "148070", "reason": "묶음에서 변동성 가장 낮음" }
+        ],
+        "hrp": { "114260": 0.9, "148070": 0.1 },
+        "after_share": { "114260": 0.9, "148070": 0.1 }
+      }
+    ],
+    "limits_applied": [{ "etf_code": "148070", "from": 0.04, "to": 0.05, "check_id": "min_weight_per_etf" }],
+    "result": { "360750": 0.51, "395270": 0.09, "114260": 0.35, "148070": 0.05 },
+    "stats": {
+      "volatility": { "360750": 0.18, "395270": 0.3, "114260": 0.02, "148070": 0.06 },
+      "correlation": [{ "pair": ["360750", "395270"], "value": 0.55 }, { "pair": ["114260", "148070"], "value": 0.7 }]
+    },
+    "excluded": [],
+    "note": "변동성·상관계수·묶음은 설명용 예시 값"
+  },
+  "confirm_text": "24개월 뒤 주택자금, 100만원으로 이해했어요. 주식 60%는 말씀하신 미국 S&P500과 국내 반도체(조금)로 담았고, 덜 출렁이는 S&P500에 더 많이 넣었어요. 채권 40%는 서로 다르게 움직이는 국고채 3년·10년으로 채웠어요. 운용 중에는 시장 국면에 따라 비중과 종목이 자동으로 바뀌어요. 주식이 60%인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요. 삼성전자 같은 개별 종목은 담을 수 없어요."
 }

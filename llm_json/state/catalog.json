@@ -1,21 +1,21 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "catalog_id": "default",
-  "version": 1,
+  "version": 2,
   "status": "초안",
   "decided_on": null,
   "decision_note": null,
   "intents": ["포트폴리오생성", "포트폴리오수정", "단순질문", "범위밖", "부적절"],
   "out_of_scope_reasons": ["개별종목", "가상자산", "레버리지인버스", "시세예측", "유니버스밖ETF", "기타"],
   "goals": ["노후", "주택자금", "목돈마련", "교육비", "기타"],
-  "risk_levels": ["안정형", "안정추구형", "위험중립형", "적극투자형", "공격투자형"],
+  "risk_asset_classes": ["주식", "원자재", "리츠"],
+  "risk_asset_classes_note": "위험자산으로 보는 자산군. 기간 경고(policy.checks의 horizon_risk)에 씀",
   "shares": ["조금", "보통", "많이"],
-  "rebalance_cycles": ["월", "분기", "반기", "연"],
-  "rebalance_methods": ["주기", "밴드", "혼합"],
+  "slot_sources": ["사용자발화", "질문답변", "생성", "기본값"],
+  "issue_levels": ["차단", "조정", "확인", "경고"],
+  "trigger_kinds": ["신호", "밴드재평가", "최소점검일"],
+  "backtest_modes": ["거시판단", "고정비중"],
   "expressions": [
-    { "words": ["안전하게", "잃기 싫", "원금"], "slot": "risk_level", "value": "안정형" },
-    { "words": ["적당히", "무난하게"], "slot": "risk_level", "value": "위험중립형" },
-    { "words": ["공격적으로", "크게 벌"], "slot": "risk_level", "value": "공격투자형" },
     { "words": ["노후", "은퇴"], "slot": "goal", "value": "노후" },
     { "words": ["전세", "내 집", "집 살"], "slot": "goal", "value": "주택자금" },
     { "words": ["조금만", "살짝", "약간"], "slot": "share", "value": "조금" },
@@ -74,83 +74,13 @@
     "329200": ["리츠", "부동산"]
   },
   "aliases_note": "자연어로 ETF를 고를 때 쓰는 별칭. 별칭 하나는 ETF 하나로만 이어진다. 별칭이 없는 ETF는 화이트리스트 이름으로 찾는다",
-  "risk_templates": [
-    {
-      "risk_level": "안정형",
-      "groups": [
-        { "asset_class": "주식", "target": 0.1, "default_etfs": ["069500", "360750"] },
-        { "asset_class": "채권", "target": 0.6, "default_etfs": ["148070", "453850"] },
-        { "asset_class": "현금성", "target": 0.3, "default_etfs": ["357870"] }
-      ],
-      "reason": "초안: 원금 손실을 피하려는 성향. 주식 최소, 현금성 비중이 큼"
-    },
-    {
-      "risk_level": "안정추구형",
-      "groups": [
-        { "asset_class": "주식", "target": 0.3, "default_etfs": ["069500", "360750"] },
-        { "asset_class": "채권", "target": 0.6, "default_etfs": ["148070", "453850"] },
-        { "asset_class": "현금성", "target": 0.1, "default_etfs": ["357870"] }
-      ],
-      "reason": "초안: 타깃데이트 펀드 글라이드패스의 보수적인 끝(주식 약 30%) 근처"
-    },
-    {
-      "risk_level": "위험중립형",
-      "groups": [
-        { "asset_class": "주식", "target": 0.5, "default_etfs": ["069500", "360750"] },
-        { "asset_class": "채권", "target": 0.45, "default_etfs": ["148070", "453850"] },
-        { "asset_class": "현금성", "target": 0.05, "default_etfs": ["357870"] }
-      ],
-      "reason": "초안: 주식·채권 반반 근처의 균형 배분"
-    },
-    {
-      "risk_level": "적극투자형",
-      "groups": [
-        { "asset_class": "주식", "target": 0.7, "default_etfs": ["069500", "360750"] },
-        { "asset_class": "채권", "target": 0.3, "default_etfs": ["148070", "453850"] }
-      ],
-      "reason": "초안: 주식 70% 근처"
-    },
-    {
-      "risk_level": "공격투자형",
-      "groups": [
-        { "asset_class": "주식", "target": 0.9, "default_etfs": ["069500", "360750"] },
-        { "asset_class": "채권", "target": 0.1, "default_etfs": ["148070", "453850"] }
-      ],
-      "reason": "초안: 글라이드패스의 공격적인 끝(주식 약 90%) 근처"
-    }
-  ],
-  "horizon_warnings": [
-    {
-      "under_months": 60,
-      "risk_levels": ["적극투자형", "공격투자형"],
-      "text": "주식 비중이 70% 이상인 구성은 5년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요.",
-      "reason": "잠정: KOSPI200(2000~)은 3년 보유해도 손실 확률 24%, 5년 9%"
-    },
-    {
-      "under_months": 36,
-      "risk_levels": ["위험중립형"],
-      "text": "주식 비중이 절반인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요.",
-      "reason": "잠정: 주식 50% 템플릿 근사의 1년 보유 손실 확률 24%, 하위 5% -13%"
-    }
-  ],
   "questions": [
     {
-      "question_key": "risk_level",
+      "question_key": "weight_conflict",
       "kind": "고르기",
-      "text": "투자한 돈이 한 달 만에 10% 줄어들면 어떻게 하실 것 같아요?",
-      "choices": [
-        { "label": "바로 전부 판다", "value": "안정형" },
-        { "label": "일부를 판다", "value": "안정추구형" },
-        { "label": "그대로 둔다", "value": "위험중립형" },
-        { "label": "조금 더 산다", "value": "적극투자형" },
-        { "label": "많이 더 산다", "value": "공격투자형" }
-      ]
-    },
-    {
-      "question_key": "horizon_months",
-      "kind": "고르기",
-      "text": "이 돈은 언제쯤 쓰실 계획인가요?",
-      "choices": [{ "label": "1년 안", "value": 12 }, { "label": "3년 안", "value": 36 }, { "label": "5년 안", "value": 60 }, { "label": "10년 이상", "value": 120 }]
+      "text": "말씀하신 비중이 서로 맞지 않아요. 어느 쪽에 맞출까요?",
+      "choices": [{ "label": "{자산군 비중}에 맞추기", "value": "자산군비중" }, { "label": "{ETF 비중}에 맞추기", "value": "ETF비중" }],
+      "note": "중괄호 안은 실제 값으로 채움. 예: \"주식 50%\" vs \"주식 ETF 합계 70%\""
     }
   ]
 }
