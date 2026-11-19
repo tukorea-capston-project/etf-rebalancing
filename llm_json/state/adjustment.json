@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "adjustment_id": "adj_20261201_pf_001",
+  "mode": "실운용",
+  "portfolio_id": "pf_001",
+  "portfolio_revision": 1,
+  "policy_version": 2,
+  "created_at": "2026-12-01T18:30:00+09:00",
+  "trigger_kind": "신호",
+  "signals": ["economy_state"],
+  "band": null,
+  "regime_from": { "economy": "꺾임", "sectors_up": ["반도체IT", "자동차", "조선"] },
+  "regime_to": { "economy": "좋아짐", "sectors_up": ["반도체IT", "자동차", "조선"] },
+  "market_state_id": "ms_20261201",
+  "rules_applied": [{ "rule_id": "regime_up_sector", "sector": "반도체IT" }],
+  "changes": [
+    { "etf_code": "395270", "base": 0.09, "from": 0.09, "to": 0.12, "limited": false },
+    { "etf_code": "360750", "base": 0.51, "from": 0.51, "to": 0.48, "limited": false }
+  ],
+  "result": "반영",
+  "text": "경기선행지수가 올랐고 반도체 수출이 전년 같은 달보다 21.4% 늘어, 경기가 좋아지는 국면으로 바뀌었어요. 그래서 반도체 비중을 9%에서 12%로 올리고 미국 S&P500을 51%에서 48%로 줄였어요.",
+  "llm_output_id": "llm_at_20261201_pf_001",
+  "applied_at": "2026-12-02T08:40:00+09:00",
+  "new_revision": 2
+}
