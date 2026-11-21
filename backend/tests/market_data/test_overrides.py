@@ -8,6 +8,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.market_data.overrides import load_overrides
+from app.market_data.service import target_codes
 
 TARGETS = {"069500", "0184E0"}
 SOURCE = "source: https://kind.krx.co.kr/x"
@@ -20,7 +21,8 @@ def write(tmp_path: Path, body: str) -> Path:
 
 
 def test_저장소의_보정_파일을_읽는다() -> None:
-    assert load_overrides({"069500"}) == []
+    # 보정 항목의 종목코드는 모두 수집 대상이어야 한다
+    load_overrides(target_codes())
 
 
 def test_추가와_삭제_항목을_읽는다(tmp_path: Path) -> None:
