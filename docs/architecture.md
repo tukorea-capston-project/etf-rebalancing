@@ -5,7 +5,7 @@
 
 ## 구성 요소
 
-![시스템 구성도](diagrams/system.architecture.png)
+![시스템 구성도](diagrams/system_architecture.png)
 
 편집 방법과 로고 출처는 아래 "다이어그램" 섹션에 있습니다.
 
