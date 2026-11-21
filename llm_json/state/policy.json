@@ -1,16 +1,23 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "policy_id": "default",
-  "version": 2,
+  "version": 3,
   "status": "초안",
   "decided_on": null,
   "decision_note": null,
-  "dialog": { "max_question_rounds": 3, "max_llm_retries": 2, "on_unresolved": "나중발화기준조정" },
+  "dialog": {
+    "max_question_rounds": 3,
+    "max_llm_retries": 2,
+    "required_slots": ["capital_krw", "rebalance"],
+    "required_slots_note": "비어 있으면 선택지를 주고 되물음(catalog.questions). 비중과 종목은 되묻지 않고 비워 두면 생성 로직이 채움",
+    "on_unresolved": "나중발화기준조정"
+  },
   "defaults": {
     "mode": "백테스트",
-    "capital_krw": 10000000,
-    "asset_classes": { "주식": 0.6, "채권": 0.4 },
-    "asset_classes_note": "잠정. 사용자가 자산군·ETF 비중을 말하지 않았을 때 씀. HRP를 자산군 밖까지 돌리면 채권·현금성이 거의 전부를 가져가므로 꼭 필요함",
+    "cash": 0.0,
+    "cash_note": "사용자가 현금 비중을 말하지 않으면 0%",
+    "band": { "abs": 0.05, "rel": 0.25 },
+    "band_note": "사용자가 밴드·혼합 조건을 고르고 폭을 말하지 않았을 때 씀",
     "backtest": {
       "start": null,
       "end": null,
@@ -21,23 +28,38 @@
       "price_basis": "실제종가",
       "reinvest_distributions": true,
       "tax_model": "ETF유형별",
-      "benchmarks": [{ "type": "무리밸런싱" }, { "type": "ETF보유", "etf_code": "069500" }]
-    },
-    "backtest_modes": ["거시판단", "고정비중"]
+      "modes": ["고정비중", "거시판단", "거시판단LLM제외"],
+      "llm_indicators": { "use": true, "compare_without": true, "without_display": "토글", "leakage_test": null },
+      "llm_indicators_note": "백테스트에도 LLM 지표를 씀. 미래 정보를 없앤다고 주장하지 않고, LLM 지표를 뺀 결과를 항상 함께 계산해 차이를 보여 줌(화면에서는 토글을 켜야 보임). 미래 정보가 섞였는지 시험하는 방법(예측 불가능한 사건 시험, 기억 정도 측정)의 구체 설계는 미정"
+    }
   },
   "construction": {
+    "selection": "minimax",
+    "selection_note": "묶음마다 대표 하나. 대표들끼리의 최대 상관계수가 가장 작은 조합. 사용자가 지정한 ETF는 고정",
+    "selection_search": null,
     "weighting": "HRP",
     "compare_weightings": ["역변동성", "동일비중"],
-    "scope": "자산군안",
-    "lookback_days": null,
+    "scope": "자산군비중있으면자산군안",
+    "scope_note": "사용자가 자산군 비중을 말하지 않으면 HRP가 자산군 배분까지 정함. 현금은 HRP에 넣지 않음",
+    "selection_days": null,
     "min_history_days": null,
-    "representative": { "order": ["낮은변동성", "거래량"], "prefer_user_etf": true },
-    "share_multipliers": { "조금": 0.5, "보통": 1.0, "많이": 1.5 },
-    "default_share": "보통",
-    "limits": { "max_weight_per_etf": 0.5, "min_weight_per_etf": 0.05, "max_etfs": 10, "weight_step": 0.01 },
-    "budget": ["사용자", "defaults.asset_classes"],
-    "regenerate": "사용자수정시",
-    "note": "HRP는 처음 생성과 백테스트 시작일에만 씀(같은 로직, 기준 시점만 다름). 동적 리밸런싱에는 쓰지 않음. lookback·min_history는 미정"
+    "default_groups": [
+      { "category": "domestic_equity_index", "group": null },
+      { "category": "foreign_equity_country", "group": null },
+      { "category": "domestic_bond", "group": null }
+    ],
+    "default_groups_status": "예시",
+    "default_groups_note": "기본 묶음 세트. 사용자 문장에 나온 묶음을 더하거나 뺌. 구성은 미정",
+    "limits": {
+      "max_weight_per_etf": 0.5,
+      "min_weight_per_etf": 0.05,
+      "max_etfs": 10,
+      "max_groups": 10,
+      "weight_step": 0.01
+    },
+    "postprocess": { "below_min": "최소비중으로올리고나머지비례축소", "rounding": "최대잔여법" },
+    "regenerate": ["생성", "국면전환"],
+    "note": "HRP는 포트폴리오를 만들 때와 국면이 바뀔 때만 계산함. selection_days(선정 기간 길이), min_history_days, minimax 탐색 방법은 미정"
   },
   "checks": [
     { "check_id": "out_of_scope", "level": "차단", "action": "담지않고이유알림" },
@@ -50,97 +72,64 @@
       "check_id": "horizon_risk",
       "level": "경고",
       "when": { "horizon_months_under": 36, "risk_asset_over": 0.0 },
-      "text": "주식이 {위험자산 비중}인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요.",
+      "text": "위험자산이 {위험자산 비중}인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요.",
       "reason": "잠정: 기준값(기간, 위험자산 비중)을 손실 확률로 다시 정해야 함"
     },
     { "check_id": "same_cluster", "level": "경고", "text": "{ETF들}은 거의 같이 움직여서 나눠 담는 효과가 작아요." }
   ],
   "rebalance": {
-    "check": "매일장마감후",
-    "inner_band": { "abs": 0.05, "rel": 0.25, "on_breach": "해당자산만되돌림" },
-    "outer_band": { "abs": 0.1, "rel": 0.5, "on_breach": "국면재평가" },
-    "repeat_breach": { "count": null, "window_days": null, "on_breach": "국면재평가" },
-    "note": "정적 층. 밴드 폭은 절대 폭과 상대 폭 중 좁은 쪽. 값은 잠정, repeat_breach는 미정"
+    "conditions": ["주기", "밴드", "혼합"],
+    "band_check": "매주마지막영업일종가",
+    "band_width": "절대폭과상대폭중좁은쪽",
+    "on_band_breach": "벗어난자산만되돌림",
+    "on_cycle": "모든자산되돌림",
+    "day_rule": "없는날은말일_휴장일은다음영업일",
+    "note": "정적 층. 국면이 유지되는 동안 사용자가 고른 조건으로 현재 목표 비중에 되돌림. 조건과 폭은 사용자 전략에 있음(docs/strategy-schema.md). 정적 리밸런싱으로는 국면을 다시 판단하지 않음"
   },
   "fixed_rules": { "contribution": "부족자산우선", "distribution": "같은ETF재투자" },
-  "dynamic": {
-    "monitoring": "매일장마감후",
-    "monthly_indicators": "발표일갱신",
-    "min_check": "분기첫영업일",
-    "signals": [
-      {
-        "signal_id": "economy_state",
-        "indicator": "regime.economy.state",
-        "enter": "상태변화",
-        "exit": null,
-        "confirm_days": null,
-        "status": "예시"
-      },
-      {
-        "signal_id": "market_down_prob",
-        "indicator": "regime.market_model.probs.하락",
-        "enter": 0.7,
-        "exit": 0.5,
-        "confirm_days": 3,
-        "status": "예시"
-      }
+  "macro": {
+    "schedule": "매주마지막영업일종가",
+    "classifier": "Z점수점수제",
+    "classifier_extension": "HMM",
+    "zscore_window_days": null,
+    "indicators": [
+      { "indicator_id": "ktb_yield_change", "name": "국고채 금리 변화율", "source": "ECOS", "llm": false },
+      { "indicator_id": "term_spread", "name": "장단기 금리차", "source": "ECOS", "llm": false },
+      { "indicator_id": "usdkrw", "name": "원/달러 환율", "source": "ECOS", "llm": false },
+      { "indicator_id": "vkospi", "name": "VKOSPI", "source": null, "llm": false },
+      { "indicator_id": "margin_loan", "name": "신용융자 잔고", "source": "금융투자협회", "llm": false },
+      { "indicator_id": "deposits", "name": "투자자예탁금", "source": "금융투자협회", "llm": false },
+      { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "source": "빅카인즈", "llm": true },
+      { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "source": "한국은행", "llm": true }
     ],
-    "signals_note": "어떤 지표를 쓰고 진입·해제 기준과 확인 기간을 얼마로 할지는 거시판단 로직에서 정함(추후). 값은 백테스트 결과를 보고 고르지 않고 관례값·기본값으로 정하며, 견고성 표와 PBO를 함께 보여 줌(docs/backtest.md). 진입·해제 기준을 다르게 두고 확인 기간을 채워야 전환해서 휩쏘를 막음",
-    "near_threshold": { "margin": null, "max_hold_days": null, "action": "밴드리밸런싱보류" },
-    "limit": { "base": "기준비중", "abs": 0.1, "rel": 0.5, "on_exceed": "한도까지만", "new_etf": null },
-    "limit_note": "new_etf: 동적 전환으로 종목을 새로 넣거나 뺄 때의 한도. 기준 비중이 0%라 지금 방식을 쓸 수 없어 미정",
-    "lock_user_weights": true,
-    "target": "기준비중+국면조정",
-    "adjustments": [
-      {
-        "rule_id": "regime_up_sector",
-        "status": "예시",
-        "when": { "economy": "좋아짐", "sector": "늘어남" },
-        "raise": { "sector": "해당업종" },
-        "take_from": { "asset_classes": ["주식"], "exclude_sector": "해당업종" },
-        "amount": 0.03
-      },
-      {
-        "rule_id": "regime_down_defense",
-        "status": "예시",
-        "when": { "economy": "나쁨" },
-        "raise": { "asset_classes": ["채권", "현금성"] },
-        "take_from": { "asset_classes": ["주식"] },
-        "amount": 0.05
-      }
+    "indicators_note": "계산일까지 공개된 값만 씀. VKOSPI 출처는 미정. llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
+    "regimes": [
+      { "axis": "금리", "states": ["상승", "하락"] },
+      { "axis": "환율", "states": ["과열", "안정"] },
+      { "axis": "변동성", "states": ["고변동", "저변동"] },
+      { "axis": "투자심리", "states": ["공포", "탐욕"] }
     ],
-    "adjustments_note": "국면별 목표 종목·비중 규칙. 누적하지 않고 매번 기준 비중 + 지금 국면의 조정으로 다시 계산함. 거시판단 로직이 정해지면 바뀜"
+    "regimes_status": "예시",
+    "hysteresis": { "enter": null, "exit": null },
+    "hysteresis_note": "잦은 전환은 진입·복귀 기준을 다르게 두는 것(히스테리시스)으로만 막음. 값은 백테스트 결과를 보고 고르지 않고 관례값·기본값으로 정하며, 견고성 표와 PBO를 함께 보여 줌(docs/backtest.md). 구체 값은 미정",
+    "on_switch": {
+      "selection": "속성매칭",
+      "score": "RegimeFit - λ·SwitchCost",
+      "lambda": null,
+      "etf_attributes": null,
+      "weighting": "HRP",
+      "keep_user": ["etfs", "asset_classes", "cash"]
+    },
+    "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(예: 환헤지 여부, 듀레이션)의 ETF를 점수로 고르고 HRP로 비중을 다시 계산함. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로. RegimeFit·λ·SwitchCost 정의와 ETF 속성 필드는 미정",
+    "events": null,
+    "events_note": "큰 악재·호재 대응. 탐지 방법과 대응 방식은 미정",
+    "static_dynamic_priority": null,
+    "static_dynamic_priority_note": "국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 미정"
   },
-  "regime": {
-    "states": { "economy": ["좋아짐", "꺾임", "나쁨"], "sector": ["늘어남", "줄어듦"] },
-    "sectors": [
-      {
-        "sector_id": "반도체IT",
-        "indicator": { "name": "반도체 수출 증감률(전년 동월 대비)", "source": "관세청" },
-        "etfs": ["395270", "363580", "266370", "396500", "469150", "455850", "298770", "367760"]
-      },
-      {
-        "sector_id": "2차전지",
-        "indicator": { "name": "이차전지 수출 증감률(전년 동월 대비)", "source": "산업통상자원부" },
-        "etfs": ["305720", "465330", "462010", "461950", "455860"]
-      },
-      {
-        "sector_id": "자동차",
-        "indicator": { "name": "자동차 수출 증감률(전년 동월 대비)", "source": "산업통상자원부" },
-        "etfs": ["466930", "138540"]
-      },
-      { "sector_id": "조선", "indicator": { "name": "선박 수출 증감률(전년 동월 대비)", "source": "산업통상자원부" }, "etfs": ["466920"] }
-    ],
-    "sector_note": "초안: 매달 나오는 업황 지표가 있는 국내 업종만 레짐 대상으로 둔다. 투자 대상의 나머지 ETF(지수·채권·해외·업종 지표가 없는 업종 등)는 경기 상태로만 판단한다",
-    "jump_penalty": null
-  },
-  "mood": {
-    "vkospi_percentile_days": 250,
-    "flow_change_days": 20,
-    "zscore_days": 250,
-    "theme_surge_z": 2.0,
-    "jump_penalty": null,
-    "fear": { "action": "계획외매도경고", "triggers": ["전략중지", "직접비중축소"] },
-    "note": "비중을 바꾸지 않고 알림만 줌. 존치 여부 미정"
+  "fear_warning": {
+    "when": { "axis": "투자심리", "state": "공포" },
+    "action": "계획외매도경고",
+    "triggers": ["전략중지", "직접비중축소"],
+    "note": "사용자가 계획에서 벗어난 매도를 하려 할 때만 경고함. 시스템의 국면 전환 재구성에는 적용하지 않음"
   }
 }

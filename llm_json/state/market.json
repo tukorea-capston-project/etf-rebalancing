@@ -1,90 +1,70 @@
 {
-  "schema_version": 2,
-  "market_state_id": "ms_20261201",
-  "as_of": "2026-12-01",
-  "policy_version": 2,
-  "regime_state": {
-    "regime": { "economy": "좋아짐", "sectors_up": ["반도체IT", "자동차", "조선"] },
-    "prev_regime": { "economy": "꺾임", "sectors_up": ["반도체IT", "자동차", "조선"] },
-    "since": "2026-12-01",
-    "check": { "verdict": "확인됨", "hold_until": null, "llm_output_ids": ["llm_ec_20261201_econ"] }
-  },
-  "signals": [
-    {
-      "signal_id": "economy_state",
-      "value": "좋아짐",
-      "prev_value": "꺾임",
-      "days_over": null,
-      "near": false,
-      "triggered": true
+  "schema_version": 3,
+  "market_state_id": "ms_20261204",
+  "as_of": "2026-12-04",
+  "as_of_note": "매주 마지막 영업일 종가 기준. 발표일(released_at)이 이 날짜 이전인 값만 씀",
+  "policy_version": 3,
+  "classifier": "Z점수점수제",
+  "zscore_window_days": null,
+  "indicators": {
+    "ktb_yield_change": {
+      "value": -0.012,
+      "z": -1.3,
+      "period": "2026-12-04",
+      "released_at": "2026-12-04",
+      "source": "ECOS"
     },
-    {
-      "signal_id": "market_down_prob",
-      "value": 0.3,
-      "enter": 0.7,
-      "exit": 0.5,
-      "days_over": 0,
-      "near": false,
-      "triggered": false
+    "term_spread": { "value": 0.004, "z": 0.2, "period": "2026-12-04", "released_at": "2026-12-04", "source": "ECOS" },
+    "usdkrw": { "value": 1385.2, "z": 0.4, "period": "2026-12-04", "released_at": "2026-12-04", "source": "ECOS" },
+    "vkospi": { "value": 17.8, "z": -0.6, "period": "2026-12-04", "released_at": "2026-12-04", "source": null },
+    "margin_loan": {
+      "value": null,
+      "z": 0.8,
+      "period": "2026-12-03",
+      "released_at": "2026-12-04",
+      "source": "금융투자협회"
+    },
+    "deposits": {
+      "value": null,
+      "z": 0.3,
+      "period": "2026-12-03",
+      "released_at": "2026-12-04",
+      "source": "금융투자협회"
+    },
+    "news_mood": {
+      "value": 0.6,
+      "z": 1.1,
+      "period": "2026-11-28~2026-12-04",
+      "released_at": "2026-12-04",
+      "source": "빅카인즈+LLM",
+      "n": 236,
+      "llm_output_ids": ["llm_news_20261204_0001"]
+    },
+    "bok_minutes": {
+      "value": "안바뀜",
+      "z": null,
+      "period": "2026-11-27",
+      "released_at": "2026-12-01",
+      "source": "한국은행+LLM",
+      "llm_output_ids": ["llm_bok_20261127"]
     }
-  ],
-  "regime": {
-    "updated_at": "2026-12-01T18:00:00+09:00",
-    "economy": {
-      "state": "좋아짐",
-      "prev_state": "꺾임",
-      "changed": true,
-      "indicators": {
-        "leading_index_direction": { "value": 1, "period": "2026-10", "released_at": "2026-11-28", "source": "KOSIS" },
-        "base_rate_change": { "value": 0.0, "period": "2026-11", "released_at": "2026-11-27", "source": "ECOS" },
-        "ktb_yield_change": { "value": -0.012, "period": "2026-11", "released_at": "2026-12-01", "source": "ECOS" },
-        "usdkrw_change": { "value": 0.004, "period": "2026-11", "released_at": "2026-12-01", "source": "ECOS" },
-        "exports_yoy": { "value": 0.081, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
-      },
-      "bok_llm_output_id": "llm_bok_20261127"
-    },
-    "sectors": {
-      "반도체IT": {
-        "state": "늘어남",
-        "prev_state": "늘어남",
-        "changed": false,
-        "indicator": { "value": 0.214, "period": "2026-11", "released_at": "2026-12-01", "source": "관세청" }
-      },
-      "2차전지": {
-        "state": "줄어듦",
-        "prev_state": "줄어듦",
-        "changed": false,
-        "indicator": { "value": -0.063, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
-      },
-      "자동차": {
-        "state": "늘어남",
-        "prev_state": "늘어남",
-        "changed": false,
-        "indicator": { "value": 0.035, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
-      },
-      "조선": {
-        "state": "늘어남",
-        "prev_state": "늘어남",
-        "changed": false,
-        "indicator": { "value": 0.152, "period": "2026-11", "released_at": "2026-12-01", "source": "산업통상자원부" }
-      }
-    },
-    "market_model": { "type": "점프모형", "fit_window": "확장", "probs": { "상승": 0.7, "하락": 0.3 } }
   },
-  "mood": {
-    "updated_at": "2026-12-01T18:00:00+09:00",
-    "state": "보통",
-    "prev_state": "보통",
-    "changed": false,
-    "days_in_state": 12,
-    "model": { "type": "점프모형", "jump_penalty": null, "fit_window": "확장", "probs": { "공포": 0.1, "보통": 0.75, "탐욕": 0.15 } },
-    "indicators": {
-      "vkospi_pct_1y": { "value": 0.42, "period": "2026-12-01", "released_at": "2026-12-01", "source": "KRX" },
-      "margin_loan_z": { "value": 0.8, "period": "2026-11-30", "released_at": "2026-12-01", "source": "FreeSIS" },
-      "deposits_z": { "value": 0.3, "period": "2026-11-30", "released_at": "2026-12-01", "source": "FreeSIS" },
-      "news_score_mean": { "value": 0.6, "period": "2026-12-01", "released_at": "2026-12-01", "source": "빅카인즈+LLM", "n": 48 },
-      "theme_count_z": { "value": 1.1, "theme": "AI·반도체", "period": "2026-12-01", "released_at": "2026-12-01", "source": "빅카인즈+LLM" }
+  "indicators_note": "값은 설명용 예시. 지표별로 Z-Score를 계산해 축마다 점수를 냄",
+  "regimes": {
+    "금리": { "state": "하락", "prev_state": "상승", "changed": true, "score": -1.3, "enter": null, "exit": null },
+    "환율": { "state": "안정", "prev_state": "안정", "changed": false, "score": 0.4, "enter": null, "exit": null },
+    "변동성": {
+      "state": "저변동",
+      "prev_state": "저변동",
+      "changed": false,
+      "score": -0.6,
+      "enter": null,
+      "exit": null
     },
-    "news_llm_output_ids": ["llm_news_20261201_0001"]
-  }
+    "투자심리": { "state": "탐욕", "prev_state": "탐욕", "changed": false, "score": 0.9, "enter": null, "exit": null }
+  },
+  "regimes_note": "축과 상태는 policy.macro.regimes(예시). enter·exit는 히스테리시스 기준(미정). 투자심리가 공포면 계획 외 매도 경고(policy.fear_warning)를 띄움",
+  "switched": true,
+  "switched_axes": ["금리"],
+  "switched_note": "국면이 바뀐 축. 포트폴리오별 재구성은 regime_switch.json에 기록함"
 }
