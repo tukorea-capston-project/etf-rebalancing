@@ -21,6 +21,7 @@ from app.market_data.service import (
     Distribution,
     FetchError,
     SourceUnavailableError,
+    check_distributions,
     collect_prices,
     refresh_distributions,
 )
@@ -354,3 +355,81 @@ def test_수집_완료_시각은_UTC_시간대가_있다(
 
     log = session.get(PriceCollectionLog, d(1))
     assert log is not None and log.checked_at >= before
+
+
+# --- 분배금 점검 ---------------------------------------------------------------
+
+
+def add_distribution(
+    session: Session,
+    code: str,
+    ex_date: date,
+    amount: str,
+    source: DistributionSource = DistributionSource.YFINANCE,
+) -> None:
+    session.add(
+        EtfDistribution(
+            code=code, ex_date=ex_date, amount=Decimal(amount), source=source
+        )
+    )
+
+
+def add_close(session: Session, code: str, trade_date: date, close: int) -> None:
+    session.add(
+        EtfDailyPrice(trade_date=trade_date, code=code, name=f"ETF {code}", close=close)
+    )
+
+
+def test_정수가_아닌_분배금을_경고한다(session: Session) -> None:
+    add_distribution(session, "069500", date(2025, 12, 12), "1.458")
+    session.commit()
+    report = CollectionReport()
+
+    check_distributions(session, CODES, report)
+
+    assert len(report.warnings) == 1
+    assert "069500 2025-12-12" in report.warnings[0]
+    assert "정수가 아니다" in report.warnings[0]
+
+
+def test_분배율이_범위_밖이면_경고한다(session: Session) -> None:
+    add_close(session, "069500", date(2025, 4, 28), 10000)
+    add_close(
+        session, "069500", date(2025, 4, 29), 9000
+    )  # 분배락일 당일 종가는 쓰지 않는다
+    add_distribution(session, "069500", date(2025, 4, 29), "1001")  # 10.01%
+    add_close(session, "0184E0", date(2025, 7, 29), 100000)
+    add_distribution(session, "0184E0", date(2025, 7, 30), "9")  # 0.009%
+    session.commit()
+    report = CollectionReport()
+
+    check_distributions(session, CODES, report)
+
+    assert len(report.warnings) == 2
+    joined = "\n".join(report.warnings)
+    assert "069500 2025-04-29" in joined and "10.0100%" in joined
+    assert "0184E0 2025-07-30" in joined and "0.0090%" in joined
+
+
+def test_범위_안이거나_시세가_없으면_경고하지_않는다(session: Session) -> None:
+    add_close(session, "069500", date(2025, 4, 28), 10000)
+    add_distribution(session, "069500", date(2025, 4, 29), "1000")  # 정확히 10%
+    add_distribution(session, "0184E0", date(2025, 7, 30), "9")  # 전일 시세 없음
+    session.commit()
+    report = CollectionReport()
+
+    check_distributions(session, CODES, report)
+
+    assert report.warnings == []
+
+
+def test_보정_YAML로_확인한_항목은_점검하지_않는다(session: Session) -> None:
+    add_distribution(
+        session, "069500", date(2025, 12, 12), "1.458", DistributionSource.OVERRIDE
+    )
+    session.commit()
+    report = CollectionReport()
+
+    check_distributions(session, CODES, report)
+
+    assert report.warnings == []

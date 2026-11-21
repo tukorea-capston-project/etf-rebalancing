@@ -420,6 +420,58 @@ def refresh_distributions(
         report.distribution_codes_updated += 1
 
 
+# 분배율(주당 분배금 ÷ 분배락 전일 종가)이 이 범위 밖이면 단위 오류 등을 의심한다.
+MIN_DISTRIBUTION_YIELD = Decimal("0.0001")  # 0.01%
+MAX_DISTRIBUTION_YIELD = Decimal("0.10")  # 10%
+
+
+def _previous_close(session: Session, code: str, ex_date: date) -> int | None:
+    """분배락 전일 종가. 그 전에 시세가 없으면(초기 적재 전 등) None이다."""
+    return session.exec(
+        select(EtfDailyPrice.close)
+        .where(
+            col(EtfDailyPrice.code) == code,
+            col(EtfDailyPrice.trade_date) < ex_date,
+        )
+        .order_by(col(EtfDailyPrice.trade_date).desc())
+        .limit(1)
+    ).first()
+
+
+def check_distributions(
+    session: Session, codes: set[str], report: CollectionReport
+) -> None:
+    """④ yfinance 분배금 중 의심 건을 경고한다.
+
+    보정 YAML로 확인·수정한 항목(source=override)은 건너뛴다. 값이 맞는 의심 건은
+    보정 YAML에 같은 금액과 근거를 적으면 경고가 꺼진다.
+    """
+    rows = session.exec(
+        select(EtfDistribution)
+        .where(
+            col(EtfDistribution.code).in_(codes),
+            EtfDistribution.source == DistributionSource.YFINANCE,
+        )
+        .order_by(col(EtfDistribution.code), col(EtfDistribution.ex_date))
+    ).all()
+    for row in rows:
+        label = f"{row.code} {row.ex_date} 분배금 {row.amount}원"
+        # 주당 분배금은 원 단위 정수다. 소수는 단위·구분 기호를 잘못 읽은 값일 수 있다.
+        if row.amount != row.amount.to_integral_value():
+            report.warnings.append(f"점검: {label}이 정수가 아니다")
+            continue
+        close = _previous_close(session, row.code, row.ex_date)
+        if close is None or close <= 0:
+            continue
+        rate = row.amount / close
+        if not MIN_DISTRIBUTION_YIELD <= rate <= MAX_DISTRIBUTION_YIELD:
+            report.warnings.append(
+                f"점검: {label}의 분배율 {rate:.4%}가 범위"
+                f"({MIN_DISTRIBUTION_YIELD:.2%}~{MAX_DISTRIBUTION_YIELD:.0%}) 밖이다"
+                f" (전일 종가 {close}원)"
+            )
+
+
 # --- 전체 실행 -----------------------------------------------------------------
 
 
@@ -430,13 +482,14 @@ def run_collection(
     settings: Settings,
     today: date | None = None,
 ) -> CollectionReport:
-    """① 날짜별 시세 → ② 신규 ETF 백필 → ③ 분배금 갱신을 차례로 한다.
+    """① 날짜별 시세 → ② 신규 ETF 백필 → ③ 분배금 갱신 → ④ 분배금 점검을 차례로 한다.
 
-    KRX가 멈춰도 ③은 진행한다(출처가 다르다).
+    KRX가 멈춰도 ③·④는 진행한다(출처가 다르다).
     """
     report = CollectionReport()
     codes = target_codes()
     overrides = load_overrides(codes)
     collect_prices(session, price_source, codes, today or today_kst(), settings, report)
     refresh_distributions(session, distribution_source, codes, overrides, report)
+    check_distributions(session, codes, report)
     return report
