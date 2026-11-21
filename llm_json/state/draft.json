@@ -82,7 +82,7 @@
         "asset_class": "채권",
         "budget": 0.4,
         "fixed": [],
-        "candidates": "화이트리스트",
+        "candidates": "선정조건통과",
         "clusters": [
           { "cluster_id": "채권-1", "etfs": ["114260"], "representative": "114260", "reason": "묶음에서 변동성 가장 낮음" },
           { "cluster_id": "채권-2", "etfs": ["148070", "439870"], "representative": "148070", "reason": "묶음에서 변동성 가장 낮음" }
