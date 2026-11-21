@@ -110,7 +110,7 @@ flowchart TB
 
     subgraph EXT["설정 파일 · 외부 시스템"]
         direction LR
-        cfg[("backend/config/*.yaml<br/>화이트리스트 · 분배금 보정")]
+        cfg[("backend/config/*.yaml<br/>투자 대상 선정 조건 · 분배금 보정")]
         ollama(["Ollama"])
         kis(["KIS Open API"])
         kms(["AWS KMS"])
@@ -161,7 +161,7 @@ sequenceDiagram
     API->>API: 세션 확인
     API->>LLM: 입력 + 전략 스키마 (타임아웃)
     LLM-->>API: 구조화된 출력
-    API->>API: Pydantic 스키마 검증 · 화이트리스트 확인
+    API->>API: Pydantic 스키마 검증 · 투자 대상 확인
 
     loop 빠진 값이 있는 동안
         API-->>FE: 되묻기 + 선택지 3개 정도
