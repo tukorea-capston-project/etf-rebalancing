@@ -23,7 +23,7 @@
 | API 서버 | 사용자 요청 처리. 인증, 전략 변환·확정, 백테스트 요청 접수와 결과 조회, 자격 증명 등록, 모드 전환, 긴급 중지 | EC2 (Docker). 개발 때는 팀원 PC |
 | 워커 | 예약 작업과 백테스트 대기열 처리 | **EC2에서만** (Docker) |
 | PostgreSQL | 모든 상태 저장. API 서버와 워커는 DB로만 주고받음 | EC2 (Docker) |
-| Ollama | 자연어 → 전략 변환 | LLM PC |
+| Ollama | 자연어 → 전략 변환, 국면 지표용 뉴스 분위기 점수·금통위 의사록 판정 | LLM PC |
 
 - EC2의 리버스 프록시, API 서버, 워커, PostgreSQL은 Docker Compose(`deploy/compose.yaml`)로 한 번에 띄움. 배포는 GitHub Actions가 함(`docs/infra.md`).
 - API 서버와 워커는 같은 코드베이스(`backend/app/`)를 씀. 워커는 각 도메인의 `service.py` 함수를 부르기만 하고, 도메인 로직을 따로 갖지 않음.
@@ -47,7 +47,7 @@
 | 계산일 판정·리밸런싱 계산 | 계산일 장 마감 후 | `portfolio` |
 | 주문, 체결 확인 | 계산일 다음 영업일 | `trading` |
 | 분배금 입금 확인, 재투자 | 미정 | `trading`, `portfolio` |
-| 거시판단 제안 생성 | 미정 | 미정 (#12) |
+| 국면 판단(거시판단) | 매주 마지막 영업일 장 마감 후 | 미정 (#12). 국면이 바뀌면 `portfolio`가 그날을 계산일로 전체 리밸런싱을 계산 |
 
 - KRX ETF 일별매매정보는 **다음 영업일 오전 8시경**에 갱신된다고 알려져 있음. 공식 문서에서는 확인하지 못했고, 비공식 라이브러리 문서들이 같은 시각을 적고 있음.
 - 그래서 계산일 장 마감 직후에는 그날 종가가 KRX 데이터에 아직 없음. 모의·실전투자의 계산일 종가를 어디서 가져올지(KIS 시세 조회 등)와 주문 시각은 주문 방식 설계(#13)에서 정함.
@@ -134,7 +134,8 @@ flowchart TB
     backtest --> strategy
     portfolio --> strategy
     trading -->|"이상 감지"| strategy
-    macro -.->|"제안"| strategy
+    macro -.->|"국면 전환"| portfolio
+    macro -.-> ollama
 
     strategy --> ollama
     strategy --> cfg
@@ -180,7 +181,7 @@ sequenceDiagram
 
     U->>FE: 확인
     FE->>API: 확정 요청
-    API->>DB: 전략 저장 (첫 버전, 목표 비중 = 기준 비중 SAA)
+    API->>DB: 전략 저장 (첫 버전)
     API-->>FE: 확정 완료
 
     Note over API,LLM: 연결 실패·타임아웃이면 "LLM 서버에 연결할 수 없음"을 돌려줌
@@ -198,7 +199,7 @@ sequenceDiagram
     participant YF as yfinance
     participant KMS as AWS KMS
     participant KIS as KIS Open API
-    participant N as 알림<br/>(채널 미정)
+    participant N as 알림<br/>(이메일)
 
     rect rgb(238, 244, 252)
         Note over W,YF: 시세·분배금 수집 (market_data) · 매 영업일, KRX 갱신(다음 영업일 08시경) 이후
@@ -248,7 +249,7 @@ sequenceDiagram
 - 팀원 PC에서 테스트 DB를 대상으로 워커를 시험 실행하는 것을 허용할지, 서비스 DB에 붙은 워커가 EC2 밖에서 실행되지 않도록 막는 장치
 - LLM 호출 타임아웃 값 (CloudFront 오리진 응답 타임아웃 30초보다 짧아야 함, `docs/infra.md`)
 - 긴급 중지·실전→모의 전환 때 미체결 주문 취소를 API 서버가 바로 할지, 워커에 맡길지
-- 계산일 종가 출처, 주문·체결 확인·분배금 재투자 시각: #13
+- 계산일 종가 출처, 주문·체결 확인·분배금 재투자 시각: #13. 주문 시각의 개편안 잠정안(장전 동시호가 08:40)은 `docs/json-flow.md` [6] 운용 참고
 - 거시판단 작업과 뉴스·공시 수집: #12
-- 알림 채널: `docs/trading.md`
+- LLM PC가 꺼져 있을 때 국면 판단의 LLM 지표(뉴스 분위기 점수, 금통위 의사록 판정)를 어떻게 처리할지
 - ERD: 테이블 구조(전략 Pydantic 모델 #10, 각 도메인 `models.py`)가 정해진 뒤 그림
