@@ -1,0 +1,45 @@
+{
+  "schema_version": 2,
+  "switch_id": "sw_20261204_pf_001",
+  "mode": "실운용",
+  "portfolio_id": "pf_001",
+  "portfolio_revision": 1,
+  "policy_version": 3,
+  "created_at": "2026-12-04T18:30:00+09:00",
+  "kind": "정기",
+  "market_state_id": "ms_20261204",
+  "regime_from": { "금리": "상승", "환율": "안정", "변동성": "저변동", "투자심리": "탐욕" },
+  "regime_to": { "금리": "하락", "환율": "안정", "변동성": "저변동", "투자심리": "탐욕" },
+  "crossed": [{ "axis": "금리", "indicator": "ktb_yield_change", "z": -1.3, "exit": null }],
+  "crossed_note": "기준을 넘은 지표. 알림의 \"어떤 지표가 기준을 넘었는지\"에 씀",
+  "selections": [
+    {
+      "group": { "category": "domestic_bond", "group": null },
+      "from": "114260",
+      "to": "148070",
+      "regime_fit": null,
+      "switch_cost": null,
+      "lambda": null,
+      "reason": "금리 하락 국면에서 듀레이션이 긴 ETF가 속성 매칭 점수가 높음"
+    },
+    {
+      "group": { "category": "domestic_equity_index", "group": null },
+      "from": "069500",
+      "to": "069500",
+      "reason": "교체 비용을 빼면 그대로가 가장 높음"
+    }
+  ],
+  "kept": [
+    { "etf_code": "360750", "reason": "사용자 지정 ETF" },
+    { "etf_code": "395270", "reason": "사용자 지정 ETF" }
+  ],
+  "selections_note": "묶음마다 속성 매칭 점수(RegimeFit − λ·SwitchCost)로 고름. 점수 정의와 λ는 미정이라 null. 사용자가 지정한 ETF·자산군 비중·현금 비중은 바꾸지 않음",
+  "weights": {
+    "from": { "360750": 0.22, "069500": 0.17, "395270": 0.11, "114260": 0.5 },
+    "to": { "360750": 0.24, "069500": 0.18, "395270": 0.12, "148070": 0.46 },
+    "method": "HRP"
+  },
+  "notice": "금리 하락 국면으로 바뀌었어요(국고채 금리 변화율이 기준을 넘음). 국내 채권을 국고채 3년에서 국고채 10년으로 바꾸고, 비중을 다시 계산했어요.",
+  "notice_note": "알림 문장은 LLM이 쓰지 않음(LLM 역할은 문장 해석, 뉴스 분위기 점수, 금통위 판정뿐). 만드는 방식은 미정",
+  "applied_at": "2026-12-07T08:40:00+09:00"
+}

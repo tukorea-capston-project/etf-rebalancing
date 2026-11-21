@@ -1,17 +1,17 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "draft_id": "dr_20261113_0001",
   "base_portfolio_id": null,
-  "catalog_version": 2,
-  "policy_version": 2,
+  "catalog_version": 3,
+  "policy_version": 3,
   "created_at": "2026-11-13T20:00:00+09:00",
-  "updated_at": "2026-11-13T20:00:05+09:00",
+  "updated_at": "2026-11-13T20:01:10+09:00",
   "status": "확인대기",
-  "question_rounds": 0,
+  "question_rounds": 1,
   "turns": [
     {
       "turn_id": "t1",
-      "text": "100만원 있는데 2년 뒤에 전세금 보탤 돈이에요. S&P 그거 넣어주시고 반도체도 조금 넣어주세요. 삼성전자도요",
+      "text": "100만원 있는데 2년 뒤에 전세금 보탤 돈이에요. S&P 그거 넣어주시고 반도체도 넣어주세요. 삼성전자도요",
       "at": "2026-11-13T20:00:00+09:00",
       "llm_output_id": "llm_pr_20261113_0001"
     }
@@ -25,19 +25,62 @@
       "monthly_contribution_krw": { "value": null, "source": "기본값", "quote": null, "ref": null },
       "monthly_contribution_day": { "value": null, "source": "기본값", "quote": null, "ref": null }
     },
-    "asset_classes": [
-      { "asset_class": "주식", "value": 0.6, "source": "기본값", "quote": null, "ref": null },
-      { "asset_class": "채권", "value": 0.4, "source": "기본값", "quote": null, "ref": null }
+    "asset_classes": [],
+    "asset_classes_note": "사용자가 말한 자산군 비중만 담음. 비어 있으면 HRP가 자산군 배분까지 정함",
+    "cash": { "value": 0.0, "source": "기본값", "quote": null, "ref": null },
+    "groups": [
+      {
+        "category": "domestic_equity_index",
+        "group": null,
+        "action": "포함",
+        "source": "기본값",
+        "quote": null,
+        "ref": null
+      },
+      {
+        "category": "foreign_equity_country",
+        "group": null,
+        "action": "포함",
+        "source": "기본값",
+        "quote": null,
+        "ref": null
+      },
+      { "category": "domestic_bond", "group": null, "action": "포함", "source": "기본값", "quote": null, "ref": null },
+      {
+        "category": "domestic_equity_sector",
+        "group": null,
+        "action": "포함",
+        "source": "사용자발화",
+        "quote": "반도체도 넣어주세요",
+        "ref": "t1"
+      }
     ],
+    "groups_note": "기본 묶음 세트(policy.construction.default_groups, 예시)와 사용자가 지정한 ETF의 묶음",
     "etfs": [
-      { "etf_code": "360750", "share": "보통", "weight": null, "source": "사용자발화", "quote": "S&P 그거 넣어주시고", "ref": "t1" },
-      { "etf_code": "395270", "share": "조금", "weight": null, "source": "사용자발화", "quote": "반도체도 조금", "ref": "t1" },
-      { "etf_code": "114260", "share": null, "weight": null, "source": "생성", "quote": null, "ref": "construction" },
-      { "etf_code": "148070", "share": null, "weight": null, "source": "생성", "quote": null, "ref": "construction" }
+      { "etf_code": "360750", "weight": null, "source": "사용자발화", "quote": "S&P 그거 넣어주시고", "ref": "t1" },
+      { "etf_code": "395270", "weight": null, "source": "사용자발화", "quote": "반도체도 넣어주세요", "ref": "t1" },
+      { "etf_code": "069500", "weight": null, "source": "생성", "quote": null, "ref": "construction" },
+      { "etf_code": "114260", "weight": null, "source": "생성", "quote": null, "ref": "construction" }
     ],
-    "etfs_note": "weight는 사용자가 직접 말한 비중만 담음. 계산된 비중은 construction.result"
+    "etfs_note": "weight는 사용자가 직접 말한 비중만 담음. 계산된 비중은 construction.result",
+    "rebalance": {
+      "value": { "condition": "밴드", "band": { "abs": 0.05, "rel": 0.25 } },
+      "source": "질문답변",
+      "quote": null,
+      "ref": "q1"
+    }
   },
-  "questions": [],
+  "questions": [
+    {
+      "question_id": "q1",
+      "question_key": "rebalance",
+      "asked_at": "2026-11-13T20:00:05+09:00",
+      "answer": {
+        "value": { "condition": "밴드", "band": { "abs": 0.05, "rel": 0.25 } },
+        "at": "2026-11-13T20:01:00+09:00"
+      }
+    }
+  ],
   "issues": [
     {
       "issue_id": "i1",
@@ -63,42 +106,55 @@
   "construction": {
     "case": { "weight_given": false, "etf_given": true },
     "as_of": "2026-11-13",
-    "lookback_days": null,
+    "selection_days": null,
+    "selection": "minimax",
     "weighting": "HRP",
-    "asset_classes": [
+    "groups": [
       {
-        "asset_class": "주식",
-        "budget": 0.6,
-        "fixed": [],
-        "candidates": "사용자ETF",
-        "clusters": [
-          { "cluster_id": "주식-1", "etfs": ["360750"], "representative": "360750", "reason": "사용자 선택" },
-          { "cluster_id": "주식-2", "etfs": ["395270"], "representative": "395270", "reason": "사용자 선택" }
-        ],
-        "hrp": { "360750": 0.74, "395270": 0.26 },
-        "after_share": { "360750": 0.85, "395270": 0.15 }
+        "category": "foreign_equity_country",
+        "group": null,
+        "fixed": "360750",
+        "candidates": null,
+        "representative": "360750"
       },
       {
-        "asset_class": "채권",
-        "budget": 0.4,
-        "fixed": [],
-        "candidates": "선정조건통과",
-        "clusters": [
-          { "cluster_id": "채권-1", "etfs": ["114260"], "representative": "114260", "reason": "묶음에서 변동성 가장 낮음" },
-          { "cluster_id": "채권-2", "etfs": ["148070", "439870"], "representative": "148070", "reason": "묶음에서 변동성 가장 낮음" }
-        ],
-        "hrp": { "114260": 0.9, "148070": 0.1 },
-        "after_share": { "114260": 0.9, "148070": 0.1 }
+        "category": "domestic_equity_index",
+        "group": null,
+        "fixed": null,
+        "candidates": ["069500", "226490", "292150"],
+        "representative": "069500"
+      },
+      {
+        "category": "domestic_equity_sector",
+        "group": null,
+        "fixed": "395270",
+        "candidates": null,
+        "representative": "395270"
+      },
+      {
+        "category": "domestic_bond",
+        "group": null,
+        "fixed": null,
+        "candidates": ["114260", "148070", "439870"],
+        "representative": "114260"
       }
     ],
-    "limits_applied": [{ "etf_code": "148070", "from": 0.04, "to": 0.05, "check_id": "min_weight_per_etf" }],
-    "result": { "360750": 0.51, "395270": 0.09, "114260": 0.35, "148070": 0.05 },
+    "groups_note": "candidates는 그 시점에 선정 조건을 통과한 그 묶음의 ETF(예시는 일부만 적음). representative는 minimax로 고른 조합",
+    "minimax": { "max_correlation": 0.62, "pair": ["069500", "395270"] },
+    "hrp": { "360750": 0.17, "069500": 0.13, "395270": 0.08, "114260": 0.62 },
+    "limits_applied": [{ "etf_code": "114260", "from": 0.62, "to": 0.5, "check_id": "max_weight_per_etf" }],
+    "result": { "360750": 0.22, "069500": 0.17, "395270": 0.11, "114260": 0.5 },
+    "result_note": "후처리(최소 5% 올림, 1%p 최대잔여법 반올림)와 제한을 거친 최종 비중. 현금 0%",
     "stats": {
-      "volatility": { "360750": 0.18, "395270": 0.3, "114260": 0.02, "148070": 0.06 },
-      "correlation": [{ "pair": ["360750", "395270"], "value": 0.55 }, { "pair": ["114260", "148070"], "value": 0.7 }]
+      "volatility": { "360750": 0.18, "069500": 0.2, "395270": 0.3, "114260": 0.02 },
+      "correlation": [
+        { "pair": ["360750", "069500"], "value": 0.45 },
+        { "pair": ["069500", "395270"], "value": 0.62 },
+        { "pair": ["360750", "114260"], "value": -0.1 }
+      ]
     },
     "excluded": [],
-    "note": "변동성·상관계수·묶음은 설명용 예시 값"
+    "note": "변동성·상관계수·비중은 설명용 예시 값"
   },
-  "confirm_text": "24개월 뒤 주택자금, 100만원으로 이해했어요. 주식 60%는 말씀하신 미국 S&P500과 국내 반도체(조금)로 담았고, 덜 출렁이는 S&P500에 더 많이 넣었어요. 채권 40%는 서로 다르게 움직이는 국고채 3년·10년으로 채웠어요. 운용 중에는 시장 국면에 따라 비중과 종목이 자동으로 바뀌어요. 주식이 60%인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요. 삼성전자 같은 개별 종목은 담을 수 없어요."
+  "confirm_text": "24개월 뒤 주택자금, 100만원으로 이해했어요. 말씀하신 미국 S&P500과 국내 반도체에 국내 대표지수, 국내 채권 묶음을 더해, 서로 덜 비슷하게 움직이는 ETF를 하나씩 골랐어요. 비중은 덜 출렁이는 국고채 3년에 가장 많이 두었고, 한 종목 최대 50%에 맞췄어요. 비중이 5%p·25% 넘게 틀어지면 원래 비중으로 되돌리고, 운용 중에는 매주 시장 국면을 보고 종목과 비중이 자동으로 바뀌어요. 위험자산이 50%인 구성은 3년 안에 쓸 돈이라면 손실 상태로 찾아야 할 수 있어요. 삼성전자 같은 개별 종목은 담을 수 없어요."
 }
