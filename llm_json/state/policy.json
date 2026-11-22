@@ -23,7 +23,7 @@
       "end": null,
       "fee_rate": 0.00015,
       "slippage": 0.001,
-      "risk_free_rate": 0.03,
+      "risk_free_rate": null,
       "fill_price": "다음영업일종가",
       "price_basis": "실제종가",
       "reinvest_distributions": true,

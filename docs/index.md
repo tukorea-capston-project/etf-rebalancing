@@ -22,19 +22,11 @@
 
 ## 기술 스택
 
-| 구분 | 사용 기술 |
-|---|---|
-| 백엔드 | Python 3.13, FastAPI, SQLModel, uv |
-| 프론트엔드 | React, Vite, TypeScript |
-| 데이터베이스 | PostgreSQL 18 |
-| LLM | Ollama로 실행하는 로컬 Qwen 계열 모델 |
-| 증권사 API | 한국투자증권 KIS Open API |
-| 시세 데이터 | KRX Open API(일별 시세), yfinance(분배금) |
-| 서버 | AWS EC2(Docker Compose), CloudFront + S3(프론트엔드) |
-| LLM 연결 | Tailscale 사설망(EC2 ↔ LLM PC) |
-| CI/CD | GitHub Actions, GHCR |
+루트 [CLAUDE.md](../CLAUDE.md)의 "기술 스택"을 봅니다.
 
 ## 문서
+
+주제마다 기준 문서가 하나씩 있습니다. 한 내용은 기준 문서에만 쓰고, 다른 문서는 링크만 겁니다(CLAUDE.md "문서 관리").
 
 ### 시스템
 
@@ -44,13 +36,15 @@
 
 ### 도메인 설계
 
-- [전략 스키마 설계](strategy-schema.md) — 전략의 구성 요소와 규칙
-- [리밸런싱 설계](rebalancing.md) — 주기·밴드·혼합 리밸런싱
-- [백테스트 설계](backtest.md) — 체결 가정, 비용, 성과 지표
+- [전략 스키마 설계](strategy-schema.md) — 전략의 구성 요소와 제약, 포트폴리오 생성(minimax·HRP), 자연어 → 전략 변환, 버전 관리
+- [투자 대상 설계](universe.md) — 선정 조건, 슬롯 분류, 화이트리스트 전환
+- [리밸런싱 설계](rebalancing.md) — 주기·밴드·혼합 리밸런싱의 실행
+- [거시판단 운용 설계](macro.md) — 국면 지표와 출처, 국면 판단, 국면 전환
+- [백테스트 설계](backtest.md) — 체결 가정, 비용, 세금, 성과 지표
 - [시세·분배금 데이터 수집 설계](market-data.md) — 수집 대상과 방식
-- [모의·실전투자 설계](trading.md) — 모드 전환, 자격 증명, 안전장치
+- [모의·실전투자 설계](trading.md) — 모드 전환, 자격 증명, 주문, 안전장치
 
 ### LLM·데이터 형식
 
-- [전체 로직 설명](json-flow.md) — 요청 해석부터 minimax·HRP 생성, 백테스트, 국면 전환까지의 흐름과 개념
+- [전체 로직 설명](json-flow.md) — 한 사용자의 예시로 따라가는 전체 흐름
 - [JSON 파일별 설명](json-files.md) — 상태 파일과 LLM 출력 형식의 필드
