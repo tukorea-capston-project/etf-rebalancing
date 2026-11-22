@@ -4,12 +4,14 @@
 # 종목코드는 반드시 따옴표로 감싼 6자리 문자열로 쓴다.
 # 따옴표가 없으면 PyYAML이 앞자리 0을 8진수로 해석한다.
 #
-# 분류(category)마다 id(코드에서 쓰는 키), name(표시 이름), etfs(종목 목록)를 둔다.
-# group은 분류 안의 세부 묶음이며, 세부 묶음이 있는 분류에만 쓴다.
+# 슬롯(자산군·지역·섹터)마다 etfs(종목 목록)를 둔다. 나누지 않는 계층은 null이다.
+# 분류 기준은 docs/universe.md 슬롯 분류를 따른다.
 
-categories:
-  - id: domestic_equity_index
-    name: 국내주식 대표지수
+slots:
+  # 주식 · 국내
+  - asset_class: 주식
+    region: 국내
+    sector: 시장대표
     etfs:
       - { code: "069500", name: "KODEX 200" }
       - { code: "278530", name: "KODEX 200TR" }
@@ -22,77 +24,93 @@ categories:
       - { code: "315930", name: "KODEX Top5PlusTR" }
       - { code: "292150", name: "TIGER 코리아TOP10" }
       - { code: "229200", name: "KODEX 코스닥150" }
+      - { code: "315960", name: "RISE 대형고배당10TR" }
+      - { code: "290130", name: "RISE ESG사회책임투자" }
 
-  - id: domestic_equity_sector
-    name: 국내주식 업종
+  - asset_class: 주식
+    region: 국내
+    sector: 정보기술
     etfs:
       - { code: "395270", name: "HANARO Fn K-반도체" }
       - { code: "363580", name: "KODEX 200IT TR" }
       - { code: "266370", name: "KODEX IT" }
+      - { code: "396500", name: "TIGER 반도체TOP10" }
+      - { code: "469150", name: "ACE AI반도체TOP3+" }
+      - { code: "455850", name: "SOL AI반도체소부장" }
+      - { code: "367760", name: "RISE 네트워크인프라" }
+      - { code: "102780", name: "KODEX 삼성그룹" }
+
+  - asset_class: 주식
+    region: 국내
+    sector: 커뮤니케이션서비스
+    etfs:
       - { code: "157490", name: "TIGER 소프트웨어" }
+      - { code: "228810", name: "TIGER 미디어컨텐츠" }
+
+  - asset_class: 주식
+    region: 국내
+    sector: 경기소비재
+    etfs:
+      - { code: "466930", name: "SOL 자동차TOP3플러스" }
+      - { code: "138540", name: "TIGER 현대차그룹플러스" }
+
+  - asset_class: 주식
+    region: 국내
+    sector: 헬스케어
+    etfs:
       - { code: "143860", name: "TIGER 헬스케어" }
       - { code: "244580", name: "KODEX 바이오" }
+      - { code: "364970", name: "TIGER 바이오TOP10" }
+
+  - asset_class: 주식
+    region: 국내
+    sector: 금융
+    etfs:
       - { code: "091170", name: "KODEX 은행" }
       - { code: "102970", name: "KODEX 증권" }
       - { code: "157500", name: "TIGER 증권" }
       - { code: "140700", name: "KODEX 보험" }
+      - { code: "466940", name: "TIGER 은행고배당플러스TOP10" }
+
+  - asset_class: 주식
+    region: 국내
+    sector: 산업재
+    etfs:
       - { code: "117700", name: "KODEX 건설" }
       - { code: "139220", name: "TIGER 200 건설" }
-      - { code: "228810", name: "TIGER 미디어컨텐츠" }
       - { code: "307520", name: "TIGER 지주회사" }
-
-  - id: domestic_equity_theme
-    name: 국내주식 테마
-    etfs:
-      - { code: "396500", name: "TIGER 반도체TOP10", group: "반도체·IT" }
-      - { code: "469150", name: "ACE AI반도체TOP3+", group: "반도체·IT" }
-      - { code: "455850", name: "SOL AI반도체소부장", group: "반도체·IT" }
-      - { code: "298770", name: "KODEX 한국대만IT프리미어", group: "반도체·IT" }
-      - { code: "367760", name: "RISE 네트워크인프라", group: "반도체·IT" }
-      - { code: "305720", name: "KODEX 2차전지산업", group: "2차전지" }
-      - { code: "465330", name: "RISE 2차전지TOP10", group: "2차전지" }
-      - { code: "462010", name: "TIGER 2차전지소재Fn", group: "2차전지" }
-      - { code: "461950", name: "KODEX 2차전지핵심소재10", group: "2차전지" }
-      - { code: "455860", name: "SOL 2차전지소부장Fn", group: "2차전지" }
-      - { code: "433500", name: "ACE 원자력TOP10", group: "에너지" }
-      - { code: "377990", name: "TIGER Fn신재생에너지", group: "에너지" }
-      - { code: "457990", name: "PLUS 태양광&ESS", group: "에너지" }
-      - { code: "367770", name: "RISE 수소경제테마", group: "에너지" }
-      - { code: "449450", name: "PLUS K방산", group: "기타" }
-      - { code: "466920", name: "SOL 조선TOP3플러스", group: "기타" }
-      - { code: "466930", name: "SOL 자동차TOP3플러스", group: "기타" }
-      - { code: "364970", name: "TIGER 바이오TOP10", group: "기타" }
-
-  - id: domestic_equity_group
-    name: 국내주식 그룹주
-    etfs:
-      - { code: "102780", name: "KODEX 삼성그룹" }
-      - { code: "138540", name: "TIGER 현대차그룹플러스" }
+      - { code: "449450", name: "PLUS K방산" }
+      - { code: "466920", name: "SOL 조선TOP3플러스" }
+      - { code: "433500", name: "ACE 원자력TOP10" }
+      - { code: "377990", name: "TIGER Fn신재생에너지" }
+      - { code: "457990", name: "PLUS 태양광&ESS" }
+      - { code: "367770", name: "RISE 수소경제테마" }
       - { code: "138530", name: "TIGER LG그룹플러스" }
+
+  - asset_class: 주식
+    region: 국내
+    sector: 소재
+    etfs:
+      - { code: "305720", name: "KODEX 2차전지산업" }
+      - { code: "465330", name: "RISE 2차전지TOP10" }
+      - { code: "462010", name: "TIGER 2차전지소재Fn" }
+      - { code: "461950", name: "KODEX 2차전지핵심소재10" }
+      - { code: "455860", name: "SOL 2차전지소부장Fn" }
       - { code: "469170", name: "ACE 포스코그룹포커스" }
 
-  - id: equity_style
-    name: 주식 스타일
-    etfs:
-      - { code: "466940", name: "TIGER 은행고배당플러스TOP10" }
-      - { code: "315960", name: "RISE 대형고배당10TR" }
-      - { code: "458730", name: "TIGER 미국배당다우존스" }
-      - { code: "290130", name: "RISE ESG사회책임투자" }
-
-  - id: foreign_equity_country
-    name: 해외주식 국가
+  # 주식 · 미국
+  - asset_class: 주식
+    region: 미국
+    sector: 시장대표
     etfs:
       - { code: "360750", name: "TIGER 미국S&P500" }
       - { code: "133690", name: "TIGER 미국나스닥100" }
       - { code: "245340", name: "TIGER 미국다우존스30" }
-      - { code: "251350", name: "KODEX MSCI선진국" }
-      - { code: "283580", name: "KODEX 차이나CSI300" }
-      - { code: "241180", name: "TIGER 일본니케이225" }
-      - { code: "453810", name: "KODEX 인도Nifty50" }
-      - { code: "245710", name: "ACE 베트남VN30(합성)" }
+      - { code: "458730", name: "TIGER 미국배당다우존스" }
 
-  - id: foreign_equity_sector_theme
-    name: 해외주식 업종·테마
+  - asset_class: 주식
+    region: 미국
+    sector: 정보기술
     etfs:
       - { code: "463680", name: "KODEX 미국S&P500테크놀로지" }
       - { code: "314250", name: "KODEX 미국빅테크10(H)" }
@@ -100,13 +118,47 @@ categories:
       - { code: "469060", name: "RISE 미국반도체NYSE" }
       - { code: "381180", name: "TIGER 미국필라델피아반도체나스닥" }
       - { code: "418670", name: "TIGER 글로벌AI사이버보안" }
+
+  - asset_class: 주식
+    region: 미국
+    sector: 헬스케어
+    etfs:
       - { code: "453640", name: "KODEX 미국S&P500헬스케어" }
       - { code: "203780", name: "TIGER 미국나스닥바이오" }
+
+  # 주식 · 선진국, 신흥국
+  - asset_class: 주식
+    region: 선진국
+    sector: 시장대표
+    etfs:
+      - { code: "251350", name: "KODEX MSCI선진국" }
+      - { code: "241180", name: "TIGER 일본니케이225" }
+
+  - asset_class: 주식
+    region: 신흥국
+    sector: 시장대표
+    etfs:
+      - { code: "283580", name: "KODEX 차이나CSI300" }
+      - { code: "453810", name: "KODEX 인도Nifty50" }
+      - { code: "245710", name: "ACE 베트남VN30(합성)" }
+
+  - asset_class: 주식
+    region: 신흥국
+    sector: 정보기술
+    etfs:
+      - { code: "298770", name: "KODEX 한국대만IT프리미어" }
+
+  - asset_class: 주식
+    region: 신흥국
+    sector: 경기소비재
+    etfs:
       - { code: "371160", name: "TIGER 차이나항셍테크" }
       - { code: "371460", name: "TIGER 차이나전기차SOLACTIVE" }
 
-  - id: domestic_bond
-    name: 국내 채권
+  # 채권
+  - asset_class: 채권
+    region: 국내
+    sector: 국채
     etfs:
       - { code: "114260", name: "KODEX 국고채3년" }
       - { code: "114820", name: "TIGER 국채3년" }
@@ -115,41 +167,71 @@ categories:
       - { code: "439870", name: "KODEX 국고채30년액티브" }
       - { code: "385560", name: "RISE KIS국고채30년Enhanced" }
       - { code: "451530", name: "TIGER 국고채30년스트립액티브" }
+
+  - asset_class: 채권
+    region: 국내
+    sector: 종합채권
+    etfs:
       - { code: "273130", name: "KODEX 종합채권(AA-이상)액티브" }
       - { code: "436140", name: "SOL 종합채권(AA-이상)액티브" }
       - { code: "363570", name: "KODEX 장기종합채권(AA-이상)액티브" }
+
+  - asset_class: 채권
+    region: 국내
+    sector: 우량 회사채
+    etfs:
       - { code: "438330", name: "TIGER 우량회사채액티브" }
       - { code: "136340", name: "RISE 중기우량회사채" }
 
-  - id: foreign_bond
-    name: 해외 채권
+  - asset_class: 채권
+    region: 미국
+    sector: 국채
     etfs:
       - { code: "305080", name: "TIGER 미국채10년선물" }
       - { code: "308620", name: "KODEX 미국10년국채선물" }
       - { code: "453850", name: "ACE 미국30년국채액티브(H)" }
       - { code: "458250", name: "TIGER 미국30년국채스트립액티브(합성 H)" }
+
+  - asset_class: 채권
+    region: 미국
+    sector: 종합채권
+    etfs:
       - { code: "437080", name: "KODEX 미국종합채권ESG액티브(H)" }
+
+  - asset_class: 채권
+    region: 미국
+    sector: 하이일드
+    etfs:
       - { code: "468380", name: "KODEX iShares미국하이일드액티브" }
 
-  - id: cash_equivalent
-    name: 현금성
+  # 현금성
+  - asset_class: 현금성
+    region: 국내
+    sector: CD·KOFR·머니마켓
     etfs:
-      - { code: "459580", name: "KODEX CD금리액티브(합성)", group: "CD·KOFR·머니마켓" }
-      - { code: "357870", name: "TIGER CD금리투자KIS(합성)", group: "CD·KOFR·머니마켓" }
-      - { code: "423160", name: "KODEX KOFR금리액티브(합성)", group: "CD·KOFR·머니마켓" }
-      - { code: "455890", name: "RISE 머니마켓액티브", group: "CD·KOFR·머니마켓" }
-      - { code: "130730", name: "KIWOOM 단기자금", group: "CD·KOFR·머니마켓" }
-      - { code: "153130", name: "KODEX 단기채권", group: "단기채" }
-      - { code: "214980", name: "KODEX 단기채권PLUS", group: "단기채" }
-      - { code: "272580", name: "TIGER 단기채권액티브", group: "단기채" }
-      - { code: "385550", name: "RISE 단기채권알파액티브", group: "단기채" }
-      - { code: "272560", name: "RISE 단기국공채액티브", group: "단기채" }
-      - { code: "157450", name: "TIGER 단기통안채", group: "단기채" }
-      - { code: "190620", name: "ACE 단기통안채", group: "단기채" }
-      - { code: "196230", name: "RISE 단기통안채", group: "단기채" }
+      - { code: "459580", name: "KODEX CD금리액티브(합성)" }
+      - { code: "357870", name: "TIGER CD금리투자KIS(합성)" }
+      - { code: "423160", name: "KODEX KOFR금리액티브(합성)" }
+      - { code: "455890", name: "RISE 머니마켓액티브" }
+      - { code: "130730", name: "KIWOOM 단기자금" }
 
-  - id: currency
-    name: 통화
+  - asset_class: 현금성
+    region: 국내
+    sector: 단기채
+    etfs:
+      - { code: "153130", name: "KODEX 단기채권" }
+      - { code: "214980", name: "KODEX 단기채권PLUS" }
+      - { code: "272580", name: "TIGER 단기채권액티브" }
+      - { code: "385550", name: "RISE 단기채권알파액티브" }
+      - { code: "272560", name: "RISE 단기국공채액티브" }
+      - { code: "157450", name: "TIGER 단기통안채" }
+      - { code: "190620", name: "ACE 단기통안채" }
+      - { code: "196230", name: "RISE 단기통안채" }
+
+  # 통화
+  - asset_class: 통화
+    region: null
+    sector: null
     etfs:
       - { code: "261240", name: "KODEX 미국달러선물" }
       - { code: "329750", name: "TIGER 미국달러단기채권액티브" }
@@ -157,16 +239,35 @@ categories:
       - { code: "455030", name: "KODEX 미국달러SOFR금리액티브(합성)" }
       - { code: "292560", name: "TIGER 일본엔선물" }
 
-  - id: commodity
-    name: 원자재
+  # 원자재
+  - asset_class: 원자재
+    region: null
+    sector: 금
     etfs:
       - { code: "411060", name: "ACE KRX금현물" }
       - { code: "319640", name: "TIGER 골드선물(H)" }
+
+  - asset_class: 원자재
+    region: null
+    sector: 은
+    etfs:
       - { code: "144600", name: "KODEX 은선물(H)" }
+
+  - asset_class: 원자재
+    region: null
+    sector: 구리
+    etfs:
       - { code: "160580", name: "TIGER 구리실물" }
+
+  - asset_class: 원자재
+    region: null
+    sector: 원유
+    etfs:
       - { code: "261220", name: "KODEX WTI원유선물(H)" }
 
-  - id: reit
-    name: 리츠
+  # 리츠
+  - asset_class: 리츠
+    region: null
+    sector: null
     etfs:
       - { code: "329200", name: "TIGER 리츠부동산인프라" }

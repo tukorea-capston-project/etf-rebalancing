@@ -14,7 +14,7 @@
   "crossed_note": "기준을 넘은 지표. 알림의 \"어떤 지표가 기준을 넘었는지\"에 씀",
   "selections": [
     {
-      "group": { "category": "domestic_bond", "group": null },
+      "group": { "asset_class": "채권", "region": "국내", "sector": "국채" },
       "from": "114260",
       "to": "148070",
       "regime_fit": null,
@@ -23,7 +23,7 @@
       "reason": "금리 하락 국면에서 듀레이션이 긴 ETF가 속성 매칭 점수가 높음"
     },
     {
-      "group": { "category": "domestic_equity_index", "group": null },
+      "group": { "asset_class": "주식", "region": "국내", "sector": "시장대표" },
       "from": "069500",
       "to": "069500",
       "reason": "교체 비용을 빼면 그대로가 가장 높음"
