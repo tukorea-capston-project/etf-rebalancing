@@ -36,7 +36,7 @@
       "z": 1.1,
       "period": "2026-11-28~2026-12-04",
       "released_at": "2026-12-04",
-      "source": "빅카인즈+LLM",
+      "source": "네이버 뉴스 API+LLM",
       "n": 236,
       "llm_output_ids": ["llm_news_20261204_0001"]
     },
