@@ -15,23 +15,23 @@
   "holdings": [
     {
       "etf_code": "360750",
-      "group": { "category": "foreign_equity_country", "group": null },
+      "group": { "asset_class": "주식", "region": "미국", "sector": "시장대표" },
       "source": "사용자종목",
       "base": 0.22
     },
     {
       "etf_code": "069500",
-      "group": { "category": "domestic_equity_index", "group": null },
+      "group": { "asset_class": "주식", "region": "국내", "sector": "시장대표" },
       "source": "생성",
       "base": 0.17
     },
     {
       "etf_code": "395270",
-      "group": { "category": "domestic_equity_sector", "group": null },
+      "group": { "asset_class": "주식", "region": "국내", "sector": "정보기술" },
       "source": "사용자종목",
       "base": 0.11
     },
-    { "etf_code": "114260", "group": { "category": "domestic_bond", "group": null }, "source": "생성", "base": 0.5 }
+    { "etf_code": "114260", "group": { "asset_class": "채권", "region": "국내", "sector": "국채" }, "source": "생성", "base": 0.5 }
   ],
   "holdings_note": "base는 전략 비중(확인할 때 만든 비중). source는 사용자비중(비중까지 지정) / 사용자종목(종목만 지정) / 생성. 지금 맞추려는 비중은 operation.target",
   "rules": {

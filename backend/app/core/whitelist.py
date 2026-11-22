@@ -30,7 +30,6 @@ def check_code(value: Any) -> str:
 class WhitelistEtf(BaseModel):
     code: str
     name: str
-    group: str | None = None
 
     @field_validator("code", mode="before")
     @classmethod
@@ -38,17 +37,30 @@ class WhitelistEtf(BaseModel):
         return check_code(value)
 
 
-class WhitelistCategory(BaseModel):
-    id: str
-    name: str
+class WhitelistSlot(BaseModel):
+    """슬롯 하나. 나누지 않는 계층(지역·섹터)은 None이다(docs/universe.md 슬롯 분류)."""
+
+    asset_class: str
+    region: str | None
+    sector: str | None
     etfs: list[WhitelistEtf]
+
+    @property
+    def key(self) -> tuple[str, str | None, str | None]:
+        return (self.asset_class, self.region, self.sector)
 
 
 class Whitelist(BaseModel):
-    categories: list[WhitelistCategory]
+    slots: list[WhitelistSlot]
 
     @model_validator(mode="after")
-    def _codes_must_be_unique(self) -> Self:
+    def _must_be_unique(self) -> Self:
+        # ETF 하나는 슬롯 하나에만, 슬롯은 한 번만 적는다.
+        seen_slots: set[tuple[str, str | None, str | None]] = set()
+        for slot in self.slots:
+            if slot.key in seen_slots:
+                raise ValueError(f"화이트리스트에 슬롯이 중복되어 있다: {slot.key}")
+            seen_slots.add(slot.key)
         seen: set[str] = set()
         for etf in self.etfs:
             if etf.code in seen:
@@ -58,7 +70,7 @@ class Whitelist(BaseModel):
 
     @property
     def etfs(self) -> list[WhitelistEtf]:
-        return [etf for category in self.categories for etf in category.etfs]
+        return [etf for slot in self.slots for etf in slot.etfs]
 
     @property
     def codes(self) -> list[str]:

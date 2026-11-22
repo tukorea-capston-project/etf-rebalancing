@@ -23,22 +23,19 @@
     { "words": ["전세", "내 집", "집 살"], "slot": "goal", "value": "주택자금" }
   ],
   "whitelist": "backend/config/etf_whitelist.yaml",
-  "categories": [
-    { "category": "domestic_equity_index", "asset_class": "주식" },
-    { "category": "domestic_equity_sector", "asset_class": "주식" },
-    { "category": "domestic_equity_theme", "asset_class": "주식" },
-    { "category": "domestic_equity_group", "asset_class": "주식" },
-    { "category": "equity_style", "asset_class": "주식" },
-    { "category": "foreign_equity_country", "asset_class": "주식" },
-    { "category": "foreign_equity_sector_theme", "asset_class": "주식" },
-    { "category": "domestic_bond", "asset_class": "채권" },
-    { "category": "foreign_bond", "asset_class": "채권" },
-    { "category": "cash_equivalent", "asset_class": "현금성" },
-    { "category": "currency", "asset_class": "통화" },
-    { "category": "commodity", "asset_class": "원자재" },
-    { "category": "reit", "asset_class": "리츠" }
+  "slot_axes": [
+    {
+      "asset_class": "주식",
+      "regions": ["국내", "미국", "선진국", "신흥국"],
+      "sectors": ["시장대표", "정보기술", "커뮤니케이션서비스", "경기소비재", "필수소비재", "헬스케어", "금융", "산업재", "소재", "에너지", "유틸리티", "부동산"]
+    },
+    { "asset_class": "채권", "regions": ["국내", "미국"], "sectors": ["국채", "우량 회사채", "하이일드", "종합채권"] },
+    { "asset_class": "현금성", "regions": ["국내"], "sectors": ["CD·KOFR·머니마켓", "단기채"] },
+    { "asset_class": "통화", "regions": null, "sectors": null },
+    { "asset_class": "원자재", "regions": null, "sectors": ["금", "은", "구리", "원유"] },
+    { "asset_class": "리츠", "regions": null, "sectors": null }
   ],
-  "categories_note": "고를 수 있는 ETF는 그 시점에 선정 조건을 통과한 ETF 전체다(전환 전에는 화이트리스트 전체). 묶음(슬롯)은 분류(category)와 세부 묶음(group)이다. 여기서는 분류별 자산군만 정한다. 자산군 목록은 미정",
+  "slot_axes_note": "고를 수 있는 ETF는 그 시점에 선정 조건을 통과한 ETF 전체다(전환 전에는 화이트리스트 전체). 묶음(슬롯)은 자산군 안의 지역 + 섹터다. null은 그 계층을 나누지 않는다는 뜻이다",
   "aliases": {
     "069500": ["코스피200", "코스피 200", "KOSPI200"],
     "226490": ["코스피", "한국 주식"],

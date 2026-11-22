@@ -8,12 +8,16 @@ from pydantic import ValidationError
 from app.core.whitelist import load_whitelist
 
 
+def _slot(etfs_yaml: str, sector: str = "시장대표") -> str:
+    return (
+        f"  - asset_class: 주식\n    region: 국내\n    sector: {sector}\n"
+        f"    etfs:\n{etfs_yaml}"
+    )
+
+
 def _write(tmp_path: Path, etfs_yaml: str) -> Path:
     path = tmp_path / "whitelist.yaml"
-    path.write_text(
-        f"categories:\n  - id: test\n    name: 테스트\n    etfs:\n{etfs_yaml}",
-        encoding="utf-8",
-    )
+    path.write_text(f"slots:\n{_slot(etfs_yaml)}", encoding="utf-8")
     return path
 
 
@@ -60,4 +64,30 @@ def test_중복된_코드는_거부한다(tmp_path: Path) -> None:
     )
 
     with pytest.raises(ValidationError, match="중복"):
+        load_whitelist(path)
+
+
+def test_다른_슬롯에_같은_코드가_있으면_거부한다(tmp_path: Path) -> None:
+    path = tmp_path / "whitelist.yaml"
+    path.write_text(
+        "slots:\n"
+        + _slot('      - { code: "069500", name: "KODEX 200" }\n')
+        + _slot('      - { code: "069500", name: "중복" }\n', sector="정보기술"),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValidationError, match="종목코드가 중복"):
+        load_whitelist(path)
+
+
+def test_같은_슬롯을_두_번_적으면_거부한다(tmp_path: Path) -> None:
+    path = tmp_path / "whitelist.yaml"
+    path.write_text(
+        "slots:\n"
+        + _slot('      - { code: "069500", name: "KODEX 200" }\n')
+        + _slot('      - { code: "278530", name: "KODEX 200TR" }\n'),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValidationError, match="슬롯이 중복"):
         load_whitelist(path)
