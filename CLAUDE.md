@@ -93,6 +93,9 @@ DB (루트에서)
 - 마이그레이션 적용: `uv run alembic upgrade head`
 - 시세·분배금 수집: `uv run python -m app.market_data` (서비스 DB에는 담당 팀원만 실행. `docs/market-data.md`)
 
+EC2 서버 (저장소 루트에서. 처음 설정과 현재 단계는 `docs/infra.md`의 "개발 서버 구축")
+- 서비스 DB 실행: `docker compose -f deploy/compose.yaml up -d`
+
 프론트엔드 (`frontend/`에서)
 - 의존성 설치: `npm install`
 - 개발 서버: `npm run dev`

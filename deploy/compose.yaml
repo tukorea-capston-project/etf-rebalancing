@@ -1,0 +1,27 @@
+# EC2 서버용 Compose. 설정은 저장소 루트의 .env를 읽습니다 (팀원 PC와 같은 .env.example 기준).
+# 지금은 개발 서버 단계라 서비스 DB만 띄웁니다. 백엔드는 각 팀원 PC에서 띄우고 이 DB에 붙습니다.
+# Caddy, API 서버, 워커는 필요해질 때 추가합니다 (docs/infra.md "개발 서버 구축").
+#
+# 실행 (저장소 루트에서): docker compose -f deploy/compose.yaml up -d
+#
+# 15432 포트는 EC2 보안그룹에서 열지 않습니다. 팀원은 Tailscale 주소로 접속합니다.
+
+services:
+  db:
+    image: postgres:18
+    env_file: ../.env
+    ports:
+      - "15432:5432"
+    # PostgreSQL 18 이미지는 /var/lib/postgresql 에 마운트합니다 (17 이하의 /data 경로와 다름)
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  # 서비스 DB 데이터. 컨테이너를 지워도 남습니다. `docker compose down -v`는 데이터를 지우므로 쓰지 않습니다.
+  db-data:
