@@ -8,9 +8,9 @@
   "created_at": "2026-12-04T17:40:00+09:00",
   "as_of": "2026-12-04",
   "inputs": [
-    { "ref": "d1", "doc_id": "bigkinds:20261204_0412", "published_at": "2026-12-04T08:30:00+09:00" },
-    { "ref": "d2", "doc_id": "bigkinds:20261204_0519", "published_at": "2026-12-04T09:10:00+09:00" },
-    { "ref": "d3", "doc_id": "bigkinds:20261204_0733", "published_at": "2026-12-04T11:20:00+09:00" }
+    { "ref": "d1", "doc_id": "naver:20261204_0412", "published_at": "2026-12-04T08:30:00+09:00" },
+    { "ref": "d2", "doc_id": "naver:20261204_0519", "published_at": "2026-12-04T09:10:00+09:00" },
+    { "ref": "d3", "doc_id": "naver:20261204_0733", "published_at": "2026-12-04T11:20:00+09:00" }
   ],
   "validation": { "passed": true, "attempts": 1, "errors": [] },
   "output": {

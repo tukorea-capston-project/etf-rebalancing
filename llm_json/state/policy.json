@@ -99,10 +99,10 @@
       { "indicator_id": "vkospi", "name": "VKOSPI", "source": null, "llm": false },
       { "indicator_id": "margin_loan", "name": "신용융자 잔고", "source": "금융투자협회", "llm": false },
       { "indicator_id": "deposits", "name": "투자자예탁금", "source": "금융투자협회", "llm": false },
-      { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "source": "빅카인즈", "llm": true },
+      { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "source": "네이버 뉴스 API", "llm": true },
       { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "source": "한국은행", "llm": true }
     ],
-    "indicators_note": "계산일까지 공개된 값만 씀. VKOSPI 출처는 미정. llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
+    "indicators_note": "계산일까지 공개된 값만 씀. VKOSPI 출처는 미정. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
     "regimes": [
       { "axis": "금리", "states": ["상승", "하락"] },
       { "axis": "환율", "states": ["과열", "안정"] },
