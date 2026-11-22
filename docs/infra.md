@@ -185,6 +185,89 @@ PR마다, 그리고 main에 머지될 때 실행합니다. 통과해야 머지�
 - 워커는 팀원 PC에서 서비스 DB를 대상으로 실행하지 않습니다.
 - 팀원 PC의 `.env`에서는 `REAL_TRADING_ENABLED`를 항상 `false`로 둡니다.
 
+## 개발 서버 구축 (현재 단계)
+
+위 구성을 한 번에 만들지 않고, 같은 EC2에 단계별로 덧붙여 최종 구성으로 키웁니다.
+
+### 현재 단계
+
+```
+[팀원 PC] 백엔드 + 자기 Ollama + 테스트 DB ── Tailscale ──► [EC2] 서비스 DB (deploy/compose.yaml)
+```
+
+- EC2에는 서비스 DB만 띄웁니다. 백엔드는 각 팀원 PC에서 띄우고(위 "개발 환경"), EC2의 서비스 DB를 공용 데이터로 씁니다.
+- 외부에 공개하지 않습니다. 보안그룹 인바운드는 하나도 열지 않고, 팀원은 Tailscale로 서비스 DB(`<EC2의 Tailscale 주소>:15432`)에 접속합니다.
+- EC2에서 LLM을 부르는 프로세스가 없으므로 LLM PC는 아직 필요 없습니다.
+- CD가 없으므로 서비스 DB 마이그레이션은 팀원이 적용합니다(아래 "마이그레이션").
+
+| 다음에 붙일 것 | 붙이는 시점 |
+|---|---|
+| 워커(백엔드 이미지, LLM PC 연결) | `backend/app/worker/` 코드가 생겨 예약 작업을 EC2에서 돌릴 때 |
+| Caddy, API 서버, 도메인, CloudFront, S3 | 외부에 공개할 때 |
+| GitHub Actions CD | 백엔드 이미지를 EC2에 올리기 시작할 때 |
+| KMS | 실전 투자를 켤 때 |
+
+### EC2 만들기 (AWS 콘솔)
+
+1. AWS Budgets로 예산 알림을 먼저 설정합니다(예: 월 $20 초과 시 이메일).
+2. EC2를 만듭니다.
+   - 리전: 서울(`ap-northeast-2`), AMI: Ubuntu 24.04, 디스크: gp3 30GB
+   - 유형: DB만 띄우는 지금은 `t3.micro`로 충분합니다. 워커를 붙일 때 인스턴스를 중지하고 유형만 바꿉니다(`t3.small` 이상).
+   - 보안그룹 인바운드: 없음
+   - IAM 역할: `AmazonSSMManagedInstanceCore` 정책을 붙인 역할. 콘솔의 Session Manager로 접속합니다(22 포트를 열지 않음).
+   - 종료 보호를 켜고, 루트 볼륨의 "종료 시 삭제"를 끕니다.
+3. 백업: Data Lifecycle Manager로 루트 볼륨 EBS 스냅샷을 하루 1회 찍습니다.
+
+- 쓰지 않는 기간에는 인스턴스를 **중지(stop)** 하면 디스크 요금만 나갑니다. 데이터와 Tailscale 주소는 그대로 남습니다. **종료(terminate)** 는 인스턴스를 지우는 것이므로 쓰지 않습니다.
+
+### EC2 안에서 처음 설정
+
+Session Manager로 접속해 실행합니다.
+
+```bash
+# swap 1GB (메모리가 작은 인스턴스에서 DB가 메모리 부족으로 죽지 않게)
+sudo fallocate -l 1G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+# Docker, Tailscale
+curl -fsSL https://get.docker.com | sudo sh
+curl -fsSL https://tailscale.com/install.sh | sh
+sudo tailscale up   # 출력되는 링크로 로그인합니다. 주소 확인: tailscale ip -4
+
+# 저장소와 .env
+git clone https://github.com/tukorea-capston-project/etf-rebalancing.git && cd etf-rebalancing
+cp .env.example .env   # POSTGRES_PASSWORD를 채웁니다 (팀원 PC의 .env와 같은 값)
+
+# 서비스 DB 실행
+sudo docker compose -f deploy/compose.yaml up -d
+```
+
+- `.env`는 저장소 루트에 하나 둡니다. 서비스 DB는 이 중 `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`만 씁니다.
+- DB 데이터는 Docker 볼륨(`db-data`)에 있습니다. `docker compose down -v`는 볼륨까지 지우므로 쓰지 않습니다.
+
+### 팀원 PC를 사설망에 연결
+
+EC2와 팀원 PC를 직접 잇는 것이 아니라, 각 기기가 같은 Tailscale 사설망(tailnet)에 들어갑니다. 같은 tailnet에 들어가면 EC2의 Tailscale 주소로 서비스 DB에 접속할 수 있습니다.
+
+1. Tailscale을 설치하고 EC2와 같은 tailnet(팀 계정)으로 로그인합니다.
+2. `.env`의 `POSTGRES_HOST`에 EC2의 Tailscale 주소를 넣습니다(`POSTGRES_PORT`는 기본값 `15432`).
+3. 백엔드를 띄워 서비스 DB에 붙는지 확인합니다(`uv run fastapi dev app/main.py`).
+
+- 기기가 모두 연결되면 Tailscale 접근 정책을 좁힙니다(위 "Tailscale"). 현재 단계에서는 팀원 PC → EC2의 `15432`만 있으면 됩니다.
+
+### 마이그레이션
+
+- 서비스 DB에는 main에 머지된 마이그레이션만 적용합니다. CD가 생기기 전까지는 마이그레이션이 머지되면, 그 PR을 올린 팀원이 최신 main에서 서비스 DB에 적용합니다.
+
+```bash
+# backend/에서. .env의 POSTGRES_HOST가 EC2의 Tailscale 주소인 상태로
+git switch main && git pull
+uv run alembic upgrade head
+```
+
+- 머지 전 마이그레이션은 서비스 DB가 아니라 테스트 DB에서 확인합니다(위 "DB").
+
 ## 시연 체크리스트
 
 - [ ] 시연 장소 네트워크에서 LLM PC의 Tailscale 연결 확인 (미리 방문해 LLM PC를 연결하고 `tailscale status`로 EC2가 보이는지, 아래 `curl` 확인까지 해 봅니다. 방화벽이 엄격한 망이면 중계 서버 경유로 느려지거나 막힐 수 있습니다)
