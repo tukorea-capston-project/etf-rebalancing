@@ -191,7 +191,6 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 |---|---|
 | `max_premium` | NAV 대비 가격 괴리 상한 |
 | `skip_halted` | 거래정지 종목을 건너뛸지 |
-| `check_balance` | 주문 전 잔고를 확인할지 |
 
 ### backtest.json — 백테스트
 

@@ -63,9 +63,8 @@
     "capital_krw": 1000000,
     "monthly_contribution_krw": null,
     "monthly_contribution_day": null,
-    "order": { "method": "장전동시호가", "time": "08:40", "min_order_krw": 10000 },
-    "order_note": "잠정안. 주문 방식은 #13에서 정함(docs/trading.md)",
-    "pre_order_checks": { "max_premium": 0.01, "skip_halted": true, "check_balance": true },
-    "started_at": "2026-11-17T08:40:00+09:00"
+    "order": { "method": "상대1호가지정가", "time": "14:30" },
+    "pre_order_checks": { "max_premium": 0.01, "skip_halted": true },
+    "started_at": "2026-11-17T14:30:00+09:00"
   }
 }
