@@ -73,7 +73,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 |---|---|
 | `use` | 백테스트에서 LLM 지표를 쓰는지 |
 | `compare_without` | LLM 지표를 뺀 거시판단도 함께 계산하는지 |
-| `without_display` | 뺀 결과를 화면에 보여 주는 방식 |
+| `without_display` | 뺀 결과를 화면에 보여 주는 방식([화면 설계](frontend.md) 백테스트 결과) |
 | `leakage_test` | 미래 정보가 섞였는지 시험하는 방법 |
 
 `construction` ([전략 스키마](strategy-schema.md) 포트폴리오 생성):

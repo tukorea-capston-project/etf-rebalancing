@@ -130,6 +130,7 @@ DB (루트에서)
 | 백테스트: 가정, 비용, 세금, 지표, LLM 지표와 미래 정보 | `docs/backtest.md` | `backtest.md` |
 | 시세·분배금 수집 | `docs/market-data.md` | `market-data.md` |
 | 모의·실전투자, KIS | `docs/trading.md` | `trading.md` |
+| 화면: 화면별 기능과 보여 줄 내용 | `docs/frontend.md` | `frontend.md` |
 | 전체 흐름 예시 | `docs/json-flow.md` | — |
 | JSON 상태 파일, LLM 출력 형식 | `docs/json-files.md` | — |
 
