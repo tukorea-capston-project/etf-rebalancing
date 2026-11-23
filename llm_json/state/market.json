@@ -6,7 +6,7 @@
   "judged_on": "2026-12-07",
   "policy_version": 3,
   "classifier": "Z점수점수제",
-  "zscore_window_days": null,
+  "zscore_window_weeks": 260,
   "indicators": {
     "ktb_yield_change": {
       "value": -0.012,
@@ -57,9 +57,9 @@
   },
   "indicators_note": "값은 설명용 예시. 지표별 Z-Score에 방향을 곱해 축마다 합침(policy.macro.axis_score). bok_minutes는 범주라 마지막 정책 방향(stance)을 점수로 씀",
   "regimes": {
-    "금리": { "state": "하락", "prev_state": "중립", "changed": true, "score": -1.2, "enter": null, "exit": null },
-    "환헤지": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.004, "enter": null, "exit": null },
-    "위험선호": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.5, "enter": null, "exit": null }
+    "금리": { "state": "하락", "prev_state": "중립", "changed": true, "score": -1.2, "enter": -1.0, "exit": 0.0 },
+    "환헤지": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.004, "enter": 0.01, "exit": 0.0 },
+    "위험선호": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.5, "enter": 1.0, "exit": 0.0 }
   },
   "regimes_note": "축과 상태는 policy.macro.regimes. enter·exit는 히스테리시스 기준. 위험선호가 회피면 계획 외 매도 경고(policy.fear_warning)를 띄움",
   "switched": true,

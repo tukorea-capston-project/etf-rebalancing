@@ -36,7 +36,9 @@
   "construction": {
     "selection": "minimax",
     "selection_note": "묶음마다 대표 하나. 대표들끼리의 최대 상관계수가 가장 작은 조합. 사용자가 지정한 ETF는 고정",
-    "selection_search": null,
+    "selection_search": "가지치기백트래킹_정확탐색",
+    "dedupe_same_index": "보유비용최소_분배금포함NAV수익률최대",
+    "tie_break": ["평균상관계수최소", "종목코드순"],
     "weighting": "HRP",
     "compare_weightings": ["역변동성", "동일비중"],
     "scope": "자산군비중있으면자산군안",
@@ -91,7 +93,10 @@
     "schedule": "매주마지막영업일값_다음영업일아침판단",
     "classifier": "Z점수점수제",
     "classifier_extension": "통계적점프모형",
-    "zscore_window_days": null,
+    "zscore_window_weeks": 260,
+    "change_windows_weeks": [4, 13, 52],
+    "z_method": "중앙값_MAD",
+    "z_clip": 3,
     "indicators": [
       { "indicator_id": "ktb_yield_change", "name": "국고채 10년 금리 변화", "axis": "금리", "transform": "변화", "direction": 1, "source": "ECOS", "llm": false },
       { "indicator_id": "term_spread", "name": "장단기 금리차", "axis": "금리", "transform": "수준", "direction": -1, "source": "ECOS", "llm": false },
@@ -105,7 +110,7 @@
       { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "axis": "위험선호", "transform": "주간평균", "direction": 1, "source": "네이버 뉴스 API", "llm": true },
       { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "axis": "금리", "transform": "범주_긴축1_완화-1_전환없음0", "direction": 1, "source": "한국은행", "llm": true }
     ],
-    "indicators_note": "계산일까지 공개된 값만 씀. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
+    "indicators_note": "날짜가 기준일 이하이고 판단(다음 영업일 아침) 전에 발표된 값만 씀. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
     "axis_score": {
       "combine": "등가중평균",
       "restandardize": true,
@@ -113,14 +118,16 @@
       "exclude": ["stock_bond_corr"],
       "absolute_axes": ["환헤지"]
     },
-    "axis_score_note": "지표 Z-Score에 방향을 곱해 축 안에서 같은 가중치로 평균하고, 같은 기준 기간으로 다시 Z-Score로 바꿈. 점수 +는 금리 상승, 환헤지 노출, 위험선호 선호. 환헤지 축은 Z-Score 없이 환헤지 비용의 절대 수준(%p)에 기준을 댐",
+    "axis_score_note": "지표 Z-Score(중앙값·MAD, ±3에서 자름)에 방향을 곱해 축 안에서 같은 가중치로 평균하고, 같은 기준 기간으로 다시 Z-Score로 바꿈. 점수 +는 금리 상승, 환헤지 노출, 위험선호 선호. 환헤지 축은 Z-Score 없이 환헤지 비용의 절대 수준(%p)에 기준을 댐",
     "regimes": [
       { "axis": "금리", "states": ["상승", "중립", "하락"], "etf_attribute": "금리민감도" },
       { "axis": "환헤지", "states": ["헤지", "중립", "노출"], "etf_attribute": "환민감도" },
       { "axis": "위험선호", "states": ["선호", "중립", "회피"], "etf_attribute": "위험민감도" }
     ],
-    "regimes_note": "중립인 축은 ETF 선택에 영향을 주지 않음. 모든 축이 중립이면 전략을 만들 때 고른 ETF(minimax)를 기본으로 씀",
-    "hysteresis": { "enter": null, "exit": null },
+    "regimes_note": "중립인 축은 ETF 선택에 영향을 주지 않음. 모든 축이 중립으로 돌아와도 전략 생성 때의 ETF로 되돌리지 않고 지금 ETF를 유지함",
+    "hysteresis": { "enter": 1.0, "exit": 0.0 },
+    "hedge_cost_threshold": { "enter": 0.01, "exit": 0.0 },
+    "stock_bond_corr_threshold": { "enter": 0.12, "exit": 0.0, "window_days": 252 },
     "hysteresis_note": "잦은 전환은 진입·복귀 기준을 다르게 두는 것(히스테리시스)으로만 막음. 값은 백테스트 결과를 보고 고르지 않고 관례값·기본값으로 정하며, 견고성 표와 PBO를 함께 보여 줌(docs/backtest.md)",
     "on_switch": {
       "selection": "속성매칭",

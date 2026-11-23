@@ -14,7 +14,7 @@
     {
       "axis": "금리",
       "score": -1.2,
-      "enter": null,
+      "enter": -1.0,
       "contributions": [
         { "indicator": "ktb_yield_change", "value": -1.3 },
         { "indicator": "bok_minutes", "value": -1 },
