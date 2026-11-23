@@ -8,9 +8,7 @@ import pytest
 from pydantic import ValidationError
 
 from app.market_data.overrides import load_overrides
-from app.market_data.service import target_codes
 
-TARGETS = {"069500", "0184E0"}
 SOURCE = "source: https://kind.krx.co.kr/x"
 
 
@@ -21,8 +19,7 @@ def write(tmp_path: Path, body: str) -> Path:
 
 
 def test_저장소의_보정_파일을_읽는다() -> None:
-    # 보정 항목의 종목코드는 모두 수집 대상이어야 한다
-    load_overrides(target_codes())
+    load_overrides()
 
 
 def test_추가와_삭제_항목을_읽는다(tmp_path: Path) -> None:
@@ -33,7 +30,7 @@ def test_추가와_삭제_항목을_읽는다(tmp_path: Path) -> None:
         f'  - {{code: "0184E0", ex_date: 2026-07-30, delete: true, {SOURCE}}}\n',
     )
 
-    first, second = load_overrides(TARGETS, path)
+    first, second = load_overrides(path)
 
     assert (first.code, first.ex_date, first.amount) == (
         "069500",
@@ -44,7 +41,7 @@ def test_추가와_삭제_항목을_읽는다(tmp_path: Path) -> None:
 
 
 def test_빈_파일은_보정_없음이다(tmp_path: Path) -> None:
-    assert load_overrides(TARGETS, write(tmp_path, "")) == []
+    assert load_overrides(write(tmp_path, "")) == []
 
 
 @pytest.mark.parametrize(
@@ -66,7 +63,7 @@ def test_형식이_틀린_항목은_거부한다(tmp_path: Path, entry: str, mes
     path = write(tmp_path, f"overrides:\n  - {entry}\n")
 
     with pytest.raises(ValidationError, match=message):
-        load_overrides(TARGETS, path)
+        load_overrides(path)
 
 
 def test_같은_종목_같은_날짜가_두_번_나오면_거부한다(tmp_path: Path) -> None:
@@ -78,14 +75,4 @@ def test_같은_종목_같은_날짜가_두_번_나오면_거부한다(tmp_path:
     )
 
     with pytest.raises(ValidationError, match="중복"):
-        load_overrides(TARGETS, path)
-
-
-def test_수집_대상이_아닌_종목코드는_거부한다(tmp_path: Path) -> None:
-    path = write(
-        tmp_path,
-        f'overrides:\n  - {{code: "999999", ex_date: 2015-04-29, amount: 1, {SOURCE}}}\n',
-    )
-
-    with pytest.raises(ValueError, match="999999"):
-        load_overrides(TARGETS, path)
+        load_overrides(path)

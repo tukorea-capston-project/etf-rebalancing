@@ -10,6 +10,7 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 import yfinance as yf
+from yfinance.exceptions import YFTickerMissingError
 
 from app.market_data.service import Distribution, FetchError
 
@@ -65,6 +66,13 @@ class YahooDistributionSource:
             try:
                 raw = self._fetch(ticker, self._timeout)
                 break
+            # 종목이 없다(상장폐지 등). 다시 시도해도 같으므로 분배금 0건으로 본다.
+            # DB에 기존 분배금이 있으면 수집 쪽에서 값을 유지하고 경고한다.
+            except YFTickerMissingError as e:
+                logger.info(
+                    "%s yfinance에 종목이 없어 분배금 0건으로 본다: %s", ticker, e
+                )
+                return []
             # yfinance는 네트워크·데이터 오류를 여러 예외로 던진다
             except Exception as e:
                 if attempt == self._max_retries:

@@ -6,6 +6,7 @@ from typing import Any
 
 import pandas as pd
 import pytest
+from yfinance.exceptions import YFPricesMissingError, YFTickerMissingError
 
 from app.market_data.service import Distribution, FetchError
 from app.market_data.yahoo import YahooDistributionSource
@@ -59,3 +60,20 @@ def test_재시도_중_성공하면_결과를_돌려준다() -> None:
 
     assert make_source(fetch).fetch_distributions("069500") == []
     assert len(attempts) == 2
+
+
+@pytest.mark.parametrize(
+    "error",
+    [
+        YFTickerMissingError("091190.KS", "no timezone found"),
+        YFPricesMissingError("091190.KS", "(period=max)"),
+    ],
+)
+def test_종목이_없으면_재시도하지_않고_0건이다(error: Exception) -> None:
+    sleeps: list[float] = []
+
+    def fetch(ticker: str, timeout: float) -> list[tuple[Any, float]]:
+        raise error
+
+    assert make_source(fetch, sleeps).fetch_distributions("091190") == []
+    assert sleeps == []

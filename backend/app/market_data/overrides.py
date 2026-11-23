@@ -3,7 +3,6 @@
 형식은 docs/market-data.md의 '보정 파일'을 따른다. (종목코드, 분배락일)별 최종값을 적는다.
 """
 
-from collections.abc import Collection
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
@@ -12,7 +11,7 @@ from typing import Any, Self
 import yaml
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
-from app.core.whitelist import check_code
+from app.core.codes import check_code
 
 OVERRIDES_PATH = (
     Path(__file__).resolve().parents[2] / "config" / "distribution_overrides.yaml"
@@ -68,14 +67,8 @@ class DistributionOverrides(BaseModel):
         return self
 
 
-def load_overrides(
-    target_codes: Collection[str], path: Path = OVERRIDES_PATH
-) -> list[DistributionOverride]:
-    """보정 항목을 읽는다. 수집 대상이 아닌 종목코드가 있으면 오류다."""
+def load_overrides(path: Path = OVERRIDES_PATH) -> list[DistributionOverride]:
+    """보정 항목을 읽는다. 시세가 없는 종목코드인지는 수집할 때 DB와 대조한다."""
     with path.open(encoding="utf-8") as f:
         data = yaml.safe_load(f) or {}
-    overrides = DistributionOverrides.model_validate(data).overrides
-    unknown = sorted({o.code for o in overrides} - set(target_codes))
-    if unknown:
-        raise ValueError(f"보정 YAML에 수집 대상이 아닌 종목코드가 있다: {unknown}")
-    return overrides
+    return DistributionOverrides.model_validate(data).overrides

@@ -127,7 +127,7 @@ EC2 서버 (저장소 루트에서. 처음 설정과 현재 단계는 `docs/infr
 | 서버, HTTPS, Tailscale, LLM 연결, DB 운영, 배포 | `docs/infra.md` | — |
 | 로그인, 세션, 소유 관계 | `docs/auth.md` | `auth.md` |
 | 전략 구성·제약, 포트폴리오 생성(minimax·HRP), 자연어 → 전략, 확정·버전 | `docs/strategy-schema.md` | `strategy.md` |
-| 투자 대상: 선정 조건, 슬롯 분류, 화이트리스트 전환 | `docs/universe.md` | — |
+| 투자 대상: 선정 조건, 슬롯 분류 | `docs/universe.md` | — |
 | 리밸런싱 실행: 시점, 종류, 목표 금액, 주문 수량 | `docs/rebalancing.md` | `rebalancing.md` |
 | 거시판단: 국면 지표와 출처(뉴스 포함), 국면 판단, 국면 전환 | `docs/macro.md` | — |
 | 백테스트: 가정, 비용, 세금, 지표, LLM 지표와 미래 정보 | `docs/backtest.md` | `backtest.md` |

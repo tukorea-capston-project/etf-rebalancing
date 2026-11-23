@@ -20,10 +20,8 @@ def _print_report(report: CollectionReport) -> None:
     statuses = ", ".join(f"{s.value} {n}" for s, n in sorted(report.statuses.items()))
     print(f"KRX 호출: {report.krx_calls}회 ({statuses or '수집할 날짜 없음'})")
     print(f"저장한 시세 행: {report.saved_rows}")
-    if report.backfilled_codes:
-        codes = report.backfilled_codes
-        shown = ", ".join(codes[:10]) + (" 등" if len(codes) > 10 else "")
-        print(f"백필 완료 ETF: {len(codes)}개 ({shown})")
+    if report.refilled_days:
+        print(f"ETF 전체를 다시 받아 채운 영업일: {report.refilled_days}")
     if report.stopped_reason:
         print(f"시세 수집 중단: {report.stopped_reason}")
     print(f"분배금 갱신 ETF: {report.distribution_codes_updated}")
@@ -36,7 +34,7 @@ def main(settings: Settings | None = None) -> int:
         prog="python -m app.market_data",
         description=(
             "KRX 시세와 yfinance 분배금을 수집해 DB에 저장한다. "
-            "미수집 날짜 시세 → 신규 ETF 백필 → 분배금 갱신 순으로 실행한다."
+            "미수집 날짜와 ETF 전체를 저장하지 않은 영업일의 시세 → 분배금 갱신 순으로 실행한다."
         ),
     )
     parser.parse_args()

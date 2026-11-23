@@ -4,7 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from enum import StrEnum
 
-from sqlalchemy import BigInteger, DateTime, Numeric, String
+from sqlalchemy import BigInteger, DateTime, Numeric, String, false
 from sqlmodel import Field, SQLModel
 
 
@@ -50,18 +50,14 @@ class PriceCollectionLog(SQLModel, table=True):
 
     trade_date: date = Field(primary_key=True)
     status: CollectionStatus = Field(sa_type=String)
-    saved_rows: int | None = None  # 저장한 대상 ETF 행 수 (영업일만)
+    saved_rows: int | None = None  # 그날 저장된 ETF 행 수 (영업일만)
     error: str | None = None  # 실패 사유 (실패만)
     checked_at: datetime = Field(sa_type=DateTime(timezone=True))  # 마지막 호출 시각
-
-
-class EtfBackfill(SQLModel, table=True):
-    """ETF별 전 기간 시세 수집 완료 기록. 화이트리스트에 있는데 여기 없으면 신규 ETF다."""
-
-    __tablename__ = "etf_backfill"  # pyright: ignore[reportAssignmentType]
-
-    code: str = Field(primary_key=True, max_length=6)
-    completed_at: datetime = Field(sa_type=DateTime(timezone=True))
+    # 그날 응답의 ETF 전체를 저장했는지 (영업일만). 전체 저장으로 바꾸기 전에는 일부 ETF만
+    # 저장했으므로, 거짓인 영업일은 다시 받아 빠진 행을 채운다.
+    all_etfs_saved: bool = Field(
+        default=False, sa_column_kwargs={"server_default": false()}
+    )
 
 
 class DistributionSource(StrEnum):
