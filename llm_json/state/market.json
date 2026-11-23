@@ -63,7 +63,7 @@
     },
     "투자심리": { "state": "탐욕", "prev_state": "탐욕", "changed": false, "score": 0.9, "enter": null, "exit": null }
   },
-  "regimes_note": "축과 상태는 policy.macro.regimes(예시). enter·exit는 히스테리시스 기준(미정). 투자심리가 공포면 계획 외 매도 경고(policy.fear_warning)를 띄움",
+  "regimes_note": "축과 상태는 policy.macro.regimes(예시). enter·exit는 히스테리시스 기준. 투자심리가 공포면 계획 외 매도 경고(policy.fear_warning)를 띄움",
   "switched": true,
   "switched_axes": ["금리"],
   "switched_note": "국면이 바뀐 축. 포트폴리오별 재구성은 regime_switch.json에 기록함"

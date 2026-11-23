@@ -23,14 +23,14 @@
       "end": null,
       "fee_rate": 0.00015,
       "slippage": 0.001,
-      "risk_free_rate": null,
+      "risk_free_rate": "CD91일물기간평균",
       "fill_price": "다음영업일종가",
       "price_basis": "실제종가",
       "reinvest_distributions": true,
       "tax_model": "ETF유형별",
       "modes": ["고정비중", "거시판단", "거시판단LLM제외"],
       "llm_indicators": { "use": true, "compare_without": true, "without_display": "토글", "leakage_test": null },
-      "llm_indicators_note": "백테스트에도 LLM 지표를 씀. 미래 정보를 없앤다고 주장하지 않고, LLM 지표를 뺀 결과를 항상 함께 계산해 차이를 보여 줌(화면에서는 토글을 켜야 보임). 미래 정보가 섞였는지 시험하는 방법(예측 불가능한 사건 시험, 기억 정도 측정)의 구체 설계는 미정"
+      "llm_indicators_note": "백테스트에도 LLM 지표를 씀. 미래 정보를 없앤다고 주장하지 않고, LLM 지표를 뺀 결과를 항상 함께 계산해 차이를 보여 줌(화면에서는 토글을 켜야 보임). 미래 정보가 섞였는지도 시험함(예측 불가능한 사건 시험, 기억 정도 측정)"
     }
   },
   "construction": {
@@ -96,13 +96,13 @@
       { "indicator_id": "ktb_yield_change", "name": "국고채 금리 변화율", "source": "ECOS", "llm": false },
       { "indicator_id": "term_spread", "name": "장단기 금리차", "source": "ECOS", "llm": false },
       { "indicator_id": "usdkrw", "name": "원/달러 환율", "source": "ECOS", "llm": false },
-      { "indicator_id": "vkospi", "name": "VKOSPI", "source": null, "llm": false },
+      { "indicator_id": "vkospi", "name": "VKOSPI", "source": "KRX Open API", "llm": false },
       { "indicator_id": "margin_loan", "name": "신용융자 잔고", "source": "금융투자협회", "llm": false },
       { "indicator_id": "deposits", "name": "투자자예탁금", "source": "금융투자협회", "llm": false },
       { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "source": "네이버 뉴스 API", "llm": true },
       { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "source": "한국은행", "llm": true }
     ],
-    "indicators_note": "계산일까지 공개된 값만 씀. VKOSPI 출처는 미정. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
+    "indicators_note": "계산일까지 공개된 값만 씀. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
     "regimes": [
       { "axis": "금리", "states": ["상승", "하락"] },
       { "axis": "환율", "states": ["과열", "안정"] },
@@ -111,7 +111,7 @@
     ],
     "regimes_status": "예시",
     "hysteresis": { "enter": null, "exit": null },
-    "hysteresis_note": "잦은 전환은 진입·복귀 기준을 다르게 두는 것(히스테리시스)으로만 막음. 값은 백테스트 결과를 보고 고르지 않고 관례값·기본값으로 정하며, 견고성 표와 PBO를 함께 보여 줌(docs/backtest.md). 구체 값은 미정",
+    "hysteresis_note": "잦은 전환은 진입·복귀 기준을 다르게 두는 것(히스테리시스)으로만 막음. 값은 백테스트 결과를 보고 고르지 않고 관례값·기본값으로 정하며, 견고성 표와 PBO를 함께 보여 줌(docs/backtest.md)",
     "on_switch": {
       "selection": "속성매칭",
       "score": "RegimeFit - λ·SwitchCost",
@@ -120,11 +120,11 @@
       "weighting": "HRP",
       "keep_user": ["etfs", "asset_classes", "cash"]
     },
-    "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(예: 환헤지 여부, 듀레이션)의 ETF를 점수로 고르고 HRP로 비중을 다시 계산함. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로. RegimeFit·λ·SwitchCost 정의와 ETF 속성 필드는 미정",
+    "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(예: 환헤지 여부, 듀레이션)의 ETF를 점수로 고르고 HRP로 비중을 다시 계산함. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로",
     "events": null,
-    "events_note": "큰 악재·호재 대응. 탐지 방법과 대응 방식은 미정",
+    "events_note": "큰 악재·호재 대응",
     "static_dynamic_priority": null,
-    "static_dynamic_priority_note": "국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 미정"
+    "static_dynamic_priority_note": "두 층의 우선순위. 국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 여부"
   },
   "fear_warning": {
     "when": { "axis": "투자심리", "state": "공포" },
