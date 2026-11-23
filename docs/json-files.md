@@ -83,7 +83,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `weighting` | 비중 계산 방식(`HRP`) |
 | `compare_weightings` | 비교용 비중 방식 |
 | `scope` | HRP를 적용하는 범위(자산군 안 / 자산군 배분까지) |
-| `selection_days`, `min_history_days` | 선정 기간 길이, 후보가 되려면 필요한 최소 데이터 기간 |
+| `selection_weeks`, `returns` | 선정 기간 길이(주), 변동성·상관계수에 쓰는 수익률 주기. 투자 대상의 상장 후 경과 기간도 선정 기간과 같습니다 |
 | `default_groups` | 기본 묶음 세트 |
 | `limits` | 비중 제한(종목당 최대·최소 비중, 최대 종목 수, 최대 묶음 수, 비중 단위) |
 | `postprocess` | 후처리 방식(최소 비중 맞추기, 반올림) |
@@ -156,7 +156,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | 필드 | 설명 |
 |---|---|
 | `case` | 네 경우 중 무엇인지. `weight_given`, `etf_given` 두 값으로 표시합니다 |
-| `as_of`, `selection_days` | 계산 기준일과 선정 기간 |
+| `as_of`, `selection_weeks` | 계산 기준일과 선정 기간 |
 | `selection`, `weighting` | 쓴 방식(`minimax`, `HRP`) |
 | `groups` | 묶음별 계산 과정. 사용자가 고정한 ETF(`fixed`), 후보(`candidates`), 고른 대표(`representative`) |
 | `minimax` | 고른 조합에서 가장 높은 상관계수와 그 쌍 |

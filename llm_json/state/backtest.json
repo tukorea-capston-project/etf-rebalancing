@@ -24,7 +24,7 @@
   },
   "construction": {
     "as_of": "2021-01-04",
-    "selection_days": null,
+    "selection_weeks": 104,
     "selection": "minimax",
     "weighting": "HRP",
     "result": { "360750": 0.21, "069500": 0.19, "395270": 0.1, "114260": 0.5 },
