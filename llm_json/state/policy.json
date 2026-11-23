@@ -44,9 +44,9 @@
     "selection_days": null,
     "min_history_days": null,
     "default_groups": [
-      { "category": "domestic_equity_index", "group": null },
-      { "category": "foreign_equity_country", "group": null },
-      { "category": "domestic_bond", "group": null }
+      { "asset_class": "주식", "region": "국내", "sector": "시장대표" },
+      { "asset_class": "주식", "region": "미국", "sector": "시장대표" },
+      { "asset_class": "채권", "region": "국내", "sector": "국채" }
     ],
     "default_groups_status": "예시",
     "default_groups_note": "기본 묶음 세트. 사용자 문장에 나온 묶음을 더하거나 뺌. 구성은 미정",

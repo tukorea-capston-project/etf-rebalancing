@@ -30,25 +30,28 @@
     "cash": { "value": 0.0, "source": "기본값", "quote": null, "ref": null },
     "groups": [
       {
-        "category": "domestic_equity_index",
-        "group": null,
+        "asset_class": "주식",
+        "region": "국내",
+        "sector": "시장대표",
         "action": "포함",
         "source": "기본값",
         "quote": null,
         "ref": null
       },
       {
-        "category": "foreign_equity_country",
-        "group": null,
+        "asset_class": "주식",
+        "region": "미국",
+        "sector": "시장대표",
         "action": "포함",
         "source": "기본값",
         "quote": null,
         "ref": null
       },
-      { "category": "domestic_bond", "group": null, "action": "포함", "source": "기본값", "quote": null, "ref": null },
+      { "asset_class": "채권", "region": "국내", "sector": "국채", "action": "포함", "source": "기본값", "quote": null, "ref": null },
       {
-        "category": "domestic_equity_sector",
-        "group": null,
+        "asset_class": "주식",
+        "region": "국내",
+        "sector": "정보기술",
         "action": "포함",
         "source": "사용자발화",
         "quote": "반도체도 넣어주세요",
@@ -111,29 +114,33 @@
     "weighting": "HRP",
     "groups": [
       {
-        "category": "foreign_equity_country",
-        "group": null,
+        "asset_class": "주식",
+        "region": "미국",
+        "sector": "시장대표",
         "fixed": "360750",
         "candidates": null,
         "representative": "360750"
       },
       {
-        "category": "domestic_equity_index",
-        "group": null,
+        "asset_class": "주식",
+        "region": "국내",
+        "sector": "시장대표",
         "fixed": null,
         "candidates": ["069500", "226490", "292150"],
         "representative": "069500"
       },
       {
-        "category": "domestic_equity_sector",
-        "group": null,
+        "asset_class": "주식",
+        "region": "국내",
+        "sector": "정보기술",
         "fixed": "395270",
         "candidates": null,
         "representative": "395270"
       },
       {
-        "category": "domestic_bond",
-        "group": null,
+        "asset_class": "채권",
+        "region": "국내",
+        "sector": "국채",
         "fixed": null,
         "candidates": ["114260", "148070", "439870"],
         "representative": "114260"

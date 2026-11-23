@@ -48,7 +48,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `backtest_modes` | 백테스트 실행 종류([백테스트](backtest.md) 대상) |
 | `expressions` | 자주 쓰는 말과 칸 값의 연결. 예: "전세" → `goal`=주택자금 |
 | `whitelist` | 화이트리스트 파일 위치([투자 대상](universe.md) 전환 중) |
-| `categories` | ETF 분류(category)가 어느 자산군(asset_class)에 속하는지 |
+| `slot_axes` | 자산군마다 고를 수 있는 지역(`regions`)과 섹터(`sectors`). `null`은 그 계층을 나누지 않음([투자 대상](universe.md) 슬롯 분류) |
 | `aliases` | ETF 별칭. 예: "S&P", "미국 주식" → `360750` |
 | `questions` | 되묻기와 `확인` 이슈에서 사용자에게 할 질문과 선택지 문구. 리밸런싱 조건(`rebalance`), 투자 금액(`capital`), 비중 충돌(`weight_conflict`) |
 
@@ -191,7 +191,6 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 |---|---|
 | `max_premium` | NAV 대비 가격 괴리 상한 |
 | `skip_halted` | 거래정지 종목을 건너뛸지 |
-| `check_balance` | 주문 전 잔고를 확인할지 |
 
 ### backtest.json — 백테스트
 

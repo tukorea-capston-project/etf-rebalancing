@@ -14,7 +14,7 @@
   "crossed_note": "기준을 넘은 지표. 알림의 \"어떤 지표가 기준을 넘었는지\"에 씀",
   "selections": [
     {
-      "group": { "category": "domestic_bond", "group": null },
+      "group": { "asset_class": "채권", "region": "국내", "sector": "국채" },
       "from": "114260",
       "to": "148070",
       "regime_fit": null,
@@ -23,7 +23,7 @@
       "reason": "금리 하락 국면에서 듀레이션이 긴 ETF가 속성 매칭 점수가 높음"
     },
     {
-      "group": { "category": "domestic_equity_index", "group": null },
+      "group": { "asset_class": "주식", "region": "국내", "sector": "시장대표" },
       "from": "069500",
       "to": "069500",
       "reason": "교체 비용을 빼면 그대로가 가장 높음"
@@ -41,5 +41,5 @@
   },
   "notice": "금리 하락 국면으로 바뀌었어요(국고채 금리 변화율이 기준을 넘음). 국내 채권을 국고채 3년에서 국고채 10년으로 바꾸고, 비중을 다시 계산했어요.",
   "notice_note": "알림 문장은 LLM이 쓰지 않음(LLM 역할은 문장 해석, 뉴스 분위기 점수, 금통위 판정뿐)",
-  "applied_at": "2026-12-07T08:40:00+09:00"
+  "applied_at": "2026-12-07T14:30:00+09:00"
 }

@@ -15,23 +15,23 @@
   "holdings": [
     {
       "etf_code": "360750",
-      "group": { "category": "foreign_equity_country", "group": null },
+      "group": { "asset_class": "주식", "region": "미국", "sector": "시장대표" },
       "source": "사용자종목",
       "base": 0.22
     },
     {
       "etf_code": "069500",
-      "group": { "category": "domestic_equity_index", "group": null },
+      "group": { "asset_class": "주식", "region": "국내", "sector": "시장대표" },
       "source": "생성",
       "base": 0.17
     },
     {
       "etf_code": "395270",
-      "group": { "category": "domestic_equity_sector", "group": null },
+      "group": { "asset_class": "주식", "region": "국내", "sector": "정보기술" },
       "source": "사용자종목",
       "base": 0.11
     },
-    { "etf_code": "114260", "group": { "category": "domestic_bond", "group": null }, "source": "생성", "base": 0.5 }
+    { "etf_code": "114260", "group": { "asset_class": "채권", "region": "국내", "sector": "국채" }, "source": "생성", "base": 0.5 }
   ],
   "holdings_note": "base는 전략 비중(확인할 때 만든 비중). source는 사용자비중(비중까지 지정) / 사용자종목(종목만 지정) / 생성. 지금 맞추려는 비중은 operation.target",
   "rules": {
@@ -63,9 +63,8 @@
     "capital_krw": 1000000,
     "monthly_contribution_krw": null,
     "monthly_contribution_day": null,
-    "order": { "method": "장전동시호가", "time": "08:40", "min_order_krw": 10000 },
-    "order_note": "잠정안. 주문 방식은 #13에서 정함(docs/trading.md)",
-    "pre_order_checks": { "max_premium": 0.01, "skip_halted": true, "check_balance": true },
-    "started_at": "2026-11-17T08:40:00+09:00"
+    "order": { "method": "상대1호가지정가", "time": "14:30" },
+    "pre_order_checks": { "max_premium": 0.01, "skip_halted": true },
+    "started_at": "2026-11-17T14:30:00+09:00"
   }
 }
