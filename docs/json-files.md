@@ -79,7 +79,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 
 | 필드 | 설명 |
 |---|---|
-| `selection` | 묶음별 대표 선택 방식(`minimax`)과 탐색 방법(`selection_search`) |
+| `selection` | 묶음별 대표 선택 방식(`minimax`), 탐색 방법(`selection_search`), 같은 기초지수 ETF를 줄이는 기준(`dedupe_same_index`), 동점 처리(`tie_break`)([전략 스키마](strategy-schema.md) 종목 선택 탐색) |
 | `weighting` | 비중 계산 방식(`HRP`) |
 | `compare_weightings` | 비교용 비중 방식 |
 | `scope` | HRP를 적용하는 범위(자산군 안 / 자산군 배분까지) |
