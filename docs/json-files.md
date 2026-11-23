@@ -64,7 +64,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `rebalance` | 정적 층. 조건 목록, 밴드 확인 시점, 밴드 폭 계산, 일자 규칙([리밸런싱](rebalancing.md)) |
 | `fixed_rules` | 고정 규칙. 적립금 매수, 분배금 재투자([리밸런싱](rebalancing.md)) |
 | `macro` | 동적 층(거시판단 운용). 아래 표 참고 |
-| `fear_warning` | 투자심리 공포 때 계획 외 매도 경고([거시판단](macro.md)) |
+| `fear_warning` | 위험회피 국면 때 계획 외 매도 경고([거시판단](macro.md)) |
 
 `defaults.backtest.llm_indicators` ([백테스트](backtest.md) LLM 지표와 미래 정보):
 
@@ -96,10 +96,10 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `schedule` | 국면 판단 시점 |
 | `classifier` | 국면 분류 방식 |
 | `zscore_window_days` | Z-Score 기준 기간 |
-| `indicators` | 국면 지표 목록. 지표마다 출처와 LLM 지표 여부(`llm`) |
-| `regimes` | 국면 축과 상태 |
+| `indicators` | 국면 지표 목록. 지표마다 축(`axis`), 출처, LLM 지표 여부(`llm`) |
+| `regimes` | 국면 축과 상태, 축이 바꾸는 ETF 속성 |
 | `hysteresis` | 진입·복귀 기준 |
-| `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`), 비중 재계산, 유지할 사용자 값(`keep_user`) |
+| `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`), ETF 속성과 재는 방법(`etf_attributes`), 비중 재계산, 유지할 사용자 값(`keep_user`) |
 | `events` | 큰 악재·호재 대응 |
 | `static_dynamic_priority` | 국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 |
 
@@ -213,7 +213,8 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 
 | 필드 | 설명 |
 |---|---|
-| `as_of` | 기준일. 발표일(`released_at`)이 이 날짜 이전인 지표만 씁니다 |
+| `as_of` | 기준일. 날짜(`period`)가 이 날 이하인 지표만 씁니다 |
+| `judged_on` | 판단한 날(기준일 다음 영업일 아침). 발표일(`released_at`)이 이 날 판단 전인 지표만 씁니다 |
 | `classifier`, `zscore_window_days` | 국면 분류 방식과 Z-Score 기준 기간 |
 | `indicators` | 지표별 값, Z-Score(`z`), 기준 기간, 발표일, 출처. LLM 지표는 근거가 된 LLM 출력 ID(`llm_output_ids`)도 둡니다 |
 | `regimes` | 축별 국면. 지금 상태, 이전 상태, 바뀌었는지, 점수, 진입·복귀 기준 |

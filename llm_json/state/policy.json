@@ -88,46 +88,52 @@
   },
   "fixed_rules": { "contribution": "부족자산우선", "distribution": "같은ETF재투자" },
   "macro": {
-    "schedule": "매주마지막영업일종가",
+    "schedule": "매주마지막영업일값_다음영업일아침판단",
     "classifier": "Z점수점수제",
-    "classifier_extension": "HMM",
+    "classifier_extension": "통계적점프모형",
     "zscore_window_days": null,
     "indicators": [
-      { "indicator_id": "ktb_yield_change", "name": "국고채 금리 변화율", "source": "ECOS", "llm": false },
-      { "indicator_id": "term_spread", "name": "장단기 금리차", "source": "ECOS", "llm": false },
-      { "indicator_id": "usdkrw", "name": "원/달러 환율", "source": "ECOS", "llm": false },
-      { "indicator_id": "vkospi", "name": "VKOSPI", "source": "KRX Open API", "llm": false },
-      { "indicator_id": "margin_loan", "name": "신용융자 잔고", "source": "금융투자협회", "llm": false },
-      { "indicator_id": "deposits", "name": "투자자예탁금", "source": "금융투자협회", "llm": false },
-      { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "source": "네이버 뉴스 API", "llm": true },
-      { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "source": "한국은행", "llm": true }
+      { "indicator_id": "ktb_yield_change", "name": "국고채 금리 변화율", "axis": "금리", "source": "ECOS", "llm": false },
+      { "indicator_id": "term_spread", "name": "장단기 금리차", "axis": "금리", "source": "ECOS", "llm": false },
+      { "indicator_id": "us_10y", "name": "미국 10년 국채 금리", "axis": "금리", "source": "yfinance(^TNX)", "llm": false },
+      { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "source": "ETF 시세 계산", "llm": false },
+      { "indicator_id": "hedge_cost", "name": "환헤지 비용(한미 단기금리차)", "axis": "환헤지", "source": "ECOS(CD 91일)+yfinance(^IRX)", "llm": false },
+      { "indicator_id": "vkospi", "name": "VKOSPI", "axis": "위험선호", "source": "KRX Open API", "llm": false },
+      { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "source": "금융투자협회", "llm": false },
+      { "indicator_id": "deposits", "name": "투자자예탁금", "axis": "위험선호", "source": "금융투자협회", "llm": false },
+      { "indicator_id": "turbulence", "name": "금융난류 지수", "axis": "위험선호", "source": "ETF 시세 계산", "llm": false },
+      { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "axis": null, "source": "네이버 뉴스 API", "llm": true },
+      { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "axis": null, "source": "한국은행", "llm": true }
     ],
     "indicators_note": "계산일까지 공개된 값만 씀. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
     "regimes": [
-      { "axis": "금리", "states": ["상승", "하락"] },
-      { "axis": "환율", "states": ["과열", "안정"] },
-      { "axis": "변동성", "states": ["고변동", "저변동"] },
-      { "axis": "투자심리", "states": ["공포", "탐욕"] }
+      { "axis": "금리", "states": ["상승", "중립", "하락"], "etf_attribute": "금리민감도" },
+      { "axis": "환헤지", "states": ["헤지", "중립", "노출"], "etf_attribute": "환민감도" },
+      { "axis": "위험선호", "states": ["선호", "중립", "회피"], "etf_attribute": "위험민감도" }
     ],
-    "regimes_status": "예시",
+    "regimes_note": "중립인 축은 ETF 선택에 영향을 주지 않음. 모든 축이 중립이면 전략을 만들 때 고른 ETF(minimax)를 기본으로 씀",
     "hysteresis": { "enter": null, "exit": null },
     "hysteresis_note": "잦은 전환은 진입·복귀 기준을 다르게 두는 것(히스테리시스)으로만 막음. 값은 백테스트 결과를 보고 고르지 않고 관례값·기본값으로 정하며, 견고성 표와 PBO를 함께 보여 줌(docs/backtest.md)",
     "on_switch": {
       "selection": "속성매칭",
       "score": "RegimeFit - λ·SwitchCost",
       "lambda": null,
-      "etf_attributes": null,
+      "etf_attributes": {
+        "method": "민감도회귀",
+        "returns": "선정기간주간수익률",
+        "regress_on": { "금리민감도": "국고채금리변화(미국채권슬롯은미국10년금리변화)", "환민감도": "원달러환율변화율", "위험민감도": "슬롯후보평균수익률" }
+      },
       "weighting": "HRP",
       "keep_user": ["etfs", "asset_classes", "cash"]
     },
-    "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(예: 환헤지 여부, 듀레이션)의 ETF를 점수로 고르고 HRP로 비중을 다시 계산함. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로",
+    "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(금리·환·위험 민감도)의 ETF를 점수로 고르고 HRP로 비중을 다시 계산함. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로",
     "events": null,
     "events_note": "큰 악재·호재 대응",
     "static_dynamic_priority": null,
     "static_dynamic_priority_note": "두 층의 우선순위. 국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 여부"
   },
   "fear_warning": {
-    "when": { "axis": "투자심리", "state": "공포" },
+    "when": { "axis": "위험선호", "state": "회피" },
     "action": "계획외매도경고",
     "triggers": ["전략중지", "직접비중축소"],
     "note": "사용자가 계획에서 벗어난 매도를 하려 할 때만 경고함. 시스템의 국면 전환 재구성에는 적용하지 않음"
