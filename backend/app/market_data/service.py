@@ -18,11 +18,9 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlmodel import Session, col, select
 
 from app.core.config import Settings
-from app.core.whitelist import load_whitelist
 from app.market_data.models import (
     CollectionStatus,
     DistributionSource,
-    EtfBackfill,
     EtfDailyPrice,
     EtfDistribution,
     PriceCollectionLog,
@@ -34,8 +32,6 @@ logger = logging.getLogger(__name__)
 KST = ZoneInfo("Asia/Seoul")
 # KRX ETF 일별매매정보가 2010년 이후만 있다. 분배금도 같은 기간만 저장한다.
 COLLECTION_START = date(2010, 1, 1)
-# 백테스트 비교 기준. 화이트리스트에 없어도 수집한다.
-BENCHMARK_CODE = "069500"
 
 
 # --- 출처 인터페이스 ---------------------------------------------------------
@@ -101,7 +97,7 @@ class CollectionReport:
     statuses: Counter[CollectionStatus] = field(default_factory=Counter)
     saved_rows: int = 0
     stopped_reason: str | None = None  # 시세 수집을 중간에 멈춘 이유
-    backfilled_codes: list[str] = field(default_factory=list)
+    refilled_days: int = 0  # ETF 전체를 다시 받아 빠진 행을 채운 영업일 수
     distribution_codes_updated: int = 0
     warnings: list[str] = field(default_factory=list)
 
@@ -130,38 +126,32 @@ def today_kst() -> date:
     return datetime.now(KST).date()
 
 
-def target_codes() -> set[str]:
-    return set(load_whitelist().codes) | {BENCHMARK_CODE}
-
-
 def _now() -> datetime:
     return datetime.now(UTC)
 
 
-def _dates_to_fetch(session: Session, today: date) -> list[date]:
-    """수집 이력에 없거나, 대기·실패로 남은 날짜."""
-    settled = set(
-        session.exec(
-            select(col(PriceCollectionLog.trade_date)).where(
-                col(PriceCollectionLog.status).in_(
-                    [CollectionStatus.BUSINESS_DAY, CollectionStatus.HOLIDAY]
-                )
-            )
-        ).all()
-    )
+def _dates_to_fetch(session: Session, today: date) -> tuple[list[date], set[date]]:
+    """받을 날짜와, 그중 ETF 전체를 다시 받아 채울 영업일.
+
+    받을 날짜: 수집 이력에 없거나, 대기·실패로 남았거나, ETF 전체를 저장하지 않은 영업일.
+    """
+    logs = session.exec(
+        select(
+            col(PriceCollectionLog.trade_date),
+            col(PriceCollectionLog.status),
+            col(PriceCollectionLog.all_etfs_saved),
+        )
+    ).all()
+    settled: set[date] = set()
+    refill: set[date] = set()
+    for trade_date, status, all_etfs_saved in logs:
+        if status == CollectionStatus.HOLIDAY:
+            settled.add(trade_date)
+        elif status == CollectionStatus.BUSINESS_DAY:
+            (settled if all_etfs_saved else refill).add(trade_date)
     days = (today - COLLECTION_START).days + 1
     all_dates = (COLLECTION_START + timedelta(days=i) for i in range(days))
-    return [d for d in all_dates if d not in settled]
-
-
-def _business_days(session: Session) -> list[date]:
-    return sorted(
-        session.exec(
-            select(col(PriceCollectionLog.trade_date)).where(
-                PriceCollectionLog.status == CollectionStatus.BUSINESS_DAY
-            )
-        ).all()
-    )
+    return [d for d in all_dates if d not in settled], refill
 
 
 def _classify(
@@ -177,19 +167,25 @@ def _classify(
     return CollectionStatus.HOLIDAY
 
 
-def _save_quotes(
-    session: Session, quotes: Iterable[DailyQuote], codes: set[str]
-) -> int:
-    """대상 ETF의 종가 있는 행만 저장한다. 이미 있는 행은 덮어쓰지 않는다."""
+def _save_quotes(session: Session, quotes: Iterable[DailyQuote]) -> tuple[int, int]:
+    """종가 있는 행을 ETF 전체 저장한다. 이미 있는 행은 덮어쓰지 않는다.
+
+    (그날 종가 있는 행 수, 새로 넣은 행 수)를 돌려준다.
+    """
     rows = [
         asdict(q)  # DailyQuote 필드는 etf_daily_price 컬럼과 같다
         for q in quotes
-        if q.code in codes and q.close is not None
+        if q.close is not None
     ]
     if not rows:
-        return 0
-    session.exec(insert(EtfDailyPrice).values(rows).on_conflict_do_nothing())
-    return len(rows)
+        return 0, 0
+    inserted = session.exec(
+        insert(EtfDailyPrice)
+        .values(rows)
+        .on_conflict_do_nothing()
+        .returning(col(EtfDailyPrice.code))
+    ).all()
+    return len(rows), len(inserted)
 
 
 def _write_log(
@@ -205,6 +201,7 @@ def _write_log(
         "saved_rows": saved_rows,
         "error": error,
         "checked_at": _now(),
+        "all_etfs_saved": status == CollectionStatus.BUSINESS_DAY,
     }
     stmt = insert(PriceCollectionLog).values(values)
     session.exec(
@@ -215,34 +212,44 @@ def _write_log(
     )
 
 
-def collect_new_dates(
+def collect_prices(
     session: Session,
     source: DailyPriceSource,
-    codes: set[str],
     today: date,
     settings: Settings,
-    budget: _CallBudget,
+    report: CollectionReport,
 ) -> None:
-    """① 수집 이력에 없거나 대기·실패로 남은 날짜의 시세를 받는다."""
-    report = budget.report
-    dates = _dates_to_fetch(session, today)
-    logger.info("시세 수집 대상 날짜: %d일", len(dates))
+    """수집 이력에 없거나 대기·실패로 남은 날짜, ETF 전체를 저장하지 않은 영업일의 시세를 받는다.
+
+    ETF 전체를 다시 받는 영업일(전체 저장 전에 수집한 날짜)은 빠진 행만 채우고, 받지 못해도
+    영업일 기록은 그대로 둔다. 과거 영업일 달력이 비지 않게 하려는 것이다.
+    """
+    budget = _CallBudget(settings.krx_max_calls_per_run, report)
+    dates, refill = _dates_to_fetch(session, today)
+    logger.info(
+        "시세 수집 대상 날짜: %d일 (ETF 전체 재수집 %d일)", len(dates), len(refill)
+    )
     for i, trade_date in enumerate(dates, 1):
         if i % 100 == 0:
             logger.info("시세 수집 %d/%d (%s)", i, len(dates), trade_date)
         if budget.exhausted():
             report.stopped_reason = f"실행당 KRX 호출 상한({budget.limit}회)에 도달했다"
             return
+        is_refill = trade_date in refill
         report.krx_calls += 1
         try:
             quotes = source.fetch_daily(trade_date)
         except SourceUnavailableError as e:
-            _write_log(session, trade_date, CollectionStatus.FAILED, error=str(e))
-            session.commit()
-            report.statuses[CollectionStatus.FAILED] += 1
+            if not is_refill:
+                _write_log(session, trade_date, CollectionStatus.FAILED, error=str(e))
+                session.commit()
+                report.statuses[CollectionStatus.FAILED] += 1
             report.stopped_reason = f"KRX 오류 응답으로 멈췄다: {e}"
             return
         except FetchError as e:
+            if is_refill:
+                report.warnings.append(f"{trade_date} 영업일을 다시 받지 못했다: {e}")
+                continue
             _write_log(session, trade_date, CollectionStatus.FAILED, error=str(e))
             session.commit()
             report.statuses[CollectionStatus.FAILED] += 1
@@ -250,89 +257,20 @@ def collect_new_dates(
             continue
 
         status = _classify(quotes, trade_date, today, settings.krx_pending_days)
+        if is_refill and status != CollectionStatus.BUSINESS_DAY:
+            report.warnings.append(
+                f"{trade_date}는 영업일로 기록돼 있는데 다시 받은 응답에 종가가 없다"
+            )
+            continue
         saved = None
         if status == CollectionStatus.BUSINESS_DAY:
-            saved = _save_quotes(session, quotes, codes)
-            report.saved_rows += saved
+            saved, inserted = _save_quotes(session, quotes)
+            report.saved_rows += inserted
+            if is_refill:
+                report.refilled_days += 1
         _write_log(session, trade_date, status, saved_rows=saved)
         session.commit()
         report.statuses[status] += 1
-
-
-def backfill_new_etfs(
-    session: Session,
-    source: DailyPriceSource,
-    new_codes: set[str],
-    business_days_before: list[date],
-    budget: _CallBudget,
-) -> None:
-    """② 이번 실행 전에 이미 영업일로 기록된 날짜를 다시 받아 신규 ETF의 과거 시세를 채운다.
-
-    이번 실행에서 새로 받은 날짜는 이미 신규 ETF를 포함하므로 다시 받지 않는다.
-    모든 날짜를 받아야 완료로 기록한다. 중간에 멈추면 다음 실행 때 처음부터 다시 받는다.
-    """
-    report = budget.report
-    if not new_codes:
-        return
-    complete = True
-    logger.info(
-        "신규 ETF %s 백필: %d영업일", sorted(new_codes), len(business_days_before)
-    )
-    for i, trade_date in enumerate(business_days_before, 1):
-        if i % 100 == 0:
-            logger.info("백필 %d/%d (%s)", i, len(business_days_before), trade_date)
-        if budget.exhausted():
-            report.stopped_reason = f"실행당 KRX 호출 상한({budget.limit}회)에 도달했다"
-            return
-        report.krx_calls += 1
-        try:
-            quotes = source.fetch_daily(trade_date)
-        except SourceUnavailableError as e:
-            report.stopped_reason = f"KRX 오류 응답으로 멈췄다: {e}"
-            return
-        except FetchError as e:
-            complete = False
-            report.warnings.append(f"백필 중 {trade_date} 시세를 받지 못했다: {e}")
-            continue
-        report.saved_rows += _save_quotes(session, quotes, new_codes)
-        session.commit()
-
-    if complete:
-        _mark_backfilled(session, new_codes, report)
-
-
-def _mark_backfilled(
-    session: Session, codes: set[str], report: CollectionReport
-) -> None:
-    now = _now()
-    for code in sorted(codes):
-        session.add(EtfBackfill(code=code, completed_at=now))
-    session.commit()
-    report.backfilled_codes = sorted(codes)
-
-
-def collect_prices(
-    session: Session,
-    source: DailyPriceSource,
-    codes: set[str],
-    today: date,
-    settings: Settings,
-    report: CollectionReport,
-) -> None:
-    budget = _CallBudget(settings.krx_max_calls_per_run, report)
-    done = set(session.exec(select(EtfBackfill.code)).all())
-    new_codes = codes - done
-    # 백필 대상 날짜는 ① 전에 정해 둔다. ①에서 새로 받은 날짜는 신규 ETF를 이미 포함한다.
-    business_days_before = _business_days(session) if new_codes else []
-    if new_codes and not business_days_before:
-        # 다시 받을 과거 영업일이 없다(초기 적재 등). 앞으로 받는 날짜는 모두 이 ETF를
-        # 포함하므로 바로 완료로 기록한다. ①이 중간에 멈춰도 다음 실행에 중복 호출이 없다.
-        _mark_backfilled(session, new_codes, report)
-        new_codes = set()
-
-    collect_new_dates(session, source, codes, today, settings, budget)
-    if report.stopped_reason is None:
-        backfill_new_etfs(session, source, new_codes, business_days_before, budget)
 
 
 # --- 분배금 --------------------------------------------------------------------
@@ -375,7 +313,7 @@ def refresh_distributions(
     overrides: Sequence[DistributionOverride],
     report: CollectionReport,
 ) -> None:
-    """③ ETF별 분배금 전체 이력을 다시 받아 바꾸고, 그 위에 보정 YAML을 적용한다."""
+    """② ETF별 분배금 전체 이력을 다시 받아 바꾸고, 그 위에 보정 YAML을 적용한다."""
     for code in sorted(codes):
         try:
             fetched = [
@@ -441,7 +379,7 @@ def _previous_close(session: Session, code: str, ex_date: date) -> int | None:
 def check_distributions(
     session: Session, codes: set[str], report: CollectionReport
 ) -> None:
-    """④ yfinance 분배금 중 의심 건을 경고한다.
+    """③ yfinance 분배금 중 의심 건을 경고한다.
 
     보정 YAML로 확인·수정한 항목(source=override)은 건너뛴다. 값이 맞는 의심 건은
     보정 YAML에 같은 금액과 근거를 적으면 경고가 꺼진다.
@@ -475,6 +413,11 @@ def check_distributions(
 # --- 전체 실행 -----------------------------------------------------------------
 
 
+def stored_codes(session: Session) -> set[str]:
+    """시세가 한 번이라도 저장된 ETF 전체. 상장폐지된 ETF도 들어 있다."""
+    return set(session.exec(select(EtfDailyPrice.code).distinct()).all())
+
+
 def run_collection(
     session: Session,
     price_source: DailyPriceSource,
@@ -482,14 +425,18 @@ def run_collection(
     settings: Settings,
     today: date | None = None,
 ) -> CollectionReport:
-    """① 날짜별 시세 → ② 신규 ETF 백필 → ③ 분배금 갱신 → ④ 분배금 점검을 차례로 한다.
+    """① 시세 → ② 분배금 갱신 → ③ 분배금 점검을 차례로 한다.
 
-    KRX가 멈춰도 ③·④는 진행한다(출처가 다르다).
+    분배금 대상은 DB에 시세가 있는 ETF 전체다. KRX가 멈춰도 ②·③은 진행한다(출처가 다르다).
+    보정 YAML에 시세가 없는 종목코드가 있으면 오류다.
     """
     report = CollectionReport()
-    codes = target_codes()
-    overrides = load_overrides(codes)
-    collect_prices(session, price_source, codes, today or today_kst(), settings, report)
+    collect_prices(session, price_source, today or today_kst(), settings, report)
+    codes = stored_codes(session)
+    overrides = load_overrides()
+    unknown = sorted({o.code for o in overrides} - codes)
+    if unknown:
+        raise ValueError(f"보정 YAML에 시세가 없는 종목코드가 있다: {unknown}")
     refresh_distributions(session, distribution_source, codes, overrides, report)
     check_distributions(session, codes, report)
     return report

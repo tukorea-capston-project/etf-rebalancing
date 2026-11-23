@@ -3,13 +3,15 @@
 from datetime import UTC, date, datetime
 from decimal import Decimal
 
+import pytest
+from sqlalchemy import delete, update
 from sqlmodel import Session, col, select
 
 from app.core.config import Settings
+from app.market_data import service
 from app.market_data.models import (
     CollectionStatus,
     DistributionSource,
-    EtfBackfill,
     EtfDailyPrice,
     EtfDistribution,
     PriceCollectionLog,
@@ -24,11 +26,13 @@ from app.market_data.service import (
     check_distributions,
     collect_prices,
     refresh_distributions,
+    run_collection,
 )
 
 # 2010-01-01 ~ 2010-01-10 열흘만 수집하도록 '오늘'을 고정한다.
 TODAY = date(2010, 1, 10)
 CODES = {"069500", "0184E0"}
+ALL_CODES = ["069500", "0184E0", "999999"]
 
 
 def d(day: int) -> date:
@@ -40,12 +44,12 @@ def quote(day: int, code: str, close: int | None = 100) -> DailyQuote:
 
 
 def business(day: int, close: int = 100) -> list[DailyQuote]:
-    """대상 ETF 두 개와 대상이 아닌 ETF 하나가 있는 영업일."""
-    return [quote(day, c, close) for c in ["069500", "0184E0", "999999"]]
+    """ETF 세 개가 있는 영업일."""
+    return [quote(day, c, close) for c in ALL_CODES]
 
 
 def holiday(day: int) -> list[DailyQuote]:
-    return [quote(day, c, None) for c in ["069500", "0184E0", "999999"]]
+    return [quote(day, c, None) for c in ALL_CODES]
 
 
 class FakeKrx:
@@ -66,8 +70,10 @@ class FakeKrx:
 class FakeYahoo:
     def __init__(self, responses: dict[str, list[Distribution] | Exception]) -> None:
         self.responses = responses
+        self.calls: list[str] = []
 
     def fetch_distributions(self, code: str) -> list[Distribution]:
+        self.calls.append(code)
         response = self.responses.get(code, [])
         if isinstance(response, Exception):
             raise response
@@ -85,11 +91,21 @@ def prices(session: Session) -> dict[tuple[date, str], int]:
 
 
 def run_prices(
-    session: Session, source: FakeKrx, settings: Settings, codes: set[str] = CODES
+    session: Session, source: FakeKrx, settings: Settings
 ) -> CollectionReport:
     report = CollectionReport()
-    collect_prices(session, source, codes, TODAY, settings, report)
+    collect_prices(session, source, TODAY, settings, report)
     return report
+
+
+def mark_partial(session: Session, *days: int) -> None:
+    """전체 저장으로 바꾸기 전에 일부 ETF만 저장했던 영업일로 만든다."""
+    session.exec(
+        update(PriceCollectionLog)
+        .where(col(PriceCollectionLog.trade_date).in_([d(day) for day in days]))
+        .values(all_etfs_saved=False)
+    )
+    session.commit()
 
 
 # --- 시세: 날짜별 수집 ----------------------------------------------------------
@@ -116,10 +132,16 @@ def test_영업일_휴장일_대기를_구분해_기록한다(
     assert result[d(2)] == CollectionStatus.HOLIDAY
     assert result[d(8)] == CollectionStatus.PENDING
     assert result[d(10)] == CollectionStatus.PENDING
-    # 대상 ETF의 종가 있는 행만 저장한다
-    assert prices(session) == {(d(4), "069500"): 100, (d(4), "0184E0"): 100}
-    assert report.saved_rows == 2
     assert report.stopped_reason is None
+
+
+def test_그날_응답의_ETF_전체를_저장한다(session: Session, settings: Settings) -> None:
+    report = run_prices(session, FakeKrx({d(4): business(4)}), settings)
+
+    assert prices(session) == {(d(4), c): 100 for c in ALL_CODES}
+    assert report.saved_rows == 3
+    log = session.get(PriceCollectionLog, d(4))
+    assert log is not None and log.all_etfs_saved and log.saved_rows == 3
 
 
 def test_다시_실행하면_대기와_실패_날짜만_호출한다(
@@ -162,8 +184,6 @@ def test_KRX_오류_응답이면_즉시_멈춘다(session: Session, settings: Se
     assert source.calls == [d(1), d(2), d(3)]
     assert statuses(session)[d(3)] == CollectionStatus.FAILED
     assert report.stopped_reason is not None and "401" in report.stopped_reason
-    # 다시 받을 과거 영업일이 없었으므로, 멈춰도 신규 ETF는 완료로 기록돼 다음 실행에 중복 호출이 없다
-    assert set(session.exec(select(EtfBackfill.code)).all()) == CODES
 
 
 def test_호출_상한에_도달하면_멈춘다(session: Session, settings: Settings) -> None:
@@ -178,58 +198,101 @@ def test_호출_상한에_도달하면_멈춘다(session: Session, settings: Set
     assert report.stopped_reason is not None and "상한" in report.stopped_reason
 
 
-# --- 시세: 신규 ETF 백필 --------------------------------------------------------
+# --- 시세: 전체 저장 전에 수집한 영업일 재수집 ---------------------------------
 
 
-def test_초기_적재는_백필_호출_없이_완료로_기록한다(
+def test_ETF_전체를_저장하지_않은_영업일은_다시_받아_빠진_행만_채운다(
     session: Session, settings: Settings
 ) -> None:
-    source = FakeKrx({d(4): business(4), d(5): business(5)})
+    # 전체 저장 전: 1/4·1/5에 069500만 저장돼 있었다
+    run_prices(session, FakeKrx({d(4): business(4), d(5): business(5)}), settings)
+    session.exec(delete(EtfDailyPrice).where(col(EtfDailyPrice.code) != "069500"))
+    session.commit()
+    mark_partial(session, 4, 5)
 
-    report = run_prices(session, source, settings)
-
-    assert len(source.calls) == 10  # 날짜별 수집만 하고 다시 호출하지 않는다
-    assert set(session.exec(select(EtfBackfill.code)).all()) == CODES
-    assert report.backfilled_codes == sorted(CODES)
-
-
-def test_신규_ETF는_이전_영업일만_다시_받아_그_ETF_행만_저장한다(
-    session: Session, settings: Settings
-) -> None:
-    # 069500만 대상일 때 1/4, 1/5 영업일을 수집해 두었다
-    run_prices(
-        session, FakeKrx({d(4): business(4), d(5): business(5)}), settings, {"069500"}
-    )
-    assert prices(session) == {(d(4), "069500"): 100, (d(5), "069500"): 100}
-
-    # 0184E0을 추가했다. 과거 영업일 응답의 069500 값은 달라도 덮어쓰지 않아야 한다.
+    # 다시 받은 응답의 069500 값은 달라도 덮어쓰지 않아야 한다
     source = FakeKrx({d(4): business(4, close=999), d(5): business(5, close=999)})
     report = run_prices(session, source, settings)
 
-    # 새로 받을 날짜는 없고, 이전 영업일 1/4·1/5만 다시 받는다
     assert source.calls == [d(4), d(5)]
     assert prices(session) == {
         (d(4), "069500"): 100,
         (d(5), "069500"): 100,
         (d(4), "0184E0"): 999,
         (d(5), "0184E0"): 999,
+        (d(4), "999999"): 999,
+        (d(5), "999999"): 999,
     }
-    assert report.backfilled_codes == ["0184E0"]
+    assert report.refilled_days == 2
+    assert report.saved_rows == 4
+    log = session.get(PriceCollectionLog, d(4))
+    assert log is not None and log.all_etfs_saved
 
 
-def test_백필_중_실패하면_완료로_기록하지_않는다(
+def test_재수집에_실패해도_영업일_기록은_그대로_둔다(
     session: Session, settings: Settings
 ) -> None:
-    run_prices(
-        session, FakeKrx({d(4): business(4), d(5): business(5)}), settings, {"069500"}
-    )
+    run_prices(session, FakeKrx({d(4): business(4), d(5): business(5)}), settings)
+    mark_partial(session, 4, 5)
 
-    source = FakeKrx({d(4): FetchError("timeout"), d(5): business(5)})
+    source = FakeKrx({d(4): FetchError("timeout"), d(5): holiday(5)})
     report = run_prices(session, source, settings)
 
-    assert set(session.exec(select(EtfBackfill.code)).all()) == {"069500"}
-    assert report.backfilled_codes == []
-    assert report.warnings
+    assert statuses(session)[d(4)] == CollectionStatus.BUSINESS_DAY
+    assert statuses(session)[d(5)] == CollectionStatus.BUSINESS_DAY
+    log = session.get(PriceCollectionLog, d(4))
+    assert log is not None and not log.all_etfs_saved  # 다음 실행 때 다시 받는다
+    assert report.refilled_days == 0
+    assert len(report.warnings) == 2
+
+
+def test_재수집_중_KRX_오류_응답이면_기록을_바꾸지_않고_멈춘다(
+    session: Session, settings: Settings
+) -> None:
+    run_prices(session, FakeKrx({d(4): business(4)}), settings)
+    mark_partial(session, 4)
+
+    source = FakeKrx({d(4): SourceUnavailableError("HTTP 401")})
+    report = run_prices(session, source, settings)
+
+    assert statuses(session)[d(4)] == CollectionStatus.BUSINESS_DAY
+    assert report.stopped_reason is not None
+
+
+# --- 전체 실행 -----------------------------------------------------------------
+
+
+def test_분배금은_DB에_시세가_있는_ETF_전체를_받는다(
+    session: Session, settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(service, "load_overrides", list)
+    # 상장폐지된 ETF(시세가 과거에만 있음)도 대상이다
+    session.add(EtfDailyPrice(trade_date=d(1), code="091190", name="폐지", close=1))
+    session.commit()
+    yahoo = FakeYahoo({})
+
+    run_collection(session, FakeKrx({d(4): business(4)}), yahoo, settings, TODAY)
+
+    assert sorted(yahoo.calls) == sorted([*ALL_CODES, "091190"])
+
+
+def test_보정_YAML에_시세가_없는_종목코드가_있으면_오류다(
+    session: Session, settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        service,
+        "load_overrides",
+        lambda: [
+            DistributionOverride.model_validate(
+                {"code": "123456", "ex_date": "2015-04-29", "amount": 1, "source": "x"}
+            )
+        ],
+    )
+
+    with pytest.raises(ValueError, match="123456"):
+        run_collection(
+            session, FakeKrx({d(4): business(4)}), FakeYahoo({}), settings, TODAY
+        )
 
 
 # --- 분배금 --------------------------------------------------------------------

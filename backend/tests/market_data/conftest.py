@@ -10,12 +10,16 @@ import app.market_data.models  # noqa: F401  테이블 등록
 from app.core.config import Settings, get_settings
 from app.core.db import get_engine
 
-TABLES = ["etf_daily_price", "price_collection_log", "etf_backfill", "etf_distribution"]
+TABLES = ["etf_daily_price", "price_collection_log", "etf_distribution"]
 
 
 @pytest.fixture(scope="session")
 def _tables() -> None:
-    SQLModel.metadata.create_all(get_engine())
+    # create_all은 있는 테이블을 고치지 않는다. 모델이 바뀌어도 테스트 DB가 따라가도록
+    # 테스트 시작 때 지우고 다시 만든다.
+    engine = get_engine()
+    SQLModel.metadata.drop_all(engine)
+    SQLModel.metadata.create_all(engine)
 
 
 @pytest.fixture
