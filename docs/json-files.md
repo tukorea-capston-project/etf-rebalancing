@@ -219,6 +219,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `classifier`, `zscore_window_weeks` | 국면 분류 방식과 Z-Score 기준 기간 |
 | `indicators` | 지표별 값, Z-Score(`z`), 기준 기간, 발표일, 출처. 범주 지표(금통위 판정)는 Z-Score 대신 점수(`score`)를 둡니다. LLM 지표는 근거가 된 LLM 출력 ID(`llm_output_ids`)도 둡니다 |
 | `regimes` | 축별 국면. 지금 상태, 이전 상태, 바뀌었는지, 점수, 진입·복귀 기준 |
+| `missing_indicators` | 받지 못해 빼고 판단한 지표([거시판단](macro.md) LLM PC가 꺼져 있을 때) |
 | `switched`, `switched_axes` | 이번 판단에서 국면이 바뀌었는지, 바뀐 축 |
 
 ### regime_switch.json — 국면 전환 기록
