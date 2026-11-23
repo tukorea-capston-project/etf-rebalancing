@@ -95,11 +95,11 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 |---|---|
 | `schedule` | 국면 판단 시점 |
 | `classifier` | 국면 분류 방식 |
-| `zscore_window_days` | Z-Score 기준 기간 |
+| `zscore_window_weeks`, `change_windows_weeks`, `z_method`, `z_clip` | Z-Score 기준 기간, 변화를 재는 기간, Z-Score 계산 방식, Z-Score를 자르는 값 |
 | `indicators` | 국면 지표 목록. 지표마다 축(`axis`), 쓰는 값(`transform`), 방향(`direction`), 출처, LLM 지표 여부(`llm`) |
 | `axis_score` | 축 안의 지표를 합치는 방식([거시판단](macro.md) 축 점수) |
 | `regimes` | 국면 축과 상태, 축이 바꾸는 ETF 속성 |
-| `hysteresis` | 진입·복귀 기준 |
+| `hysteresis`, `hedge_cost_threshold`, `stock_bond_corr_threshold` | 축 점수, 환헤지 비용, 주식·채권 상관계수의 진입·복귀 기준([거시판단](macro.md) 기준값) |
 | `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`)와 구성(`lambda`, `rank_scale`, `switch_cost`), 상관 제약(`max_corr_rule`), 위험선호 축을 적용하지 않는 슬롯(`risk_axis_excluded_slots`), ETF 속성과 재는 방법(`etf_attributes`), 비중 재계산, 유지할 사용자 값(`keep_user`)([거시판단](macro.md) 속성 매칭 점수) |
 | `events` | 큰 악재·호재 대응 |
 | `static_dynamic_priority` | 국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 |
@@ -216,7 +216,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 |---|---|
 | `as_of` | 기준일. 날짜(`period`)가 이 날 이하인 지표만 씁니다 |
 | `judged_on` | 판단한 날(기준일 다음 영업일 아침). 발표일(`released_at`)이 이 날 판단 전인 지표만 씁니다 |
-| `classifier`, `zscore_window_days` | 국면 분류 방식과 Z-Score 기준 기간 |
+| `classifier`, `zscore_window_weeks` | 국면 분류 방식과 Z-Score 기준 기간 |
 | `indicators` | 지표별 값, Z-Score(`z`), 기준 기간, 발표일, 출처. 범주 지표(금통위 판정)는 Z-Score 대신 점수(`score`)를 둡니다. LLM 지표는 근거가 된 LLM 출력 ID(`llm_output_ids`)도 둡니다 |
 | `regimes` | 축별 국면. 지금 상태, 이전 상태, 바뀌었는지, 점수, 진입·복귀 기준 |
 | `switched`, `switched_axes` | 이번 판단에서 국면이 바뀌었는지, 바뀐 축 |

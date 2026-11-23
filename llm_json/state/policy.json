@@ -91,7 +91,10 @@
     "schedule": "매주마지막영업일값_다음영업일아침판단",
     "classifier": "Z점수점수제",
     "classifier_extension": "통계적점프모형",
-    "zscore_window_days": null,
+    "zscore_window_weeks": 260,
+    "change_windows_weeks": [4, 13, 52],
+    "z_method": "중앙값_MAD",
+    "z_clip": 3,
     "indicators": [
       { "indicator_id": "ktb_yield_change", "name": "국고채 10년 금리 변화", "axis": "금리", "transform": "변화", "direction": 1, "source": "ECOS", "llm": false },
       { "indicator_id": "term_spread", "name": "장단기 금리차", "axis": "금리", "transform": "수준", "direction": -1, "source": "ECOS", "llm": false },
@@ -120,7 +123,9 @@
       { "axis": "위험선호", "states": ["선호", "중립", "회피"], "etf_attribute": "위험민감도" }
     ],
     "regimes_note": "중립인 축은 ETF 선택에 영향을 주지 않음. 모든 축이 중립이면 전략을 만들 때 고른 ETF(minimax)를 기본으로 씀",
-    "hysteresis": { "enter": null, "exit": null },
+    "hysteresis": { "enter": 1.0, "exit": 0.0 },
+    "hedge_cost_threshold": { "enter": 0.01, "exit": 0.0 },
+    "stock_bond_corr_threshold": { "enter": 0.12, "exit": 0.0, "window_days": 252 },
     "hysteresis_note": "잦은 전환은 진입·복귀 기준을 다르게 두는 것(히스테리시스)으로만 막음. 값은 백테스트 결과를 보고 고르지 않고 관례값·기본값으로 정하며, 견고성 표와 PBO를 함께 보여 줌(docs/backtest.md)",
     "on_switch": {
       "selection": "속성매칭",
