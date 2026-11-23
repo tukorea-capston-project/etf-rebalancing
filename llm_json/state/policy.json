@@ -43,8 +43,8 @@
     "compare_weightings": ["역변동성", "동일비중"],
     "scope": "자산군비중있으면자산군안",
     "scope_note": "사용자가 자산군 비중을 말하지 않으면 HRP가 자산군 배분까지 정함. 현금은 HRP에 넣지 않음",
-    "selection_days": null,
-    "min_history_days": null,
+    "selection_weeks": 104,
+    "returns": "주간",
     "default_groups": [
       { "asset_class": "주식", "region": "국내", "sector": "시장대표" },
       { "asset_class": "주식", "region": "미국", "sector": "시장대표" },
@@ -61,7 +61,7 @@
     },
     "postprocess": { "below_min": "최소비중으로올리고나머지비례축소", "rounding": "최대잔여법" },
     "regenerate": ["생성", "국면전환"],
-    "note": "HRP는 포트폴리오를 만들 때와 국면이 바뀔 때만 계산함. selection_days(선정 기간 길이), min_history_days, minimax 탐색 방법은 미정"
+    "note": "HRP는 포트폴리오를 만들 때와 국면이 바뀔 때만 계산함. 상장 후 경과 기간은 선정 기간과 같음(docs/universe.md)"
   },
   "checks": [
     { "check_id": "out_of_scope", "level": "차단", "action": "담지않고이유알림" },
