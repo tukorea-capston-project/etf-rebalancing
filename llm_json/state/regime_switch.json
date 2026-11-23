@@ -28,9 +28,9 @@
       "group": { "asset_class": "채권", "region": "국내", "sector": "국채" },
       "from": "114260",
       "to": "148070",
-      "regime_fit": null,
-      "switch_cost": null,
-      "lambda": null,
+      "regime_fit": 1,
+      "switch_cost": 0.0023,
+      "lambda": 100,
       "reason": "금리 하락 국면에서 금리 민감도(듀레이션)가 큰 ETF가 속성 매칭 점수가 높음"
     },
     {
@@ -44,7 +44,7 @@
     { "etf_code": "360750", "reason": "사용자 지정 ETF" },
     { "etf_code": "395270", "reason": "사용자 지정 ETF" }
   ],
-  "selections_note": "묶음마다 속성 매칭 점수(RegimeFit − λ·SwitchCost)로 고름. 사용자가 지정한 ETF·자산군 비중·현금 비중은 바꾸지 않음",
+  "selections_note": "묶음마다 속성 매칭 점수(RegimeFit − λ·SwitchCost)로 고름. 예시의 국내 국채 묶음은 후보가 국고채3년·10년 둘이라 순위가 −1·+1이고, 금리 하락 국면에서 10년의 RegimeFit이 1, 교체 비용 0.23%(세금 없음)를 빼면 0.77로 3년(−1)보다 높음. 사용자가 지정한 ETF·자산군 비중·현금 비중은 바꾸지 않음",
   "weights": {
     "from": { "360750": 0.22, "069500": 0.17, "395270": 0.11, "114260": 0.5 },
     "to": { "360750": 0.24, "069500": 0.18, "395270": 0.12, "148070": 0.46 },

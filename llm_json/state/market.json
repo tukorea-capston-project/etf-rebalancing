@@ -17,7 +17,7 @@
     },
     "term_spread": { "value": 0.004, "z": 0.2, "period": "2026-12-04", "released_at": "2026-12-04", "source": "ECOS" },
     "us_10y": { "value": 0.0412, "z": -0.9, "period": "2026-12-04", "released_at": "2026-12-05", "source": "yfinance(^TNX)" },
-    "stock_bond_corr": { "value": -0.2, "z": -0.4, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ETF 시세 계산" },
+    "stock_bond_corr": { "value": -0.2, "z": -0.4, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ECOS(KOSPI, 국고채 10년) 계산" },
     "hedge_cost": { "value": 0.004, "z": null, "period": "2026-12-04", "released_at": "2026-12-05", "source": "ECOS(CD 91일)+yfinance(^IRX)" },
     "vkospi": { "value": 17.8, "z": -0.6, "period": "2026-12-04", "released_at": "2026-12-07", "source": "KRX Open API" },
     "margin_loan": {
@@ -34,7 +34,7 @@
       "released_at": "2026-12-04",
       "source": "금융투자협회"
     },
-    "turbulence": { "value": 9.8, "z": -0.3, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ETF 시세 계산" },
+    "turbulence": { "value": 9.8, "z": -0.3, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ECOS+yfinance 주간수익률 계산" },
     "news_mood": {
       "value": 0.6,
       "z": 1.1,

@@ -93,15 +93,15 @@
     "classifier_extension": "통계적점프모형",
     "zscore_window_days": null,
     "indicators": [
-      { "indicator_id": "ktb_yield_change", "name": "국고채 금리 변화율", "axis": "금리", "transform": "변화", "direction": 1, "source": "ECOS", "llm": false },
+      { "indicator_id": "ktb_yield_change", "name": "국고채 10년 금리 변화", "axis": "금리", "transform": "변화", "direction": 1, "source": "ECOS", "llm": false },
       { "indicator_id": "term_spread", "name": "장단기 금리차", "axis": "금리", "transform": "수준", "direction": -1, "source": "ECOS", "llm": false },
       { "indicator_id": "us_10y", "name": "미국 10년 국채 금리", "axis": "금리", "transform": "변화", "direction": 1, "source": "yfinance(^TNX)", "llm": false },
-      { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "transform": null, "direction": null, "source": "ETF 시세 계산", "llm": false },
+      { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "transform": "조건_기준초과면하락을중립으로", "direction": null, "source": "ECOS(KOSPI, 국고채 10년) 계산", "llm": false },
       { "indicator_id": "hedge_cost", "name": "환헤지 비용(한미 단기금리차)", "axis": "환헤지", "transform": "절대수준", "direction": 1, "source": "ECOS(CD 91일)+yfinance(^IRX)", "llm": false },
       { "indicator_id": "vkospi", "name": "VKOSPI", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "KRX Open API", "llm": false },
       { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "금융투자협회", "llm": false },
       { "indicator_id": "deposits", "name": "투자자예탁금", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "금융투자협회", "llm": false },
-      { "indicator_id": "turbulence", "name": "금융난류 지수", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "ETF 시세 계산", "llm": false },
+      { "indicator_id": "turbulence", "name": "금융난류 지수", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "ECOS(KOSPI, 국고채 10년, 원달러)+yfinance(^GSPC, ^TNX) 주간수익률 계산", "llm": false },
       { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "axis": "위험선호", "transform": "주간평균", "direction": 1, "source": "네이버 뉴스 API", "llm": true },
       { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "axis": "금리", "transform": "범주_긴축1_완화-1_전환없음0", "direction": 1, "source": "한국은행", "llm": true }
     ],
@@ -125,11 +125,15 @@
     "on_switch": {
       "selection": "속성매칭",
       "score": "RegimeFit - λ·SwitchCost",
-      "lambda": null,
+      "lambda": 100,
+      "rank_scale": "슬롯안순위_-1~1",
+      "switch_cost": "수수료+슬리피지+매매차익세금(지금ETF는0)",
+      "max_corr_rule": "지금조합의최대상관계수를넘지않음",
+      "risk_axis_excluded_slots": ["채권", "현금성"],
       "etf_attributes": {
         "method": "민감도회귀",
         "returns": "선정기간주간수익률",
-        "regress_on": { "금리민감도": "국고채금리변화(미국채권슬롯은미국10년금리변화)", "환민감도": "원달러환율변화율", "위험민감도": "슬롯후보평균수익률" }
+        "regress_on": { "금리민감도": "국고채10년금리변화(미국채권슬롯은미국10년금리변화)", "환민감도": "원달러환율변화율", "위험민감도": "슬롯후보평균수익률" }
       },
       "weighting": "HRP",
       "keep_user": ["etfs", "asset_classes", "cash"]

@@ -100,7 +100,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `axis_score` | 축 안의 지표를 합치는 방식([거시판단](macro.md) 축 점수) |
 | `regimes` | 국면 축과 상태, 축이 바꾸는 ETF 속성 |
 | `hysteresis` | 진입·복귀 기준 |
-| `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`), ETF 속성과 재는 방법(`etf_attributes`), 비중 재계산, 유지할 사용자 값(`keep_user`) |
+| `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`)와 구성(`lambda`, `rank_scale`, `switch_cost`), 상관 제약(`max_corr_rule`), 위험선호 축을 적용하지 않는 슬롯(`risk_axis_excluded_slots`), ETF 속성과 재는 방법(`etf_attributes`), 비중 재계산, 유지할 사용자 값(`keep_user`)([거시판단](macro.md) 속성 매칭 점수) |
 | `events` | 큰 악재·호재 대응 |
 | `static_dynamic_priority` | 국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 |
 
