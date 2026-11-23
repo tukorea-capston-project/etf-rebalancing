@@ -10,8 +10,19 @@
   "market_state_id": "ms_20261204",
   "regime_from": { "금리": "중립", "환헤지": "중립", "위험선호": "중립" },
   "regime_to": { "금리": "하락", "환헤지": "중립", "위험선호": "중립" },
-  "crossed": [{ "axis": "금리", "indicator": "ktb_yield_change", "z": -1.3, "enter": null }],
-  "crossed_note": "기준을 넘은 지표. 알림의 \"어떤 지표가 기준을 넘었는지\"에 씀",
+  "crossed": [
+    {
+      "axis": "금리",
+      "score": -1.2,
+      "enter": null,
+      "contributions": [
+        { "indicator": "ktb_yield_change", "value": -1.3 },
+        { "indicator": "bok_minutes", "value": -1 },
+        { "indicator": "us_10y", "value": -0.9 }
+      ]
+    }
+  ],
+  "crossed_note": "기준을 넘은 축 점수와 기여가 큰 지표 순서(방향을 곱한 Z-Score, 금통위는 점수). 알림에 씀",
   "selections": [
     {
       "group": { "asset_class": "채권", "region": "국내", "sector": "국채" },
@@ -39,7 +50,7 @@
     "to": { "360750": 0.24, "069500": 0.18, "395270": 0.12, "148070": 0.46 },
     "method": "HRP"
   },
-  "notice": "금리 하락 국면으로 바뀌었어요(국고채 금리 변화율이 기준을 넘음). 국내 채권을 국고채 3년에서 국고채 10년으로 바꾸고, 비중을 다시 계산했어요.",
+  "notice": "금리 하락 국면으로 바뀌었어요(국고채 금리 하락이 가장 크게 기여). 국내 채권을 국고채 3년에서 국고채 10년으로 바꾸고, 비중을 다시 계산했어요.",
   "notice_note": "알림 문장은 LLM이 쓰지 않음(LLM 역할은 문장 해석, 뉴스 분위기 점수, 금통위 판정뿐)",
   "applied_at": "2026-12-07T14:30:00+09:00"
 }

@@ -18,7 +18,7 @@
     "term_spread": { "value": 0.004, "z": 0.2, "period": "2026-12-04", "released_at": "2026-12-04", "source": "ECOS" },
     "us_10y": { "value": 0.0412, "z": -0.9, "period": "2026-12-04", "released_at": "2026-12-05", "source": "yfinance(^TNX)" },
     "stock_bond_corr": { "value": -0.2, "z": -0.4, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ETF 시세 계산" },
-    "hedge_cost": { "value": 0.011, "z": 0.4, "period": "2026-12-04", "released_at": "2026-12-05", "source": "ECOS(CD 91일)+yfinance(^IRX)" },
+    "hedge_cost": { "value": 0.004, "z": null, "period": "2026-12-04", "released_at": "2026-12-05", "source": "ECOS(CD 91일)+yfinance(^IRX)" },
     "vkospi": { "value": 17.8, "z": -0.6, "period": "2026-12-04", "released_at": "2026-12-07", "source": "KRX Open API" },
     "margin_loan": {
       "value": null,
@@ -46,6 +46,8 @@
     },
     "bok_minutes": {
       "value": "안바뀜",
+      "stance": "완화",
+      "score": -1,
       "z": null,
       "period": "2026-11-27",
       "released_at": "2026-12-01",
@@ -53,10 +55,10 @@
       "llm_output_ids": ["llm_bok_20261127"]
     }
   },
-  "indicators_note": "값은 설명용 예시. 지표별로 Z-Score를 계산해 축마다 점수를 냄",
+  "indicators_note": "값은 설명용 예시. 지표별 Z-Score에 방향을 곱해 축마다 합침(policy.macro.axis_score). bok_minutes는 범주라 마지막 정책 방향(stance)을 점수로 씀",
   "regimes": {
-    "금리": { "state": "하락", "prev_state": "중립", "changed": true, "score": -1.3, "enter": null, "exit": null },
-    "환헤지": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.4, "enter": null, "exit": null },
+    "금리": { "state": "하락", "prev_state": "중립", "changed": true, "score": -1.2, "enter": null, "exit": null },
+    "환헤지": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.004, "enter": null, "exit": null },
     "위험선호": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.5, "enter": null, "exit": null }
   },
   "regimes_note": "축과 상태는 policy.macro.regimes. enter·exit는 히스테리시스 기준. 위험선호가 회피면 계획 외 매도 경고(policy.fear_warning)를 띄움",

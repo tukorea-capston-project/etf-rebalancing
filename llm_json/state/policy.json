@@ -93,19 +93,27 @@
     "classifier_extension": "통계적점프모형",
     "zscore_window_days": null,
     "indicators": [
-      { "indicator_id": "ktb_yield_change", "name": "국고채 금리 변화율", "axis": "금리", "source": "ECOS", "llm": false },
-      { "indicator_id": "term_spread", "name": "장단기 금리차", "axis": "금리", "source": "ECOS", "llm": false },
-      { "indicator_id": "us_10y", "name": "미국 10년 국채 금리", "axis": "금리", "source": "yfinance(^TNX)", "llm": false },
-      { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "source": "ETF 시세 계산", "llm": false },
-      { "indicator_id": "hedge_cost", "name": "환헤지 비용(한미 단기금리차)", "axis": "환헤지", "source": "ECOS(CD 91일)+yfinance(^IRX)", "llm": false },
-      { "indicator_id": "vkospi", "name": "VKOSPI", "axis": "위험선호", "source": "KRX Open API", "llm": false },
-      { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "source": "금융투자협회", "llm": false },
-      { "indicator_id": "deposits", "name": "투자자예탁금", "axis": "위험선호", "source": "금융투자협회", "llm": false },
-      { "indicator_id": "turbulence", "name": "금융난류 지수", "axis": "위험선호", "source": "ETF 시세 계산", "llm": false },
-      { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "axis": null, "source": "네이버 뉴스 API", "llm": true },
-      { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "axis": null, "source": "한국은행", "llm": true }
+      { "indicator_id": "ktb_yield_change", "name": "국고채 금리 변화율", "axis": "금리", "transform": "변화", "direction": 1, "source": "ECOS", "llm": false },
+      { "indicator_id": "term_spread", "name": "장단기 금리차", "axis": "금리", "transform": "수준", "direction": -1, "source": "ECOS", "llm": false },
+      { "indicator_id": "us_10y", "name": "미국 10년 국채 금리", "axis": "금리", "transform": "변화", "direction": 1, "source": "yfinance(^TNX)", "llm": false },
+      { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "transform": null, "direction": null, "source": "ETF 시세 계산", "llm": false },
+      { "indicator_id": "hedge_cost", "name": "환헤지 비용(한미 단기금리차)", "axis": "환헤지", "transform": "절대수준", "direction": 1, "source": "ECOS(CD 91일)+yfinance(^IRX)", "llm": false },
+      { "indicator_id": "vkospi", "name": "VKOSPI", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "KRX Open API", "llm": false },
+      { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "금융투자협회", "llm": false },
+      { "indicator_id": "deposits", "name": "투자자예탁금", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "금융투자협회", "llm": false },
+      { "indicator_id": "turbulence", "name": "금융난류 지수", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "ETF 시세 계산", "llm": false },
+      { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "axis": "위험선호", "transform": "주간평균", "direction": 1, "source": "네이버 뉴스 API", "llm": true },
+      { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "axis": "금리", "transform": "범주_긴축1_완화-1_전환없음0", "direction": 1, "source": "한국은행", "llm": true }
     ],
     "indicators_note": "계산일까지 공개된 값만 씀. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
+    "axis_score": {
+      "combine": "등가중평균",
+      "restandardize": true,
+      "missing": "있는지표만평균_없으면국면유지",
+      "exclude": ["stock_bond_corr"],
+      "absolute_axes": ["환헤지"]
+    },
+    "axis_score_note": "지표 Z-Score에 방향을 곱해 축 안에서 같은 가중치로 평균하고, 같은 기준 기간으로 다시 Z-Score로 바꿈. 점수 +는 금리 상승, 환헤지 노출, 위험선호 선호. 환헤지 축은 Z-Score 없이 환헤지 비용의 절대 수준(%p)에 기준을 댐",
     "regimes": [
       { "axis": "금리", "states": ["상승", "중립", "하락"], "etf_attribute": "금리민감도" },
       { "axis": "환헤지", "states": ["헤지", "중립", "노출"], "etf_attribute": "환민감도" },
