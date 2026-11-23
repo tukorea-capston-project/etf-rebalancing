@@ -202,7 +202,8 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `backtest_id`, `portfolio_id`, `portfolio_revision` | 어느 포트폴리오의 몇 번째 버전을 돌렸는지 |
 | `settings` | 기간, 투자금·적립금, 리밸런싱 조건, 비용·무위험수익률, 체결 가정, 분배금 재투자, 세금 |
 | `construction` | 백테스트 시작일 기준으로 다시 고르고 계산한 생성 결과(`draft.construction`과 같은 형식) |
-| `excluded_etfs` | 시작일에 데이터가 없어 뺀 사용자 ETF |
+| `settings.requested_start`, `settings.start_adjusted_reason` | 사용자가 요청한 시작일과, 시작일을 늦췄다면 그 이유([백테스트](backtest.md#슬롯에-후보가-없을-때)) |
+| `substitutions` | 시작일에 쓸 수 없던 지정 ETF와 대신 쓴 대용 ETF, 교체일([백테스트](backtest.md#지정-etf를-아직-쓸-수-없을-때)) |
 | `macro_active_from` | 거시판단이 작동하기 시작한 날 |
 | `runs` | 실행 결과 목록. `mode`(실행 종류), 화면 표시(`display`: 기본 / 토글), 성과 지표, 기간 중 국면 전환 기록(`switch_ids`) |
 | `leakage_test` | LLM 지표의 미래 정보 시험 결과 |
