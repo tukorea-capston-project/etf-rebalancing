@@ -15,7 +15,7 @@
   - Node.js 26을 씁니다. `frontend/package.json`의 `engines`와 `frontend/.npmrc`의 `engine-strict=true`로 버전을 고정합니다.
 - 프론트엔드 품질 도구: Vitest(테스트), Oxlint(린트), Prettier(포맷)
 - 증권사 API: 한국투자증권 KIS Open API (모의투자·실전투자)
-- 외부 데이터: KRX Open API(ETF 일별 시세), yfinance(분배금). 국면 지표의 출처는 `docs/macro.md`를 봅니다.
+- 외부 데이터: KRX Open API(ETF 일별 시세), yfinance(분배금), 한국은행 ECOS(CD금리, 백테스트 무위험수익률). 국면 지표의 출처는 `docs/macro.md`를 봅니다.
 - LLM: Ollama로 실행하는 로컬 Qwen 계열 모델 (팀원 최저 사양 16GB 기준, 7~8B급). AWS에서는 돌리지 않습니다.
   <!-- TODO: 정확한 모델 태그(예: ollama pull <모델명>) 확정 후 기입 -->
 - 데이터 저장소: PostgreSQL 18. 서비스 DB는 AWS EC2에 두고, 테스트 DB는 각자 로컬에서 띄웁니다. 코드에서는 SQLModel로 접근합니다.
@@ -144,7 +144,7 @@ EC2 서버 (저장소 루트에서. 처음 설정과 현재 단계는 `docs/infr
 - 투자 대상 선정 조건, 슬롯 분류 규칙(보정표 포함), 분배금 보정은 `backend/config/`의 YAML로만 관리합니다. DB에만 두거나 DB를 직접 고치지 않습니다.
 - KIS 자격 증명 원문은 API 응답, 로그, 예외 메시지, 알림에 남기지 않습니다.
 - 서버 실전 스위치 `REAL_TRADING_ENABLED`는 기본 `false`이고 EC2에서만 켭니다. 켜려면 마스터키가 KMS여야 하며, 아니면 서버가 시작되지 않습니다.
-- 자동 테스트는 외부 API(KIS, KRX, yfinance)를 실제로 호출하지 않습니다.
+- 자동 테스트는 외부 API(KIS, KRX, yfinance, ECOS)를 실제로 호출하지 않습니다.
 
 # 협업 규칙
 
