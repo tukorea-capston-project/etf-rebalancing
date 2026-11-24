@@ -97,7 +97,8 @@ flowchart TB
         backtest["backtest<br/>시뮬레이션 · 성과 지표"]
         trading["trading<br/>KIS 주문 · 자격 증명<br/>모드 · 안전장치"]
         market["market_data<br/>시세 · 분배금 · 영업일"]
-        macro["거시판단 · news"]
+        macro["macro<br/>국면 판단 · 전환<br/>LLM 지표 채점"]
+        news["news<br/>뉴스 수집"]
         portfolio["portfolio<br/>계산일 판정 · 리밸런싱<br/>주문 수량"]
         strategy["strategy<br/>자연어 → 전략<br/>스키마 · 버전"]
     end
@@ -122,6 +123,7 @@ flowchart TB
     worker -->|"주문"| trading
     worker -->|"대기열 실행"| backtest
     worker -.-> macro
+    worker -.->|"수집"| news
 
     backtest --> portfolio
     backtest --> market
