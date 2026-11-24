@@ -80,8 +80,8 @@
       "weight_step": 0.01
     },
     "postprocess": { "below_min": "최소비중으로올리고나머지비례축소", "rounding": "최대잔여법" },
-    "regenerate": ["생성", "국면전환"],
-    "note": "HRP는 포트폴리오를 만들 때와 국면이 바뀔 때만 계산함. 상장 후 경과 기간은 선정 기간과 같음(docs/universe.md)"
+    "regenerate": ["생성"],
+    "note": "HRP는 포트폴리오를 만들 때만 계산함. 국면 전환 때는 새 ETF가 이전 ETF의 비중을 물려받음(docs/macro.md). 상장 후 경과 기간은 선정 기간과 같음(docs/universe.md)"
   },
   "checks": [
     { "check_id": "out_of_scope", "level": "차단", "action": "담지않고이유알림" },
@@ -155,17 +155,17 @@
       "lambda": 100,
       "rank_scale": "슬롯안순위_-1~1",
       "switch_cost": "수수료+슬리피지+매매차익세금(지금ETF는0)",
-      "max_corr_rule": "지금조합의최대상관계수를넘지않음",
-      "risk_axis_excluded_slots": ["채권", "현금성"],
+      "max_corr_rule": "지금조합의최대상관계수를넘지않음_만족조합없으면초과최소조합중점수최대",
+      "axis_slots": { "금리": ["국내채권", "미국채권"], "환헤지": ["미국채권", "해외주식", "원자재", "리츠"], "위험선호": ["주식"] },
       "etf_attributes": {
         "method": "민감도회귀",
         "returns": "선정기간주간수익률",
         "regress_on": { "금리민감도": "국고채10년금리변화(미국채권슬롯은미국10년금리변화)", "환민감도": "원달러환율변화율", "위험민감도": "슬롯후보평균수익률" }
       },
-      "weighting": "HRP",
+      "weighting": "이전ETF비중물려받기",
       "keep_user": ["etfs", "asset_classes", "cash"]
     },
-    "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(금리·환·위험 민감도)의 ETF를 점수로 고르고 HRP로 비중을 다시 계산함. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로",
+    "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(금리·환·위험 민감도)의 ETF를 점수로 고름. 축은 axis_slots의 슬롯에만 적용함. 새 ETF는 이전 ETF의 비중을 물려받고 HRP는 다시 계산하지 않음. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로",
     "events": { "check": "매영업일아침", "enter": 2.0, "exit": "정기판단에서만", "axes": ["금리", "위험선호"] },
     "events_note": "매 영업일 전 영업일 기준으로 축 점수를 계산해 ±2.0을 넘으면 주간 판단을 기다리지 않고 전환함. 중립 복귀는 정기 판단에서만. 환헤지 축은 제외",
     "static_dynamic_priority": null,

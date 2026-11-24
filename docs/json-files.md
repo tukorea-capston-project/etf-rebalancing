@@ -100,7 +100,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `axis_score` | 축 안의 지표를 합치는 방식([거시판단](macro.md) 축 점수) |
 | `regimes` | 국면 축과 상태, 축이 바꾸는 ETF 속성 |
 | `hysteresis`, `hedge_cost_threshold`, `stock_bond_corr_threshold` | 축 점수, 환헤지 비용, 주식·채권 상관계수의 진입·복귀 기준([거시판단](macro.md) 기준값) |
-| `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`)와 구성(`lambda`, `rank_scale`, `switch_cost`), 상관 제약(`max_corr_rule`), 위험선호 축을 적용하지 않는 슬롯(`risk_axis_excluded_slots`), ETF 속성과 재는 방법(`etf_attributes`), 비중 재계산, 유지할 사용자 값(`keep_user`)([거시판단](macro.md) 속성 매칭 점수) |
+| `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`)와 구성(`lambda`, `rank_scale`, `switch_cost`), 상관 제약(`max_corr_rule`), 축마다 적용하는 슬롯(`axis_slots`), ETF 속성과 재는 방법(`etf_attributes`), 비중 처리(`weighting`), 유지할 사용자 값(`keep_user`)([거시판단](macro.md) 속성 매칭 점수) |
 | `events` | 이벤트 판단: 확인 시점, 진입 기준, 복귀 방식, 대상 축([거시판단](macro.md) 국면 판단) |
 | `static_dynamic_priority` | 국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 |
 
@@ -237,7 +237,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `crossed` | 기준을 넘은 축 점수와 기여가 큰 지표 순서. 알림에 씁니다 |
 | `selections` | 묶음별 ETF 선택. 이전 ETF, 새 ETF, 속성 매칭 점수(`regime_fit`, `switch_cost`, `lambda`), 이유 |
 | `kept` | 사용자가 지정해 바꾸지 않은 ETF |
-| `weights` | 이전 목표 비중과 HRP로 다시 계산한 새 목표 비중 |
+| `weights` | 이전 목표 비중과 새 목표 비중(새 ETF가 이전 ETF의 비중을 물려받음) |
 | `notice` | 사용자에게 보낼 알림 문장 |
 | `applied_at` | 주문으로 반영한 시각 |
 
