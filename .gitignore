@@ -1,5 +1,8 @@
 # 비밀값·개인 설정
 .env
+
+# 이용 조건을 확인하지 않은 외부 데이터 원본(적재 결과만 DB에 둠, docs/market-data.md)
+backend/data/
 CLAUDE.local.md
 .claude/settings.local.json
 

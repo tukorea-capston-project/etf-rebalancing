@@ -3,7 +3,6 @@ paths:
   - "backend/app/market_data/**"
   - "backend/tests/market_data/**"
   - "backend/config/distribution_overrides.yaml"
-  - "backend/data/kofia/**"
 ---
 
 # 시세·분배금·국면 지표 수집 규칙
