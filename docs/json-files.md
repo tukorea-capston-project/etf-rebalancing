@@ -102,7 +102,6 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `hysteresis`, `hedge_cost_threshold`, `stock_bond_corr_threshold` | 축 점수, 환헤지 비용, 주식·채권 상관계수의 진입·복귀 기준([거시판단](macro.md) 기준값) |
 | `on_switch` | 국면이 바뀌었을 때의 처리. ETF 선택 점수(`RegimeFit − λ·SwitchCost`)와 구성(`lambda`, `rank_scale`, `switch_cost`), 상관 제약(`max_corr_rule`), 축마다 적용하는 슬롯(`axis_slots`), ETF 속성과 재는 방법(`etf_attributes`), 비중 처리(`weighting`), 유지할 사용자 값(`keep_user`)([거시판단](macro.md) 속성 매칭 점수) |
 | `events` | 이벤트 판단: 확인 시점, 진입 기준, 복귀 방식, 대상 축([거시판단](macro.md) 국면 판단) |
-| `static_dynamic_priority` | 국면 신호가 기준선 근처일 때 밴드 리밸런싱을 보류할지 |
 
 ### draft.json — 포트폴리오 초안
 
