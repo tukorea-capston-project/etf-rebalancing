@@ -127,7 +127,7 @@
       { "indicator_id": "deposits", "name": "투자자예탁금", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "FreeSIS(2021년까지)+공공데이터포털 KOFIA API(invrDpsgAmt)", "llm": false },
       { "indicator_id": "turbulence", "name": "금융난류 지수", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "ECOS(KOSPI, 국고채 10년, 원달러)+yfinance(^GSPC, ^TNX) 주간수익률 계산", "llm": false },
       { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "axis": "위험선호", "transform": "주간평균", "direction": 1, "source": "네이버 뉴스 API", "llm": true },
-      { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "axis": "금리", "transform": "범주_긴축1_완화-1_전환없음0", "direction": 1, "source": "한국은행", "llm": true }
+      { "indicator_id": "bok_statement", "name": "금통위 결정문 정책 방향 판정", "axis": "금리", "transform": "범주_긴축1_완화-1_전환없음0", "direction": 1, "source": "한국은행", "llm": true }
     ],
     "indicators_note": "날짜가 기준일 이하이고 판단(다음 영업일 아침) 전에 발표된 값만 씀. news_mood는 실시간 수집을 네이버 뉴스 API로 하고, 백테스트용 과거 뉴스는 빅카인즈에서 수동 수집함(빅카인즈 API는 비용이 커서 쓰지 않음). llm=true인 지표는 거시판단LLM제외 백테스트에서 뺌",
     "axis_score": {

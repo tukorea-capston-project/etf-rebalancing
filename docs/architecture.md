@@ -17,7 +17,7 @@
 | API 서버 | 사용자 요청 처리. 인증, 전략 변환·확정, 백테스트 요청 접수와 결과 조회, 자격 증명 등록, 모드 전환, 긴급 중지 | EC2 (Docker). 개발 때는 팀원 PC |
 | 워커 | 예약 작업과 백테스트 대기열 처리 | **EC2에서만** (Docker) |
 | PostgreSQL | 모든 상태 저장. API 서버와 워커는 DB로만 주고받습니다 | EC2 (Docker) |
-| Ollama | 자연어 → 전략 변환, 국면 지표용 뉴스 분위기 점수·금통위 의사록 판정 | LLM PC |
+| Ollama | 자연어 → 전략 변환, 국면 지표용 뉴스 분위기 점수·금통위 결정문 판정 | LLM PC |
 
 - EC2의 리버스 프록시, API 서버, 워커, PostgreSQL은 Docker Compose(`deploy/compose.yaml`)로 한 번에 띄웁니다. 배포는 GitHub Actions가 합니다(`docs/infra.md`).
 - API 서버와 워커는 같은 코드베이스(`backend/app/`)를 씁니다. 워커는 각 도메인의 `service.py` 함수를 부르기만 하고, 도메인 로직을 따로 갖지 않습니다.
