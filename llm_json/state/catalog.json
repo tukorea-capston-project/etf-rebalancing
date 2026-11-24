@@ -15,7 +15,7 @@
   "rebalance_conditions": ["주기", "밴드", "혼합"],
   "rebalance_cycles": ["월", "분기", "반기", "연"],
   "switch_kinds": ["정기", "이벤트"],
-  "switch_kinds_note": "국면 전환이 일어난 계기. 정기는 매주 마지막 영업일 국면 판단, 이벤트는 큰 악재·호재",
+  "switch_kinds_note": "국면 전환이 일어난 계기. 정기는 매주 마지막 영업일 국면 판단, 이벤트는 매 영업일 확인에서 축 점수가 이벤트 진입 기준을 넘은 때(docs/macro.md 국면 판단)",
   "backtest_modes": ["고정비중", "거시판단", "거시판단LLM제외"],
   "backtest_modes_note": "거시판단LLM제외는 국면 지표에서 LLM 지표(뉴스 분위기 점수, 금통위 결정문 판정)를 뺀 거시판단. 항상 함께 계산하고, 화면에서는 토글을 켰을 때만 보여 줌",
   "expressions": [
