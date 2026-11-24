@@ -58,8 +58,8 @@
   "robustness": { "period": null, "variants": [] },
   "robustness_note": "기준값을 하나씩 바꾼 변형마다 CAGR·MDD·샤프·매매회전율·국면 전환 횟수와 정한 값과의 차이. 값은 계산 후 채워짐",
   "pbo": { "value": null, "performance_degradation": null, "probability_of_loss": null },
-  "leakage_test": null,
-  "leakage_test_note": "LLM 지표에 미래 정보가 섞였는지 시험(예측 불가능한 사건 시험, 기억 정도 측정)",
+  "leakage_test": { "model": null, "prompt_version": null, "memorization": null, "next_decision": null, "by_memorization": null, "events": null, "pre_post_cutoff": null },
+  "leakage_test_note": "모델·프롬프트 버전마다 한 번 계산한 미래 정보 시험 결과를 붙임. 값은 계산 후 채워짐(docs/backtest.md 미래 정보 시험)",
   "metrics_note": "성과 지표 정의는 docs/backtest.md. 예시라 값은 비워 둠",
   "approved_at": "2026-11-14T10:00:00+09:00"
 }

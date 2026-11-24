@@ -73,7 +73,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `use` | 백테스트에서 LLM 지표를 쓰는지 |
 | `compare_without` | LLM 지표를 뺀 거시판단도 함께 계산하는지 |
 | `without_display` | 뺀 결과를 화면에 보여 주는 방식([화면 설계](frontend.md) 백테스트 결과) |
-| `leakage_test` | 미래 정보가 섞였는지 시험하는 방법 |
+| `leakage_test` | 미래 정보 시험의 구성과 시험 4의 사건 목록([백테스트](backtest.md) 미래 정보 시험) |
 
 `construction` ([전략 스키마](strategy-schema.md) 포트폴리오 생성):
 
@@ -206,7 +206,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `macro_active_from` | 거시판단이 작동하기 시작한 날 |
 | `runs` | 실행 결과 목록. `mode`(실행 종류), 화면 표시(`display`: 기본 / 토글), 성과 지표, 기간 중 국면 전환 기록(`switch_ids`) |
 | `robustness`, `pbo` | 견고성 표(공통 기간, 변형별 지표)와 과최적화 확률·성과 저하·손실 확률([백테스트](backtest.md) 견고성 표, 과최적화 확률) |
-| `leakage_test` | LLM 지표의 미래 정보 시험 결과 |
+| `leakage_test` | LLM 지표의 미래 정보 시험 결과. 시험한 모델·프롬프트 버전과 시험별 값([백테스트](backtest.md) 미래 정보 시험) |
 | `approved_at` | 사용자가 승인한 시각 |
 
 ### market.json — 시장 상태

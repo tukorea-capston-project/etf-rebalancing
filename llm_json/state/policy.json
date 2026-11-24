@@ -29,7 +29,7 @@
       "reinvest_distributions": true,
       "tax_model": "ETF유형별",
       "modes": ["고정비중", "거시판단", "거시판단LLM제외"],
-      "llm_indicators": { "use": true, "compare_without": true, "without_display": "토글", "leakage_test": null },
+      "llm_indicators": { "use": true, "compare_without": true, "without_display": "토글", "leakage_test": { "tests": ["기억정도", "다음결정맞히기", "기억정도별성과", "예측불가사건"], "events": ["2008-10-27", "2020-03-16"], "when": "모델·프롬프트버전마다", "masking": false } },
       "robustness": {
         "variants": {
           "zscore_window_weeks": [156, 364],
