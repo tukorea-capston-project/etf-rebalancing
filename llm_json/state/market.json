@@ -52,7 +52,10 @@
       "period": "2026-11-27",
       "released_at": "2026-11-27T18:00:00+09:00",
       "source": "한국은행 결정문+LLM",
-      "llm_output_ids": ["llm_bok_20261127"]
+      "llm_output_ids": ["llm_bok_20261127"],
+      "rate_decision": "동결",
+      "rate_check": "통과",
+      "rate_check_note": "결정문에서 코드로 뽑은 금리 결정(인상·인하·동결)과 LLM 판정의 대조 결과. 통과 / 어긋남(판정 버림) / 추출실패"
     }
   },
   "indicators_note": "값은 설명용 예시. 지표별 Z-Score에 방향을 곱해 축마다 합침(policy.macro.axis_score). bok_statement는 범주라 마지막 정책 방향(stance)을 점수로 씀",
