@@ -11,35 +11,35 @@
     "ktb_yield_change": {
       "value": -0.012,
       "z": -1.3,
-      "period": "2026-12-04",
-      "released_at": "2026-12-04",
+      "period": "2026-12-03",
+      "released_at": "2026-12-04T18:00:00+09:00",
       "source": "ECOS"
     },
-    "term_spread": { "value": 0.004, "z": 0.2, "period": "2026-12-04", "released_at": "2026-12-04", "source": "ECOS" },
-    "us_10y": { "value": 0.0412, "z": -0.9, "period": "2026-12-04", "released_at": "2026-12-05", "source": "yfinance(^TNX)" },
-    "stock_bond_corr": { "value": -0.2, "z": -0.4, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ECOS(KOSPI, 국고채 10년) 계산" },
-    "hedge_cost": { "value": 0.004, "z": null, "period": "2026-12-04", "released_at": "2026-12-05", "source": "ECOS(CD 91일)+yfinance(^IRX)" },
-    "vkospi": { "value": 17.8, "z": -0.6, "period": "2026-12-04", "released_at": "2026-12-07", "source": "KRX Open API" },
+    "term_spread": { "value": 0.004, "z": 0.2, "period": "2026-12-03", "released_at": "2026-12-04T18:00:00+09:00", "source": "ECOS" },
+    "us_10y": { "value": 0.0412, "z": -0.9, "period": "2026-12-04", "released_at": "2026-12-07T08:00:00+09:00", "source": "yfinance(^TNX)" },
+    "stock_bond_corr": { "value": -0.2, "z": -0.4, "period": "2026-12-03", "released_at": "2026-12-04T18:00:00+09:00", "source": "ECOS(KOSPI, 국고채 10년) 계산" },
+    "hedge_cost": { "value": 0.004, "z": null, "period": "2026-12-03", "released_at": "2026-12-04T18:00:00+09:00", "source": "ECOS(CD 91일)+yfinance(^IRX)" },
+    "vkospi": { "value": 17.8, "z": -0.6, "period": "2026-12-04", "released_at": "2026-12-07T08:10:00+09:00", "source": "KRX Open API" },
     "margin_loan": {
       "value": null,
       "z": 0.8,
       "period": "2026-12-01",
-      "released_at": "2026-12-04",
+      "released_at": "2026-12-04T18:00:00+09:00",
       "source": "공공데이터포털 KOFIA API"
     },
     "deposits": {
       "value": null,
       "z": 0.3,
       "period": "2026-12-01",
-      "released_at": "2026-12-04",
+      "released_at": "2026-12-04T18:00:00+09:00",
       "source": "공공데이터포털 KOFIA API"
     },
-    "turbulence": { "value": 9.8, "z": -0.3, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ECOS+yfinance 주간수익률 계산" },
+    "turbulence": { "value": 9.8, "z": -0.3, "period": "2026-12-03", "released_at": "2026-12-04T18:00:00+09:00", "source": "ECOS+yfinance 주간수익률 계산" },
     "news_mood": {
       "value": 0.6,
       "z": 1.1,
       "period": "2026-11-28~2026-12-04",
-      "released_at": "2026-12-04",
+      "released_at": "2026-12-05T00:00:00+09:00",
       "source": "네이버 뉴스 API+LLM",
       "n": 236,
       "llm_output_ids": ["llm_news_20261204_0001"]
@@ -50,7 +50,7 @@
       "score": -1,
       "z": null,
       "period": "2026-11-27",
-      "released_at": "2026-11-27",
+      "released_at": "2026-11-27T18:00:00+09:00",
       "source": "한국은행 결정문+LLM",
       "llm_output_ids": ["llm_bok_20261127"]
     }

@@ -45,7 +45,7 @@
   - `deploy/compose.yaml`: EC2 운영용 Compose (Caddy, API 서버, 워커, 서비스 DB)
   - `.github/workflows/`: CI/CD 워크플로
 - 백엔드 코드는 `backend/app/` 아래에 기능(도메인)별 폴더로 나눕니다.
-  - `core/`: 설정, DB 연결
+  - `core/`: 설정, DB 연결, LLM(Ollama) 클라이언트
   - `auth/`: 사용자, 세션, 로그인
   - `worker/`: 워커 진입점. 예약 작업 시각표와 백테스트 대기열 처리만 두고, 실제 로직은 각 도메인의 `service.py`를 부릅니다. 도메인 폴더가 아니므로 아래 `router.py`/`models.py`/`service.py` 구성의 예외입니다.
   - `strategy/`: 자연어 → 전략 변환, 전략 스키마
@@ -54,6 +54,7 @@
   - `trading/`: KIS 모의·실전투자 주문, KIS 자격 증명
   - `market_data/`: 시세·분배금·국면 지표 수집
   - `news/`: 국면 지표용 뉴스 수집
+  - `macro/`: 거시판단. 축 점수, 국면 판단·전환, LLM 지표(뉴스 분위기, 금통위 결정문 판정) 채점
   - 수집 코드(`market_data/`, `news/`)도 백엔드의 DB 모델과 설정을 그대로 씁니다.
 - 각 기능 폴더는 `router.py`(API), `models.py`(DB 모델), `service.py`(로직)로 구성합니다. `api/`, `services/` 같은 계층별 폴더는 만들지 않습니다.
 - 마이그레이션은 `backend/alembic/`, 테스트는 `backend/tests/`에 둡니다.
@@ -129,7 +130,7 @@ EC2 서버 (저장소 루트에서. 처음 설정과 현재 단계는 `docs/infr
 | 전략 구성·제약, 포트폴리오 생성(minimax·HRP), 자연어 → 전략, 확정·버전 | `docs/strategy-schema.md` | `strategy.md` |
 | 투자 대상: 선정 조건, 슬롯 분류 | `docs/universe.md` | — |
 | 리밸런싱 실행: 시점, 종류, 목표 금액, 주문 수량 | `docs/rebalancing.md` | `rebalancing.md` |
-| 거시판단: 국면 지표와 출처(뉴스 포함), 국면 판단, 국면 전환 | `docs/macro.md` | — |
+| 거시판단: 국면 지표와 출처(뉴스 포함), 국면 판단, 국면 전환 | `docs/macro.md` | `macro.md` |
 | 백테스트: 가정, 비용, 세금, 지표, LLM 지표와 미래 정보 | `docs/backtest.md` | `backtest.md` |
 | 시세·분배금·국면 지표 수집 | `docs/market-data.md` | `market-data.md` |
 | 모의·실전투자, KIS | `docs/trading.md` | `trading.md` |

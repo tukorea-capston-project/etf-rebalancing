@@ -37,14 +37,19 @@
 
 | 작업 | 시점 | 호출하는 로직 |
 |---|---|---|
-| 시세·분배금·국면 지표 수집 | 매 영업일. KRX 데이터가 갱신된 뒤 | `market_data` |
+| 아침 수집: KRX 시세·VKOSPI, yfinance 미국 금리·지수 | 매 영업일 08:00부터 10분마다, 전 영업일 KRX 데이터가 들어올 때까지(14:00 마감) | `market_data` |
+| 국면 판단(거시판단) | 아침 수집이 끝난 직후. 매 영업일 이벤트 판단을 하고, 전 영업일이 그 주 마지막 영업일이면 정기 판단도 합니다 | `macro`(`docs/macro.md`). 국면이 바뀌면 `portfolio`가 기준일을 계산일로 전체 리밸런싱을 계산 |
+| 저녁 수집: ECOS, 금융투자협회 API, 금통위 결정문, 분배금 | 매일 18:00 | `market_data`. 새 결정문은 `macro`가 LLM으로 판정 |
+| 뉴스 수집·채점 | 매시 정각(주말 포함) | `news`(수집), `macro`(채점) |
 | 계산일 판정·리밸런싱 계산 | 계산일 장 마감 후 | `portfolio` |
 | 주문, 체결 확인 | 계산일 다음 영업일 | `trading` |
 | 분배금 입금 확인, 재투자 | `docs/trading.md` 주문 방식을 따름 | `trading`, `portfolio` |
-| 국면 판단(거시판단) | 매주 마지막 영업일 장 마감 후 | 거시판단(`docs/macro.md`). 국면이 바뀌면 `portfolio`가 그날을 계산일로 전체 리밸런싱을 계산 |
 
 - KRX ETF 일별매매정보는 **다음 영업일 오전 8시경**에 갱신된다고 알려져 있습니다. 공식 문서에서는 확인하지 못했고, 비공식 라이브러리 문서들이 같은 시각을 적고 있습니다.
 - 그래서 계산일 장 마감 직후에는 그날 종가가 KRX 데이터에 아직 없습니다. 모의·실전투자의 계산일 종가 출처와 주문 시각은 `docs/trading.md`를 봅니다.
+- 수집을 아침과 저녁으로 나누는 이유는, 출처마다 백테스트가 가정한 공개 시각(`docs/market-data.md` 국면 지표의 발표일) 뒤, 그리고 다음 판단 전에 받기 위해서입니다. 아침 판단 전에는 KRX와 미국 값만 공개돼 있다고 가정하므로 그것만 받습니다. ECOS·금융투자협회·결정문은 오후까지 공개되므로 저녁에 받습니다. 그러면 운용이 백테스트와 같은 날짜의 값으로 판단합니다.
+- KRX 재시도와 LLM 지표 재시도(`docs/macro.md` LLM PC가 꺼져 있을 때)는 14:00에 마감합니다. 국면이 바뀌었을 때 전체 리밸런싱을 다시 계산하고 14:30 이상 감지(`docs/trading.md` 계산과 주문 시각)를 하기 전까지 30분 여유를 둡니다. KRX 확인 한 번은 호출 몇 회라 하루 한도(`docs/market-data.md`)에 영향이 없습니다.
+- 전 영업일이 그 주 마지막 영업일인지는 영업일 달력으로 판별합니다. 미래 휴장일 달력은 `docs/market-data.md` 미정(#13)을 따릅니다.
 
 ### 백테스트 대기열
 
@@ -97,7 +102,8 @@ flowchart TB
         backtest["backtest<br/>시뮬레이션 · 성과 지표"]
         trading["trading<br/>KIS 주문 · 자격 증명<br/>모드 · 안전장치"]
         market["market_data<br/>시세 · 분배금 · 영업일"]
-        macro["거시판단 · news"]
+        macro["macro<br/>국면 판단 · 전환<br/>LLM 지표 채점"]
+        news["news<br/>뉴스 수집"]
         portfolio["portfolio<br/>계산일 판정 · 리밸런싱<br/>주문 수량"]
         strategy["strategy<br/>자연어 → 전략<br/>스키마 · 버전"]
     end
@@ -122,6 +128,7 @@ flowchart TB
     worker -->|"주문"| trading
     worker -->|"대기열 실행"| backtest
     worker -.-> macro
+    worker -.->|"수집"| news
 
     backtest --> portfolio
     backtest --> market
