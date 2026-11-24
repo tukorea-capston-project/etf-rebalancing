@@ -73,6 +73,16 @@
   "aliases_note": "자연어로 ETF를 고를 때 쓰는 별칭. 별칭 하나는 ETF 하나로만 이어진다. 별칭이 없는 ETF는 종목명으로 찾는다. 별칭은 오늘 시점 선정 조건을 통과한 ETF로 만든다. 묶음을 자연어로 찾는 방법, \"현금\"을 현금 비중으로 볼지 현금성 ETF로 볼지는 미정",
   "questions": [
     {
+      "question_key": "weight_infeasible",
+      "kind": "고르기",
+      "text": null,
+      "choices": [
+        { "label": null, "value": "같은자산군묶음추가" },
+        { "label": null, "value": "현금성묶음추가" }
+      ],
+      "note": "종목당 최대 비중을 넘는 몫을 받을 ETF가 없을 때. 문구는 미정(docs/strategy-schema.md 미정의 되묻기 문구)"
+    },
+    {
       "question_key": "weight_conflict",
       "kind": "고르기",
       "text": "말씀하신 비중이 서로 맞지 않아요. 어느 쪽에 맞출까요?",

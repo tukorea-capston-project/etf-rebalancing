@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "user_id": "u_001",
+  "mode": "모의",
+  "mode_note": "계좌 기록은 사용자·모드마다 하나",
+  "broker": "한국투자증권",
+  "account_masked": "****1234",
+  "credential": { "registered_at": "2026-11-10T21:00:00+09:00", "verified": true },
+  "credential_note": "앱키·시크릿·계좌번호·접근 토큰 원문은 암호화해 DB에 따로 저장하고 여기 두지 않음(docs/trading.md 자격 증명)",
+  "first_used_on": "2026-11-16",
+  "reserve_krw": 99000000,
+  "reserve_note": "예비금. 모의만 씀. 이 계좌를 처음 쓸 때 KIS 현금 − 초기 투자금으로 한 번 정함. 예시는 모의 잔고 1억 원, 초기 투자금 100만 원. 실전은 null",
+  "holdings": { "360750": 11, "069500": 4, "395270": 7, "148070": 4 },
+  "holdings_note": "내부 보유 기록(전략 ETF 수량). 이상 감지에서 KIS 잔고와 비교함. 값은 설명용 예시",
+  "reinvested_distributions": [],
+  "reinvested_note": "재투자한 분배금 입금 기록. 두 번 재투자하지 않게 함",
+  "orders_note": "주문·체결 기록은 이 계좌에 연결된 별도 기록으로 남김"
+}

@@ -14,7 +14,7 @@
 | CloudFront | HTTPS 종료(서비스 도메인), `/api/*`는 EC2로, 나머지는 S3로 전달 | AWS |
 | S3 | 프론트엔드 빌드 결과(정적 파일) 저장 | AWS |
 | 리버스 프록시 (Caddy) | CloudFront에서 온 `/api` 요청의 HTTPS 종료(오리진용 하위 도메인 인증서), API 서버로 전달 | EC2 (Docker) |
-| API 서버 | 사용자 요청 처리. 인증, 전략 변환·확정, 백테스트 요청 접수와 결과 조회, 자격 증명 등록, 모드 전환, 긴급 중지 | EC2 (Docker). 개발 때는 팀원 PC |
+| API 서버 | 사용자 요청 처리. 인증, 전략 변환·확정, 백테스트 요청 접수와 결과 조회, 자격 증명 등록, 운용 시작·변경·종료, 모드 전환, 긴급 중지 | EC2 (Docker). 개발 때는 팀원 PC |
 | 워커 | 예약 작업과 백테스트 대기열 처리 | **EC2에서만** (Docker) |
 | PostgreSQL | 모든 상태 저장. API 서버와 워커는 DB로만 주고받습니다 | EC2 (Docker) |
 | Ollama | 자연어 → 전략 변환, 국면 지표용 뉴스 분위기 점수·금통위 결정문 판정 | LLM PC |
@@ -49,7 +49,7 @@
 - 그래서 계산일 장 마감 직후에는 그날 종가가 KRX 데이터에 아직 없습니다. 모의·실전투자의 계산일 종가 출처와 주문 시각은 `docs/trading.md`를 봅니다.
 - 수집을 아침과 저녁으로 나누는 이유는, 출처마다 백테스트가 가정한 공개 시각(`docs/market-data.md` 국면 지표의 발표일) 뒤, 그리고 다음 판단 전에 받기 위해서입니다. 아침 판단 전에는 KRX와 미국 값만 공개돼 있다고 가정하므로 그것만 받습니다. ECOS·금융투자협회·결정문은 오후까지 공개되므로 저녁에 받습니다. 그러면 운용이 백테스트와 같은 날짜의 값으로 판단합니다.
 - KRX 재시도와 LLM 지표 재시도(`docs/macro.md` LLM PC가 꺼져 있을 때)는 14:00에 마감합니다. 국면이 바뀌었을 때 전체 리밸런싱을 다시 계산하고 14:30 이상 감지(`docs/trading.md` 계산과 주문 시각)를 하기 전까지 30분 여유를 둡니다. KRX 확인 한 번은 호출 몇 회라 하루 한도(`docs/market-data.md`)에 영향이 없습니다.
-- 전 영업일이 그 주 마지막 영업일인지는 영업일 달력으로 판별합니다. 미래 휴장일 달력은 `docs/market-data.md` 미정(#13)을 따릅니다.
+- 전 영업일이 그 주 마지막 영업일인지는 영업일 달력으로 판별합니다. 미래 휴장일은 `docs/market-data.md` 미래 영업일 달력을 따릅니다.
 
 ### 백테스트 대기열
 
@@ -127,16 +127,19 @@ flowchart TB
     worker -->|"계산"| portfolio
     worker -->|"주문"| trading
     worker -->|"대기열 실행"| backtest
-    worker -.-> macro
-    worker -.->|"수집"| news
+    worker -->|"국면 판단 · LLM 지표 채점"| macro
+    worker -->|"수집"| news
 
     backtest --> portfolio
     backtest --> market
     backtest --> strategy
+    backtest -->|"국면 판단"| macro
     portfolio --> strategy
     trading -->|"이상 감지"| strategy
-    macro -.->|"국면 전환"| portfolio
-    macro -.-> ollama
+    macro -->|"국면 전환"| portfolio
+    macro -->|"국면 지표 읽기"| market
+    macro -->|"종목 선택 탐색"| strategy
+    macro --> ollama
 
     strategy --> ollama
     strategy --> cfg
@@ -202,26 +205,29 @@ sequenceDiagram
     participant N as 알림<br/>(이메일)
 
     rect rgb(238, 244, 252)
-        Note over W,YF: 시세·분배금 수집 (market_data) · 매 영업일, KRX 갱신(다음 영업일 08시경) 이후
-        W->>KRX: 미수집·실패 날짜의 ETF 일별매매정보
-        KRX-->>W: 전체 ETF 시세
-        W->>YF: 대상 ETF 분배금 전체 이력
-        YF-->>W: 분배금
-        W->>DB: 대상 ETF 시세 · 분배금(보정 YAML 적용) · 수집 이력 저장
+        Note over W,YF: 아침 수집 (market_data) · 매 영업일 08:00부터, 전 영업일 KRX 데이터가 들어올 때까지(14:00 마감)
+        W->>KRX: 미수집·실패 날짜의 ETF 일별매매정보 · VKOSPI
+        KRX-->>W: 전체 ETF 시세 · VKOSPI
+        W->>YF: 미국 금리 · 지수
+        YF-->>W: 미국 금리 · 지수
+        W->>DB: 시세 · 국면 지표 · 수집 이력 저장
     end
 
-    rect rgb(240, 248, 240)
-        Note over W,DB: 리밸런싱 계산 (portfolio) · 계산일 장 마감 후
-        W->>DB: 사용자별 운용 전략 · 보유 현황 조회
-        W->>W: 계산일 판정
-        opt 계산일
-            W->>W: 목표 금액 · 주문 수량 계산
-            W->>DB: 주문 계획 저장
+    rect rgb(244, 240, 252)
+        Note over W,N: 국면 판단 (macro) · 아침 수집 직후 · 매 영업일 이벤트 판단, 전 영업일이 그 주 마지막 영업일이면 정기 판단도
+        W->>DB: 기준일 이하이고 판단 전에 발표된 국면 지표 조회
+        W->>W: 축 점수 · 국면 판단
+        opt 국면이 바뀜
+            W->>W: 묶음별 ETF 선택 · 새 현재 목표 비중(이전 비중 물려받기)
+            W->>W: 기준일을 계산일로 전체 리밸런싱 계산 (portfolio)
+            W->>DB: 전환 이력 · 주문 계획 저장
+            W-)N: 국면 전환 알림 ("오늘 주문할 내용")
         end
+        W->>W: 전 영업일 계산에 쓴 KIS 종가가 KRX 종가와 다르면 다시 계산 (trading)
     end
 
     rect rgb(252, 244, 236)
-        Note over W,N: 주문 (trading) · 다음 영업일 · 정지 상태인 사용자는 건너뜀
+        Note over W,N: 주문 (trading) · 계산일 다음 영업일 14:30~15:15 · 정지 상태인 사용자는 건너뜀
         W->>DB: 주문 계획 · 자격 증명(암호문) 조회
         W->>KMS: 자격 증명 복호화
         W->>KIS: 잔고 조회 (접근 토큰 캐시 사용)
@@ -237,7 +243,28 @@ sequenceDiagram
             W-)N: 주문 결과 알림
         end
     end
+
+    rect rgb(240, 248, 240)
+        Note over W,KIS: 리밸런싱 계산 (portfolio) · 계산일 16:00
+        W->>DB: 사용자별 운용 전략 · 보유 현황 조회
+        W->>W: 계산일 판정
+        opt 계산일
+            W->>KIS: 그날 종가 조회 (KRX 데이터는 다음 영업일 아침에 들어옴)
+            W->>W: 목표 금액 · 주문 수량 계산
+            W->>DB: 주문 계획 저장
+        end
+    end
+
+    rect rgb(238, 244, 252)
+        Note over W,YF: 저녁 수집 (market_data) · 매일 18:00
+        W->>YF: 대상 ETF 분배금 전체 이력
+        YF-->>W: 분배금
+        W->>W: ECOS · 금융투자협회 통계 · 금통위 결정문 수집, 새 결정문은 LLM으로 판정 (macro)
+        W->>DB: 분배금(보정 YAML 적용) · 국면 지표 저장
+    end
 ```
+
+- 뉴스 수집·채점(매시 정각)과 분배금 입금 확인은 그림에서 뺐습니다. 시각은 위 "예약 작업" 표를 봅니다.
 
 ## 미정
 
