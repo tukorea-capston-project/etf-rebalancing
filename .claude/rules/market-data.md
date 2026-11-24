@@ -3,9 +3,10 @@ paths:
   - "backend/app/market_data/**"
   - "backend/tests/market_data/**"
   - "backend/config/distribution_overrides.yaml"
+  - "backend/data/kofia/**"
 ---
 
-# 시세·분배금 수집 규칙
+# 시세·분배금·국면 지표 수집 규칙
 
 이 폴더를 고치기 전에 `docs/market-data.md`를 읽습니다. 로직은 그 문서에만 쓰고, 설계가 바뀌면 그 문서를 고칩니다. 아래는 어기면 사고가 나는 규칙입니다.
 
@@ -13,3 +14,4 @@ paths:
 - 이미 저장된 시세는 덮어쓰지 않습니다. 기존 ETF의 백테스트 입력이 바뀝니다.
 - KRX 하루 호출 한도를 넘지 않게 합니다. 실행당 상한에서 멈추고, KRX 오류 응답을 받으면 재시도 없이 멈춥니다.
 - yfinance에서 받지 못했거나, DB에 있는데 0건이 오면 기존 분배금을 지우지 않고 유지한 뒤 경고합니다.
+- 이미 저장된 국면 지표의 값과 발표일은 덮어쓰지 않습니다. 고쳐진 값을 쓰면 과거 판단에 그때 몰랐던 값이 섞입니다.

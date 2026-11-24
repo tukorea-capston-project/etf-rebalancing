@@ -104,8 +104,8 @@
       { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "transform": "조건_기준초과면하락을중립으로", "direction": null, "source": "ECOS(KOSPI, 국고채 10년) 계산", "llm": false },
       { "indicator_id": "hedge_cost", "name": "환헤지 비용(한미 단기금리차)", "axis": "환헤지", "transform": "절대수준", "direction": 1, "source": "ECOS(CD 91일)+yfinance(^IRX)", "llm": false },
       { "indicator_id": "vkospi", "name": "VKOSPI", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "KRX Open API", "llm": false },
-      { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "금융투자협회", "llm": false },
-      { "indicator_id": "deposits", "name": "투자자예탁금", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "금융투자협회", "llm": false },
+      { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "FreeSIS(2021년까지)+공공데이터포털 KOFIA API(crdTrFingWhl)", "llm": false },
+      { "indicator_id": "deposits", "name": "투자자예탁금", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "FreeSIS(2021년까지)+공공데이터포털 KOFIA API(invrDpsgAmt)", "llm": false },
       { "indicator_id": "turbulence", "name": "금융난류 지수", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "ECOS(KOSPI, 국고채 10년, 원달러)+yfinance(^GSPC, ^TNX) 주간수익률 계산", "llm": false },
       { "indicator_id": "news_mood", "name": "뉴스 헤드라인 분위기 점수", "axis": "위험선호", "transform": "주간평균", "direction": 1, "source": "네이버 뉴스 API", "llm": true },
       { "indicator_id": "bok_minutes", "name": "금통위 의사록 정책 방향 판정", "axis": "금리", "transform": "범주_긴축1_완화-1_전환없음0", "direction": 1, "source": "한국은행", "llm": true }
