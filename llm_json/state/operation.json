@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "user_id": "u_001",
+  "status": "운용중",
+  "status_note": "운용중 / 청산중 / 종료(운용 중인 전략 없음). 사용자당 하나",
+  "portfolio_id": "pf_001",
+  "portfolio_revision": 1,
+  "backtest_id": "bt_pf_001_r1",
+  "mode": "모의",
+  "mode_note": "모드는 여기에만 둠. 전략 버전에는 두지 않음",
+  "started_on": "2026-11-16",
+  "started_on_note": "지금 전략 버전·계좌로 운용을 시작한 계산일. 운용 시작, 전략 변경, 모드 전환 때 바뀜",
+  "halt": { "halted": false, "reason": null, "at": null },
+  "halt_note": "정지 상태. reason은 이상감지 / 긴급중지 / 서버스위치",
+  "regime": { "금리": "하락", "환헤지": "중립", "위험선호": "중립" },
+  "regime_since": "2026-12-04",
+  "market_state_id": "ms_20261204",
+  "target": { "360750": 0.22, "069500": 0.17, "395270": 0.11, "148070": 0.5 },
+  "target_cash": 0.0,
+  "tilt": "없음",
+  "tilt_note": "위험자산 비중 기울이기 상태. 회피 / 선호 / 없음",
+  "switch_ids": ["sw_20261204_pf_001"],
+  "macro_enabled": true,
+  "target_note": "현재 목표 비중. 국면이 바뀔 때마다 바뀌고 전환 이력(regime_switch.json)이 쌓임. 예시는 금리 하락 국면으로 바뀌어 채권 묶음을 국고채 10년으로 바꾼 뒤",
+  "history": [
+    { "at": "2026-11-14T10:05:00+09:00", "event": "운용시작", "portfolio_revision": 1, "mode": "모의" }
+  ],
+  "history_note": "운용 시작·전략 변경·모드 전환·운용 종료·청산 요청 이력"
+}

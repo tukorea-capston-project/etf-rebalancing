@@ -9,7 +9,7 @@
 
 | 폴더 | 내용 |
 |---|---|
-| `llm_json/state/` | 서버가 저장하고 계속 갱신하는 상태. 설정, 사용자 요청 초안, 포트폴리오, 시장 상태, 백테스트, 국면 전환 기록 |
+| `llm_json/state/` | 서버가 저장하고 계속 갱신하는 상태. 설정, 사용자 요청 초안, 전략 버전, 운용 상태, 계좌 기록, 시장 상태, 백테스트, 국면 전환 기록 |
 | `llm_json/llm/` | LLM이 돌려주는 출력 형식. LLM은 정해진 형식의 JSON만 내야 하고, 서버가 검증한 뒤 사용합니다 |
 
 ## 파일 간 연결
@@ -18,10 +18,17 @@
 |---|---|---|---|
 | `catalog.json`, `policy.json` | 저장소 설정 | - | `draft.json` |
 | `draft.json` | 사용자 메시지, 되묻기 답변, 카탈로그, 정책 | `parse_request` | `portfolio.json` |
-| `portfolio.json` | 확인된 `draft.json`, 국면 전환 결과(`operation`) | - | `backtest.json` |
-| `backtest.json` | `portfolio.json`, 과거 시세, 과거 시점의 `market.json` | - | `portfolio.json` (승인) |
+| `portfolio.json` | 확인된 `draft.json` | - | `backtest.json` |
+| `backtest.json` | `portfolio.json`, 과거 시세, 과거 시점의 `market.json` | - | `operation.json` (승인한 버전으로 운용 시작) |
+| `operation.json` | 승인된 `portfolio.json`, `regime_switch.json` | - | `account.json` (주문) |
+| `account.json` | KIS 잔고·체결, `operation.json`의 현재 목표 비중 | - | - |
 | `market.json` | 국면 지표([거시판단](macro.md) 국면 지표) | `news_mood`, `bok_policy` | `regime_switch.json` |
-| `regime_switch.json` | `market.json`의 국면 변화, `portfolio.json` | - | `portfolio.operation` |
+| `regime_switch.json` | `market.json`의 국면 변화, `portfolio.json`, `operation.json` | - | `operation.json` |
+
+- 상태는 성격에 따라 나눕니다. 소유 관계와 사용자당 개수는 [사용자·인증 설계](auth.md) 소유 관계를 따릅니다.
+  - `portfolio.json`: 전략 버전. 확정하면 바뀌지 않습니다
+  - `operation.json`: 운용 상태. 사용자당 하나이고 계속 바뀝니다
+  - `account.json`: 계좌 기록. 사용자·모드마다 하나입니다
 
 - 모든 상태 파일에 `schema_version`이 있습니다. JSON 구조 자체의 버전입니다
 - `catalog_version`, `policy_version`은 그 데이터를 만들 때 쓴 설정 버전입니다. 설정이 바뀌어도 예전 데이터가 어떤 기준으로 만들어졌는지 추적할 수 있습니다
@@ -64,6 +71,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `rebalance` | 정적 층. 조건 목록, 밴드 확인 시점, 밴드 폭 계산, 일자 규칙([리밸런싱](rebalancing.md)) |
 | `fixed_rules` | 고정 규칙. 적립금 매수, 분배금 재투자([리밸런싱](rebalancing.md)) |
 | `macro` | 동적 층(거시판단 운용). 아래 표 참고 |
+| `trading` | 주문 방식(`order`)과 주문 전 점검(`pre_order_checks`: NAV 대비 가격 괴리 상한 `max_premium`, 거래정지 종목을 건너뛸지 `skip_halted`)([모의·실전투자](trading.md) 주문 실행) |
 | `fear_warning` | 위험회피 국면 때 계획 외 매도 경고([거시판단](macro.md)) |
 
 `defaults.backtest.llm_indicators` ([백테스트](backtest.md) LLM 지표와 미래 정보):
@@ -167,29 +175,49 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 
 확인 문장에서 "왜 이 종목·비중인지"를 설명하는 재료가 됩니다.
 
-### portfolio.json — 확정된 포트폴리오
+### portfolio.json — 전략 버전
 
-사용자가 확인한 **실제 운용 대상**입니다. 버전 규칙은 [전략 스키마](strategy-schema.md) 확정, 승인, 버전 관리를 따릅니다.
+사용자가 확인한 **전략 버전**입니다. 확정하면 바뀌지 않습니다. 버전 규칙과 단계는 [전략 스키마](strategy-schema.md) 확정, 승인, 버전 관리를 따릅니다. 운용 상태·모드·승인은 여기 두지 않습니다.
 
 | 필드 | 설명 |
 |---|---|
 | `revision`, `prev_revision` | 현재 버전과 이전 버전 |
 | `origin` | 이 버전이 어떻게 만들어졌는지. `생성`(초안 확인), `직접수정` |
-| `stage` | 운용 단계. `백테스트` → `승인` → `모의운용` / `실전운용` |
 | `profile` | 목적, 기간 |
+| `amounts` | 초기 투자금, 매월 적립금과 적립일 |
 | `cash` | 현금의 전략 비중과 출처 |
-| `holdings` | 보유 ETF. `base`는 전략 비중, `group`은 묶음, `source`는 `사용자비중`(직접 정함) / `사용자종목`(종목만 정함) / `생성` |
-| `rules` | 이 포트폴리오에 적용할 규칙. 사용자가 고른 리밸런싱 조건(`rebalance`), 비중 제한, 국면 전환에서 지킬 사용자 값(`keep_user`) |
-| `operation` | 운용 상태. 지금 국면, 국면 시작일, 현재 목표 비중(`target`, `target_cash`), 전환 기록 ID, 거시판단 작동 여부 |
-| `backtest` | `backtest_id`와 승인 시각(`approved_at`) |
-| `trading` | 모의·실전투자 설정. 계좌 종류, 주문 방식, 주문 전 점검([모의·실전투자](trading.md) 주문 실행). 자동 주문 정지 상태는 사용자 단위라 여기 두지 않습니다 |
+| `holdings` | ETF와 전략 비중. `base`는 전략 비중, `group`은 묶음, `source`는 `사용자비중`(직접 정함) / `사용자종목`(종목만 정함) / `생성` |
+| `rules` | 이 전략에 적용할 규칙. 사용자가 고른 리밸런싱 조건(`rebalance`), 비중 제한, 국면 전환에서 지킬 사용자 값(`keep_user`) |
 
-`trading.pre_order_checks`:
+### operation.json — 운용 상태
+
+사용자가 지금 **운용하는 전략과 그 상태**입니다. 사용자당 하나이고 계속 바뀝니다. 규칙은 [모의·실전투자](trading.md) 운용 상태를 따릅니다.
 
 | 필드 | 설명 |
 |---|---|
-| `max_premium` | NAV 대비 가격 괴리 상한 |
-| `skip_halted` | 거래정지 종목을 건너뛸지 |
+| `status` | `운용중` / `청산중` / `종료` |
+| `portfolio_id`, `portfolio_revision`, `backtest_id` | 운용 중인 전략 버전과 승인한 백테스트 |
+| `mode` | `모의` / `실전`. 모드는 여기에만 둡니다 |
+| `started_on` | 지금 전략 버전·계좌로 운용을 시작한 계산일 |
+| `halt` | 자동 주문 정지 상태와 사유(이상 감지 / 긴급 중지 / 서버 스위치) |
+| `regime`, `regime_since`, `market_state_id` | 현재 목표 비중을 정할 때 쓴 국면과 그 근거 |
+| `target`, `target_cash`, `tilt` | 현재 목표 비중과 위험자산 비중 기울이기 상태([거시판단](macro.md) 국면 전환) |
+| `switch_ids` | 국면 전환 기록 ID |
+| `macro_enabled` | 거시판단 작동 여부 |
+| `history` | 운용 시작, 전략 변경, 모드 전환, 운용 종료, 청산 요청 이력 |
+
+### account.json — 계좌 기록
+
+사용자·모드마다 하나인 **계좌의 기록**입니다. 규칙은 [모의·실전투자](trading.md) 운용 금액과 내부 기록을 따릅니다.
+
+| 필드 | 설명 |
+|---|---|
+| `mode` | 이 기록의 모드 |
+| `account_masked`, `credential` | 마스킹한 계좌번호와 자격 증명 등록·검증 상태. 원문은 암호화해 따로 저장하고 여기 두지 않습니다 |
+| `first_used_on` | 이 계좌를 처음 쓴 날 |
+| `reserve_krw` | 예비금(모의만). 실전은 `null` |
+| `holdings` | 내부 보유 기록(전략 ETF 수량). 이상 감지에서 KIS 잔고와 비교합니다 |
+| `reinvested_distributions` | 재투자한 분배금 입금 기록 |
 
 ### backtest.json — 백테스트
 
@@ -206,7 +234,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `runs` | 실행 결과 목록. `mode`(실행 종류), 화면 표시(`display`: 기본 / 토글), 성과 지표, 기간 중 국면 전환 기록(`switch_ids`) |
 | `robustness`, `pbo` | 견고성 표(공통 기간, 변형별 지표)와 과최적화 확률·성과 저하·손실 확률([백테스트](backtest.md) 견고성 표, 과최적화 확률) |
 | `leakage_test` | LLM 지표의 미래 정보 시험 결과. 시험한 모델·프롬프트 버전과 시험별 값([백테스트](backtest.md) 미래 정보 시험) |
-| `approved_at` | 사용자가 승인한 시각 |
+| `approved_at` | 사용자가 승인한 시각. 승인은 여기에만 남깁니다 |
 
 ### market.json — 시장 상태
 

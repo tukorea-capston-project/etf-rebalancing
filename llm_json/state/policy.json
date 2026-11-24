@@ -181,10 +181,15 @@
     "events": { "check": "매영업일아침", "enter": 2.0, "exit": "정기판단에서만", "axes": ["금리", "위험선호"] },
     "events_note": "매 영업일 전 영업일 기준으로 축 점수를 계산해 ±2.0을 넘으면 주간 판단을 기다리지 않고 전환함. 중립 복귀는 정기 판단에서만. 환헤지 축은 제외"
   },
+  "trading": {
+    "order": { "method": "상대1호가지정가", "sell_from": "14:30", "sell_cancel": "14:50", "buy_cancel": "15:15" },
+    "pre_order_checks": { "max_premium": 0.01, "skip_halted": true },
+    "note": "주문 방식과 주문 전 점검은 시스템 규칙이라 전략 버전에 두지 않음(docs/trading.md 주문 실행). max_premium은 잠정"
+  },
   "fear_warning": {
     "when": { "axis": "위험선호", "state": "회피" },
     "action": "계획외매도경고",
-    "triggers": ["전략중지", "직접비중축소"],
+    "triggers": ["운용종료", "전략변경"],
     "note": "사용자가 계획에서 벗어난 매도를 하려 할 때만 경고함. 시스템의 국면 전환 재구성에는 적용하지 않음"
   }
 }
