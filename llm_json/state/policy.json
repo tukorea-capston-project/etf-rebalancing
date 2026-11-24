@@ -41,15 +41,16 @@
           "stock_bond_corr_enter": [0.10, 0.16],
           "lambda": [50, 200],
           "selection_weeks": [52, 156],
-          "event_enter": [1.5, 2.5]
+          "event_enter": [1.5, 2.5],
+          "tilt_size": [0.1, 0.3]
         },
         "one_at_a_time": true,
         "period": "모든변형공통기간",
         "metrics": ["CAGR", "MDD", "샤프", "매매회전율", "국면전환횟수"],
         "modes": ["거시판단"]
       },
-      "pbo": { "method": "CSCV", "trials": "견고성표21개", "splits": 16, "metric": "샤프", "also": ["성과저하", "손실확률"] },
-      "robustness_note": "기준값을 하나씩 바꾼 변형 20개와 정한 값을 공통 기간으로 계산하고, 같은 21개로 PBO를 계산함. z_clip null은 자르지 않음. 통과 기준은 두지 않음(docs/backtest.md)",
+      "pbo": { "method": "CSCV", "trials": "견고성표23개", "splits": 16, "metric": "샤프", "also": ["성과저하", "손실확률"] },
+      "robustness_note": "기준값을 하나씩 바꾼 변형 22개와 정한 값을 공통 기간으로 계산하고, 같은 23개로 PBO를 계산함. z_clip null은 자르지 않음. 통과 기준은 두지 않음(docs/backtest.md)",
       "llm_indicators_note": "백테스트에도 LLM 지표를 씀. 미래 정보를 없앤다고 주장하지 않고, LLM 지표를 뺀 결과를 항상 함께 계산해 차이를 보여 줌(화면에서는 토글을 켜야 보임). 미래 정보가 섞였는지도 시험함(예측 불가능한 사건 시험, 기억 정도 측정)"
     }
   },
@@ -163,6 +164,17 @@
         "regress_on": { "금리민감도": "국고채10년금리변화(미국채권슬롯은미국10년금리변화)", "환민감도": "원달러환율변화율", "위험민감도": "슬롯후보평균수익률" }
       },
       "weighting": "이전ETF비중물려받기",
+      "tilt": {
+        "axis": "위험선호",
+        "size": 0.2,
+        "size_base": "줄이는쪽비중합계",
+        "risky": ["주식", "원자재", "리츠"],
+        "safe": ["채권", "현금성", "현금"],
+        "excluded": ["통화"],
+        "to": "늘리는쪽지금비중비율_없으면현금",
+        "from": "전략비중",
+        "user_weights": "기울이지않음"
+      },
       "keep_user": ["etfs", "asset_classes", "cash"]
     },
     "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(금리·환·위험 민감도)의 ETF를 점수로 고름. 축은 axis_slots의 슬롯에만 적용함. 새 ETF는 이전 ETF의 비중을 물려받고 HRP는 다시 계산하지 않음. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로",
