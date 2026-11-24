@@ -52,7 +52,7 @@
   - `portfolio/`: 포트폴리오, 리밸런싱
   - `backtest/`: 백테스트
   - `trading/`: KIS 모의·실전투자 주문, KIS 자격 증명
-  - `market_data/`: 시세·분배금 수집
+  - `market_data/`: 시세·분배금·국면 지표 수집
   - `news/`: 국면 지표용 뉴스 수집
   - 수집 코드(`market_data/`, `news/`)도 백엔드의 DB 모델과 설정을 그대로 씁니다.
 - 각 기능 폴더는 `router.py`(API), `models.py`(DB 모델), `service.py`(로직)로 구성합니다. `api/`, `services/` 같은 계층별 폴더는 만들지 않습니다.
@@ -91,7 +91,7 @@ DB (루트에서)
 - 타입 체크: `uv run pyright`
 - 마이그레이션 생성: `uv run alembic revision --autogenerate -m "<변경 내용>"`
 - 마이그레이션 적용: `uv run alembic upgrade head`
-- 시세·분배금 수집: `uv run python -m app.market_data` (서비스 DB에는 담당 팀원만 실행. `docs/market-data.md`)
+- 시세·분배금·국면 지표 수집: `uv run python -m app.market_data` (서비스 DB에는 담당 팀원만 실행. `docs/market-data.md`)
 
 EC2 서버 (저장소 루트에서. 처음 설정과 현재 단계는 `docs/infra.md`의 "개발 서버 구축")
 - 서비스 DB 실행: `docker compose -f deploy/compose.yaml up -d`
@@ -131,7 +131,7 @@ EC2 서버 (저장소 루트에서. 처음 설정과 현재 단계는 `docs/infr
 | 리밸런싱 실행: 시점, 종류, 목표 금액, 주문 수량 | `docs/rebalancing.md` | `rebalancing.md` |
 | 거시판단: 국면 지표와 출처(뉴스 포함), 국면 판단, 국면 전환 | `docs/macro.md` | — |
 | 백테스트: 가정, 비용, 세금, 지표, LLM 지표와 미래 정보 | `docs/backtest.md` | `backtest.md` |
-| 시세·분배금 수집 | `docs/market-data.md` | `market-data.md` |
+| 시세·분배금·국면 지표 수집 | `docs/market-data.md` | `market-data.md` |
 | 모의·실전투자, KIS | `docs/trading.md` | `trading.md` |
 | 화면: 화면별 기능과 보여 줄 내용 | `docs/frontend.md` | `frontend.md` |
 | 전체 흐름 예시 | `docs/json-flow.md` | — |
@@ -144,7 +144,7 @@ EC2 서버 (저장소 루트에서. 처음 설정과 현재 단계는 `docs/infr
 - 투자 대상 선정 조건, 슬롯 분류 규칙(보정표 포함), 분배금 보정은 `backend/config/`의 YAML로만 관리합니다. DB에만 두거나 DB를 직접 고치지 않습니다.
 - KIS 자격 증명 원문은 API 응답, 로그, 예외 메시지, 알림에 남기지 않습니다.
 - 서버 실전 스위치 `REAL_TRADING_ENABLED`는 기본 `false`이고 EC2에서만 켭니다. 켜려면 마스터키가 KMS여야 하며, 아니면 서버가 시작되지 않습니다.
-- 자동 테스트는 외부 API(KIS, KRX, yfinance, ECOS)를 실제로 호출하지 않습니다.
+- 자동 테스트는 외부 API(KIS, KRX, yfinance, ECOS, 공공데이터포털)를 실제로 호출하지 않습니다.
 
 # 협업 규칙
 

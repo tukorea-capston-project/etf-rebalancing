@@ -23,16 +23,16 @@
     "margin_loan": {
       "value": null,
       "z": 0.8,
-      "period": "2026-12-03",
+      "period": "2026-12-01",
       "released_at": "2026-12-04",
-      "source": "금융투자협회"
+      "source": "공공데이터포털 KOFIA API"
     },
     "deposits": {
       "value": null,
       "z": 0.3,
-      "period": "2026-12-03",
+      "period": "2026-12-01",
       "released_at": "2026-12-04",
-      "source": "금융투자협회"
+      "source": "공공데이터포털 KOFIA API"
     },
     "turbulence": { "value": 9.8, "z": -0.3, "period": "2026-12-04", "released_at": "2026-12-07", "source": "ECOS+yfinance 주간수익률 계산" },
     "news_mood": {
