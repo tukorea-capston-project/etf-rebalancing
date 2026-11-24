@@ -58,7 +58,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | 필드 | 설명 |
 |---|---|
 | `dialog` | 대화 규칙. 질문 횟수, LLM 재시도 횟수, 필수 값(`required_slots`)([전략 스키마](strategy-schema.md) 자연어 → 전략 변환) |
-| `defaults` | 사용자가 말하지 않은 값의 기본값. 현금 비중, 밴드 폭, 백테스트 설정(비용·무위험수익률, 실행 종류 `modes`, LLM 지표 사용 `llm_indicators`) |
+| `defaults` | 사용자가 말하지 않은 값의 기본값. 현금 비중, 밴드 폭, 백테스트 설정(비용·무위험수익률, 실행 종류 `modes`, LLM 지표 사용 `llm_indicators`, 견고성 표 `robustness`, 과최적화 확률 `pbo`) |
 | `construction` | 포트폴리오 생성 규칙. 아래 표 참고 |
 | `checks` | 이슈 규칙 목록. 규칙마다 `check_id`, `level`, 처리 방식, 사용자 문구 |
 | `rebalance` | 정적 층. 조건 목록, 밴드 확인 시점, 밴드 폭 계산, 일자 규칙([리밸런싱](rebalancing.md)) |
@@ -205,6 +205,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `substitutions` | 시작일에 쓸 수 없던 지정 ETF와 대신 쓴 대용 ETF, 교체일([백테스트](backtest.md#지정-etf를-아직-쓸-수-없을-때)) |
 | `macro_active_from` | 거시판단이 작동하기 시작한 날 |
 | `runs` | 실행 결과 목록. `mode`(실행 종류), 화면 표시(`display`: 기본 / 토글), 성과 지표, 기간 중 국면 전환 기록(`switch_ids`) |
+| `robustness`, `pbo` | 견고성 표(공통 기간, 변형별 지표)와 과최적화 확률·성과 저하·손실 확률([백테스트](backtest.md) 견고성 표, 과최적화 확률) |
 | `leakage_test` | LLM 지표의 미래 정보 시험 결과 |
 | `approved_at` | 사용자가 승인한 시각 |
 
