@@ -13,7 +13,7 @@
 [CloudFront (CDN)] ──── 정적 파일 ────► [S3] 프론트엔드 빌드 결과
      │  /api/* · HTTPS (오리진용 하위 도메인)
      ▼
-[AWS EC2]  Docker Compose: Caddy + API 서버 + 워커 + PostgreSQL 18(서비스 DB)
+[AWS EC2]  Docker Compose: Caddy + API 서버 + 워커 2개 + PostgreSQL 18(서비스 DB)
      │
      │  Tailscale 사설망
      ▼
@@ -56,8 +56,8 @@
 
 ### EC2
 
-- EC2 한 대에서 Docker Compose(`deploy/compose.yaml`)로 Caddy, API 서버, 워커, 서비스 DB를 한 번에 띄웁니다. 이미지는 CD가 GHCR에 올린 것을 받습니다.
-- 워커(예약 작업, 백테스트 대기열)는 EC2에서만 하나 실행합니다. 팀원 PC에서는 서비스 DB에 붙은 워커를 실행하지 않습니다(`docs/architecture.md`).
+- EC2 한 대에서 Docker Compose(`deploy/compose.yaml`)로 Caddy, API 서버, 예약 작업 워커, 백테스트 워커, 서비스 DB를 한 번에 띄웁니다. 이미지는 CD가 GHCR에 올린 것을 받습니다.
+- 예약 작업 워커와 백테스트 워커는 EC2에서만 각각 하나씩 실행합니다. 팀원 PC에서는 서비스 DB에 붙은 워커를 실행하지 않습니다(`docs/architecture.md`).
 - 보안그룹 인바운드
   - `443`: CloudFront에서 오는 요청만 허용합니다(AWS 관리형 접두사 목록 `com.amazonaws.global.cloudfront.origin-facing`).
   - `15432`(DB), `22`(SSH): 열지 않습니다. 팀원은 Tailscale로 접속합니다. Tailscale은 인바운드 포트를 열지 않아도 연결됩니다.
@@ -202,7 +202,7 @@ PR마다, 그리고 main에 머지될 때 실행합니다. 통과해야 머지�
 
 | 다음에 붙일 것 | 붙이는 시점 |
 |---|---|
-| 워커(백엔드 이미지, LLM PC 연결) | `backend/app/worker/` 코드가 생겨 예약 작업을 EC2에서 돌릴 때 |
+| 예약 작업 워커·백테스트 워커(백엔드 이미지, LLM PC 연결) | `backend/app/worker/` 코드가 생겨 예약 작업을 EC2에서 돌릴 때 |
 | Caddy, API 서버, 도메인, CloudFront, S3 | 외부에 공개할 때 |
 | GitHub Actions CD | 백엔드 이미지를 EC2에 올리기 시작할 때 |
 | KMS | 실전 투자를 켤 때 |
