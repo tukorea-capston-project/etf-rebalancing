@@ -19,7 +19,7 @@
 - LLM: Ollama로 실행하는 로컬 Qwen 계열 모델 (팀원 최저 사양 16GB 기준, 7~8B급). AWS에서는 돌리지 않습니다.
   <!-- TODO: 정확한 모델 태그(예: ollama pull <모델명>) 확정 후 기입 -->
 - 데이터 저장소: PostgreSQL 18. 서비스 DB는 AWS EC2에 두고, 테스트 DB는 각자 로컬에서 띄웁니다. 코드에서는 SQLModel로 접근합니다.
-- 서버: AWS EC2 한 대에 백엔드(Caddy, API 서버, 워커)와 서비스 DB를 Docker Compose로 띄웁니다. 프론트엔드는 S3 + CloudFront로 배포합니다.
+- 서버: AWS EC2 한 대에 백엔드(Caddy, API 서버, 예약 작업 워커, 백테스트 워커)와 서비스 DB를 Docker Compose로 띄웁니다. 프론트엔드는 S3 + CloudFront로 배포합니다.
 - 사설망: Tailscale. EC2와 LLM PC를 잇는 데 쓰고, 팀원 PC는 관리 접근(서비스 DB, SSH)에만 참여합니다.
 - CI/CD: GitHub Actions. 백엔드 이미지는 GHCR에 올립니다.
 - 비밀값 암호화: KIS 자격 증명의 암호화 마스터키는 AWS KMS에 둡니다(팀원 PC는 로컬 키).
@@ -30,7 +30,7 @@
 아래는 어기면 사고가 나는 규칙만 적습니다.
 
 - DB 포트(`15432`), SSH, Ollama 포트(`11434`)는 인터넷에 열지 않습니다. Tailscale 사설망으로만 접근합니다.
-- 예약 작업(시세 수집, 리밸런싱 계산, 주문 등)과 백테스트 대기열은 워커 프로세스에서만 실행하고, 워커는 EC2에서 하나만 띄웁니다. API 서버에는 스케줄러나 백그라운드 작업을 넣지 않습니다. 팀원 PC의 API 서버도 서비스 DB에 붙으므로, 그러면 수집·주문이 여러 곳에서 중복 실행됩니다.
+- 예약 작업(시세 수집, 리밸런싱 계산, 주문 등)은 예약 작업 워커에서만, 백테스트 대기열은 백테스트 워커에서만 실행하고, 두 워커는 EC2에서 각각 하나만 띄웁니다. API 서버에는 스케줄러나 백그라운드 작업을 넣지 않습니다. 팀원 PC의 API 서버도 서비스 DB에 붙으므로, 그러면 수집·주문이 여러 곳에서 중복 실행됩니다.
 - CD 워크플로를 고칠 때 배포 금지 시간대 검사(`docs/infra.md` 배포)를 없애지 않습니다.
 - LLM 호출 주소는 `.env`의 `OLLAMA_BASE_URL` 하나로 정합니다. 코드에 주소를 하드코딩하지 않습니다.
 - Ollama를 `OLLAMA_HOST=0.0.0.0`으로 띄우지 않습니다. Ollama API에는 인증이 없어 같은 LAN에 노출됩니다.
@@ -42,7 +42,7 @@
   - 루트: `compose.yaml`(팀원 PC용 테스트 DB), `.env.example`
   - `docs/`: 설계 문서
   - `llm_json/`: JSON 상태 파일과 LLM 출력 형식의 예시(`docs/json-files.md`)
-  - `deploy/compose.yaml`: EC2 운영용 Compose (Caddy, API 서버, 워커, 서비스 DB)
+  - `deploy/compose.yaml`: EC2 운영용 Compose (Caddy, API 서버, 예약 작업 워커, 백테스트 워커, 서비스 DB)
   - `.github/workflows/`: CI/CD 워크플로
 - 백엔드 코드는 `backend/app/` 아래에 기능(도메인)별 폴더로 나눕니다.
   - `core/`: 설정, DB 연결, LLM(Ollama) 클라이언트

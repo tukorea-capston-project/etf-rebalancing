@@ -216,7 +216,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `account_masked`, `credential` | 마스킹한 계좌번호와 자격 증명 등록·검증 상태. 원문은 암호화해 따로 저장하고 여기 두지 않습니다 |
 | `first_used_on` | 이 계좌를 처음 쓴 날 |
 | `reserve_krw` | 예비금(모의만). 실전은 `null` |
-| `holdings` | 내부 보유 기록(전략 ETF 수량). 이상 감지에서 KIS 잔고와 비교합니다 |
+| `holdings` | 내부 보유 기록(보유 종목과 수량). 이상 감지에서 KIS 잔고와 비교합니다 |
 | `reinvested_distributions` | 재투자한 분배금 입금 기록 |
 
 ### backtest.json — 백테스트

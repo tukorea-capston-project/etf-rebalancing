@@ -59,7 +59,7 @@
     "selection_note": "묶음마다 대표 하나. 대표들끼리의 최대 상관계수가 가장 작은 조합. 사용자가 지정한 ETF는 고정",
     "selection_search": "가지치기백트래킹_정확탐색",
     "dedupe_same_index": "보유비용최소_분배금포함NAV수익률최대",
-    "tie_break": ["평균상관계수최소", "종목코드순"],
+    "tie_break": ["평균상관계수최소", "순자산총액합계최대", "종목코드순"],
     "weighting": "HRP",
     "compare_weightings": ["역변동성", "동일비중"],
     "scope": "자산군비중있으면자산군안",
