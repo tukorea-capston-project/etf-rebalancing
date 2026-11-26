@@ -32,7 +32,7 @@
     { "asset_class": "현금성", "regions": ["국내"], "sectors": ["CD·KOFR·머니마켓", "단기채"] },
     { "asset_class": "통화", "regions": null, "sectors": null },
     { "asset_class": "원자재", "regions": null, "sectors": ["금", "은", "구리", "원유"] },
-    { "asset_class": "리츠", "regions": null, "sectors": null }
+    { "asset_class": "리츠", "regions": ["국내", "해외"], "sectors": null }
   ],
   "slot_axes_note": "고를 수 있는 ETF는 그 시점에 선정 조건을 통과한 ETF 전체다. 묶음(슬롯)은 자산군 안의 지역 + 섹터다. null은 그 계층을 나누지 않는다는 뜻이다",
   "aliases": {

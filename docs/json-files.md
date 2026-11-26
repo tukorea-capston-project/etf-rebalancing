@@ -201,6 +201,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `started_on` | 지금 전략 버전·계좌로 운용을 시작한 계산일 |
 | `halt` | 자동 주문 정지 상태와 사유(이상 감지 / 긴급 중지 / 서버 스위치) |
 | `regime`, `regime_since`, `market_state_id` | 현재 목표 비중을 정할 때 쓴 국면과 그 근거 |
+| `start` | 시작 비중. 운용을 시작할 때 생성한 부분을 그날 데이터로 다시 계산한 종목·비중([전략 스키마](strategy-schema.md) 기본 개념) |
 | `target`, `target_cash`, `tilt` | 현재 목표 비중과 위험자산 비중 기울이기 상태([거시판단](macro.md) 국면 전환) |
 | `switch_ids` | 국면 전환 기록 ID |
 | `macro_enabled` | 거시판단 작동 여부 |
@@ -232,7 +233,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `settings.requested_start`, `settings.start_adjusted_reason` | 사용자가 요청한 시작일과, 시작일을 늦췄다면 그 이유([백테스트](backtest.md#슬롯에-후보가-없을-때)) |
 | `substitutions` | 시작일에 쓸 수 없던 지정 ETF와 대신 쓴 대용 ETF, 교체일([백테스트](backtest.md#지정-etf를-아직-쓸-수-없을-때)) |
 | `macro_active_from` | 거시판단이 작동하기 시작한 날 |
-| `runs` | 실행 결과 목록. `mode`(실행 종류), 화면 표시(`display`: 기본 / 토글), 성과 지표, 기간 중 국면 전환 기록(`switch_ids`) |
+| `runs` | 실행 결과 목록. `mode`(실행 종류), 화면 표시(`display`: 기본 / 토글), 성과 지표, 기간 중 국면 전환 기록(`switch_ids`), 선정 조건에서 떨어진 ETF를 바꾼 기록(`dropout_replacements`: 날짜, 묶음, 이전 ETF, 새 ETF, [백테스트](backtest.md) 대상) |
 | `robustness`, `pbo` | 견고성 표(공통 기간, 변형별 지표)와 과최적화 확률·성과 저하·손실 확률([백테스트](backtest.md) 견고성 표, 과최적화 확률) |
 | `leakage_test` | LLM 지표의 미래 정보 시험 결과. 시험한 모델·프롬프트 버전과 시험별 값([백테스트](backtest.md) 미래 정보 시험) |
 | `approved_at` | 사용자가 승인한 시각. 승인은 여기에만 남깁니다 |

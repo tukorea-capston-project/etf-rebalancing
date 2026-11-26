@@ -39,19 +39,22 @@
       "mode": "고정비중",
       "display": "기본",
       "metrics": { "cagr": null, "volatility": null, "mdd": null, "sharpe": null, "sortino": null },
-      "switch_ids": []
+      "switch_ids": [],
+      "dropout_replacements": []
     },
     {
       "mode": "거시판단",
       "display": "기본",
       "metrics": { "cagr": null, "volatility": null, "mdd": null, "sharpe": null, "sortino": null },
-      "switch_ids": ["sw_bt_20220617_pf_001", "sw_bt_20230303_pf_001"]
+      "switch_ids": ["sw_bt_20220617_pf_001", "sw_bt_20230303_pf_001"],
+      "dropout_replacements": []
     },
     {
       "mode": "거시판단LLM제외",
       "display": "토글",
       "metrics": { "cagr": null, "volatility": null, "mdd": null, "sharpe": null, "sortino": null },
-      "switch_ids": ["sw_bt_20220624_pf_001"]
+      "switch_ids": ["sw_bt_20220624_pf_001"],
+      "dropout_replacements": []
     }
   ],
   "runs_note": "세 실행을 항상 함께 계산함. 거시판단LLM제외는 국면 지표에서 LLM 지표(뉴스 분위기 점수, 금통위 결정문 판정)를 뺀 것으로, 화면에서는 토글을 켰을 때만 보여 줌. 고정비중과 거시판단만 비교 기준이고 KODEX 200 보유 등은 두지 않음",

@@ -124,6 +124,9 @@
       { "indicator_id": "term_spread", "name": "장단기 금리차(국고채 10년 − 3년)", "axis": "금리", "transform": "수준", "direction": -1, "source": "ECOS", "llm": false },
       { "indicator_id": "us_10y", "name": "미국 10년 국채 금리", "axis": "금리", "transform": "변화", "direction": 1, "source": "yfinance(^TNX)", "llm": false },
       { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "transform": "조건_켜져있으면ETF선택때하락을중립으로_금리축상태는바꾸지않음", "direction": null, "source": "ECOS(KOSPI, 국고채 10년) 계산", "llm": false },
+      { "indicator_id": "us_yield_change", "name": "미국 10년 국채 금리 변화", "axis": "미국금리", "transform": "변화", "direction": 1, "source": "yfinance(^TNX)", "llm": false },
+      { "indicator_id": "us_term_spread", "name": "미국 장단기 금리차(10년 − 3개월)", "axis": "미국금리", "transform": "수준", "direction": -1, "source": "yfinance(^TNX, ^IRX)", "llm": false },
+      { "indicator_id": "us_stock_bond_corr", "name": "미국 주식·채권 상관계수", "axis": "미국금리", "transform": "조건_켜져있으면ETF선택때하락을중립으로_금리축상태는바꾸지않음", "direction": null, "source": "yfinance(^GSPC, ^TNX) 계산", "llm": false },
       { "indicator_id": "hedge_cost", "name": "환헤지 비용(한미 단기금리차)", "axis": "환헤지", "transform": "절대수준", "direction": 1, "source": "ECOS(CD 91일)+yfinance(^IRX)", "llm": false },
       { "indicator_id": "vkospi", "name": "VKOSPI", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "KRX Open API", "llm": false },
       { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "FreeSIS(2021년까지)+공공데이터포털 KOFIA API(crdTrFingWhl)", "llm": false },
@@ -136,13 +139,14 @@
     "axis_score": {
       "combine": "등가중평균",
       "restandardize": true,
-      "missing": "있는지표만평균_없으면국면유지",
+      "missing": "있는지표만평균_재표준화기준도같은지표조합으로_없으면국면유지",
       "exclude": ["stock_bond_corr"],
       "absolute_axes": ["환헤지"]
     },
-    "axis_score_note": "지표 Z-Score(중앙값·MAD, ±3에서 자름)에 방향을 곱해 축 안에서 같은 가중치로 평균하고, 같은 기준 기간으로 다시 Z-Score로 바꿈. 점수 +는 금리 상승, 환헤지 노출, 위험선호 선호. 환헤지 축은 Z-Score 없이 환헤지 비용의 절대 수준(%p)에 기준을 댐",
+    "axis_score_note": "지표 Z-Score(중앙값·MAD, ±3에서 자름)에 방향을 곱해 축 안에서 같은 가중치로 평균하고, 같은 기준 기간으로 다시 Z-Score로 바꿈. 점수 +는 금리·미국 금리 상승, 환헤지 노출, 위험선호 선호. 환헤지 축은 Z-Score 없이 환헤지 비용의 절대 수준(%p)에 기준을 댐",
     "regimes": [
       { "axis": "금리", "states": ["상승", "중립", "하락"], "etf_attribute": "금리민감도" },
+      { "axis": "미국금리", "states": ["상승", "중립", "하락"], "etf_attribute": "금리민감도" },
       { "axis": "환헤지", "states": ["헤지", "중립", "노출"], "etf_attribute": "환민감도" },
       { "axis": "위험선호", "states": ["선호", "중립", "회피"], "etf_attribute": "위험민감도" }
     ],
@@ -155,10 +159,10 @@
       "selection": "속성매칭",
       "score": "RegimeFit - λ·SwitchCost",
       "lambda": 100,
-      "rank_scale": "슬롯안순위_-1~1",
-      "switch_cost": "수수료+슬리피지+매매차익세금(지금ETF는0)",
+      "rank_scale": "슬롯안순위_-1~1_차이가표준오차1.96배미만이면같은순위",
+      "switch_cost": "수수료+슬리피지+매매차익세금(실제보유ETF는0)",
       "max_corr_rule": "지금조합의최대상관계수를넘지않음_만족조합없으면초과최소조합중점수최대",
-      "axis_slots": { "금리": ["국내채권", "미국채권"], "환헤지": ["미국채권", "해외주식", "원자재", "리츠"], "위험선호": ["주식"] },
+      "axis_slots": { "금리": ["국내채권"], "미국금리": ["미국채권"], "환헤지": ["미국채권", "해외주식", "원자재", "해외리츠"], "위험선호": ["주식"] },
       "etf_attributes": {
         "method": "민감도회귀",
         "returns": "선정기간주간수익률",
@@ -179,7 +183,7 @@
       "keep_user": ["etfs", "asset_classes", "cash"]
     },
     "on_switch_note": "국면이 바뀌면 묶음마다 새 국면에 맞는 속성(금리·환·위험 민감도)의 ETF를 점수로 고름. 축은 axis_slots의 슬롯에만 적용함. 새 ETF는 이전 ETF의 비중을 물려받고 HRP는 다시 계산하지 않음. 사용자가 지정한 ETF·자산군 비중·현금 비중은 그대로",
-    "events": { "check": "매영업일아침", "enter": 2.0, "exit": "정기판단에서만", "axes": ["금리", "위험선호"] },
+    "events": { "check": "매영업일아침", "enter": 2.0, "exit": "정기판단에서만", "axes": ["금리", "미국금리", "위험선호"], "weekly_indicators": "기준일로끝나는7일로다시계산" },
     "events_note": "매 영업일 전 영업일 기준으로 축 점수를 계산해 ±2.0을 넘으면 주간 판단을 기다리지 않고 전환함. 중립 복귀는 정기 판단에서만. 환헤지 축은 제외"
   },
   "trading": {
