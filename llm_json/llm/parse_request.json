@@ -11,8 +11,8 @@
   "cash": null,
   "groups": [],
   "etfs": [
-    { "quote": "S&P 그거 넣어주시고", "etf_code": "360750", "weight": null },
-    { "quote": "반도체도 넣어주세요", "etf_code": "395270", "weight": null }
+    { "quote": "S&P 그거 넣어주시고", "etf_code": "360750", "action": "포함", "weight": null },
+    { "quote": "반도체도 넣어주세요", "etf_code": "395270", "action": "포함", "weight": null }
   ],
   "rebalance": null,
   "out_of_scope": [{ "quote": "삼성전자도요", "reason": "개별종목" }]

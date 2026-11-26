@@ -2,7 +2,7 @@
   "schema_version": 2,
   "output_id": "llm_news_20261204_0001",
   "task": "news_mood",
-  "model": "qwen3:8b",
+  "model": "qwen3.5:9b",
   "model_cutoff": null,
   "prompt_version": "news_mood_v1",
   "created_at": "2026-12-04T17:40:00+09:00",
