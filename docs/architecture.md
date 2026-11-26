@@ -5,7 +5,7 @@
 
 ## 구성 요소
 
-![시스템 구성도](etf-rebalancing-아키텍처.drawio.svg)
+![시스템 구성도](diagrams/system-architecture.drawio.svg)
 
 편집 방법과 로고 출처는 아래 "다이어그램" 섹션에 있습니다.
 
@@ -103,7 +103,7 @@ EC2 중지, 워커 장애 등으로 예약 작업을 제 시각에 실행하지 
 
 그림은 위 "구성 요소" 섹션에 있습니다.
 
-- 파일은 `docs/diagrams/system.drawio.svg`입니다. GitHub에서는 그림으로 보이고, draw.io에서 열면 그대로 편집할 수 있습니다.
+- 파일은 `docs/diagrams/system-architecture.drawio.svg`입니다. GitHub에서는 그림으로 보이고, draw.io에서 열면 그대로 편집할 수 있습니다.
 - 편집: [app.diagrams.net](https://app.diagrams.net)(브라우저), VS Code의 Draw.io Integration 확장, 또는 draw.io 데스크톱 앱에서 엽니다. 저장할 때 형식을 `.drawio.svg`로 유지합니다.
 - 로고는 파일 안에 포함되어 있습니다. 출처: 각 사의 공식 사이트(한국투자증권, KRX, Yahoo Finance, Ollama), Simple Icons(Tailscale), draw.io 내장 아이콘(AWS KMS·CloudFront·S3, GitHub), 팀 로고 모음(FastAPI, PostgreSQL, React, AWS EC2, Docker). 로고의 상표권은 각 사에 있습니다.
 
