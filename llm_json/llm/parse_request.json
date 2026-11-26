@@ -1,5 +1,5 @@
 {
-  "intent": "포트폴리오생성",
+  "intent": ["포트폴리오생성"],
   "profile": {
     "goal": { "quote": "전세금 보탤 돈", "value": "주택자금" },
     "horizon_months": { "quote": "2년 뒤에", "value": 24 },
