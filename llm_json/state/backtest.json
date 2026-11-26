@@ -58,9 +58,9 @@
     }
   ],
   "runs_note": "세 실행을 항상 함께 계산함. 거시판단LLM제외는 국면 지표에서 LLM 지표(뉴스 분위기 점수, 금통위 결정문 판정)를 뺀 것으로, 화면에서는 토글을 켰을 때만 보여 줌. 고정비중과 거시판단만 비교 기준이고 KODEX 200 보유 등은 두지 않음",
-  "robustness": { "period": null, "variants": [] },
+  "robustness": { "period": null, "variants": [], "skipped_reason": null },
   "robustness_note": "기준값을 하나씩 바꾼 변형마다 CAGR·MDD·샤프·매매회전율·국면 전환 횟수와 정한 값과의 차이. 값은 계산 후 채워짐",
-  "pbo": { "value": null, "performance_degradation": null, "probability_of_loss": null },
+  "pbo": { "skipped_reason": null, "value": null, "performance_degradation": null, "probability_of_loss": null },
   "leakage_test": { "model": null, "prompt_version": null, "memorization": null, "next_decision": null, "by_memorization": null, "events": null, "pre_post_cutoff": null },
   "leakage_test_note": "모델·프롬프트 버전마다 한 번 계산한 미래 정보 시험 결과를 붙임. 값은 계산 후 채워짐(docs/backtest.md 미래 정보 시험)",
   "metrics_note": "성과 지표 정의는 docs/backtest.md. 예시라 값은 비워 둠",

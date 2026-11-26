@@ -56,7 +56,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `expressions` | 자주 쓰는 말과 칸 값의 연결. 예: "전세" → `goal`=주택자금 |
 | `slot_axes` | 자산군마다 고를 수 있는 지역(`regions`)과 섹터(`sectors`). `null`은 그 계층을 나누지 않음([투자 대상](universe.md) 슬롯 분류) |
 | `aliases` | ETF 별칭. 예: "S&P", "미국 주식" → `360750` |
-| `questions` | 되묻기와 `확인` 이슈에서 사용자에게 할 질문과 선택지 문구. 리밸런싱 조건(`rebalance`), 투자 금액(`capital`), 비중 충돌(`weight_conflict`), 비중 제약 불가능(`weight_infeasible`) |
+| `questions` | 되묻기와 `확인` 이슈에서 사용자에게 할 질문과 선택지 문구. 리밸런싱 조건(`rebalance`), 투자 금액(`capital`), 비중 충돌(`weight_conflict`), 비중 제약 불가능(최대 비중 쪽 `weight_infeasible`, 최소 비중 쪽 `weight_min_infeasible`) |
 
 ### policy.json — 운용 규칙(정책)
 
@@ -234,7 +234,7 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `substitutions` | 시작일에 쓸 수 없던 지정 ETF와 대신 쓴 대용 ETF, 교체일([백테스트](backtest.md#지정-etf를-아직-쓸-수-없을-때)) |
 | `macro_active_from` | 거시판단이 작동하기 시작한 날 |
 | `runs` | 실행 결과 목록. `mode`(실행 종류), 화면 표시(`display`: 기본 / 토글), 성과 지표, 기간 중 국면 전환 기록(`switch_ids`), 선정 조건에서 떨어진 ETF를 바꾼 기록(`dropout_replacements`: 날짜, 묶음, 이전 ETF, 새 ETF, [백테스트](backtest.md) 대상) |
-| `robustness`, `pbo` | 견고성 표(공통 기간, 변형별 지표)와 과최적화 확률·성과 저하·손실 확률([백테스트](backtest.md) 견고성 표, 과최적화 확률) |
+| `robustness`, `pbo` | 견고성 표(공통 기간, 변형별 지표)와 과최적화 확률·성과 저하·손실 확률. 공통 기간이 짧아 계산하지 않았으면 그 이유(`skipped_reason`)([백테스트](backtest.md) 견고성 표, 과최적화 확률) |
 | `leakage_test` | LLM 지표의 미래 정보 시험 결과. 시험한 모델·프롬프트 버전과 시험별 값([백테스트](backtest.md) 미래 정보 시험) |
 | `approved_at` | 사용자가 승인한 시각. 승인은 여기에만 남깁니다 |
 

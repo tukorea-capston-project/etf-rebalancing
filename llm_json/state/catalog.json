@@ -83,6 +83,13 @@
       "note": "종목당 최대 비중을 넘는 몫을 받을 ETF가 없을 때. 문구는 미정(docs/strategy-schema.md 미정의 되묻기 문구)"
     },
     {
+      "question_key": "weight_min_infeasible",
+      "kind": "고르기",
+      "text": null,
+      "choices": [],
+      "note": "묶음마다 최소 비중을 주면 나눌 몫을 넘는데, 사용자가 말한 묶음만으로도 맞출 수 없을 때. 선택지는 뺄 수 있는 묶음 목록으로 그때 만듦. 문구는 미정(docs/strategy-schema.md 미정의 되묻기 문구)"
+    },
+    {
       "question_key": "weight_conflict",
       "kind": "고르기",
       "text": "말씀하신 비중이 서로 맞지 않아요. 어느 쪽에 맞출까요?",

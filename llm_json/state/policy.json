@@ -92,6 +92,7 @@
     { "check_id": "max_etfs", "level": "조정", "action": "비중작은생성ETF부터뺌" },
     { "check_id": "weight_conflict", "level": "확인", "question_key": "weight_conflict" },
     { "check_id": "weight_infeasible", "level": "확인", "question_key": "weight_infeasible", "on_unresolved": "현금성묶음추가" },
+    { "check_id": "weight_min_infeasible", "level": "확인", "auto_first": "기본묶음중HRP비중최소부터빼기", "question_key": "weight_min_infeasible", "on_unresolved": "HRP비중최소묶음부터빼기" },
     {
       "check_id": "horizon_risk",
       "level": "경고",
