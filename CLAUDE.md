@@ -16,8 +16,7 @@
 - 프론트엔드 품질 도구: Vitest(테스트), Oxlint(린트), Prettier(포맷)
 - 증권사 API: 한국투자증권 KIS Open API (모의투자·실전투자)
 - 외부 데이터: KRX Open API(ETF 일별 시세), yfinance(분배금), 한국은행 ECOS(CD금리, 백테스트 무위험수익률). 국면 지표의 출처는 `docs/macro.md`를 봅니다.
-- LLM: Ollama로 실행하는 로컬 Qwen 계열 모델 (팀원 최저 사양 16GB 기준, 7~8B급). AWS에서는 돌리지 않습니다.
-  <!-- TODO: 정확한 모델 태그(예: ollama pull <모델명>) 확정 후 기입 -->
+- LLM: Ollama로 실행하는 로컬 Qwen 모델 `qwen3.5:9b` (팀원 최저 사양 16GB 기준). 받기: `ollama pull qwen3.5:9b`. AWS에서는 돌리지 않습니다.
 - 데이터 저장소: PostgreSQL 18. 서비스 DB는 AWS EC2에 두고, 테스트 DB는 각자 로컬에서 띄웁니다. 코드에서는 SQLModel로 접근합니다.
 - 서버: AWS EC2 한 대에 백엔드(Caddy, API 서버, 예약 작업 워커, 백테스트 워커)와 서비스 DB를 Docker Compose로 띄웁니다. 프론트엔드는 S3 + CloudFront로 배포합니다.
 - 사설망: Tailscale. EC2와 LLM PC를 잇는 데 쓰고, 팀원 PC는 관리 접근(서비스 DB, SSH)에만 참여합니다.
