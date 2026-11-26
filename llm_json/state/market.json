@@ -17,6 +17,9 @@
     },
     "term_spread": { "value": 0.004, "z": 0.2, "period": "2026-12-03", "released_at": "2026-12-04T18:00:00+09:00", "source": "ECOS" },
     "us_10y": { "value": 0.0412, "z": -0.9, "period": "2026-12-04", "released_at": "2026-12-07T08:00:00+09:00", "source": "yfinance(^TNX)" },
+    "us_yield_change": { "value": 0.0412, "z": -0.3, "period": "2026-12-04", "released_at": "2026-12-07T08:00:00+09:00", "source": "yfinance(^TNX)" },
+    "us_term_spread": { "value": 0.0021, "z": 0.1, "period": "2026-12-04", "released_at": "2026-12-07T08:00:00+09:00", "source": "yfinance(^TNX, ^IRX)" },
+    "us_stock_bond_corr": { "value": -0.1, "z": null, "period": "2026-12-04", "released_at": "2026-12-07T08:00:00+09:00", "source": "yfinance(^GSPC, ^TNX) 계산" },
     "stock_bond_corr": { "value": -0.2, "z": null, "period": "2026-12-03", "released_at": "2026-12-04T18:00:00+09:00", "source": "ECOS(KOSPI, 국고채 10년) 계산" },
     "hedge_cost": { "value": 0.004, "z": null, "period": "2026-12-03", "released_at": "2026-12-04T18:00:00+09:00", "source": "ECOS(CD 91일)+yfinance(^IRX)" },
     "vkospi": { "value": 17.8, "z": -0.6, "period": "2026-12-04", "released_at": "2026-12-07T08:10:00+09:00", "source": "KRX Open API" },
@@ -61,6 +64,7 @@
   "indicators_note": "값은 설명용 예시. 지표별 Z-Score에 방향을 곱해 축마다 합침(policy.macro.axis_score). bok_statement는 범주라 마지막 정책 방향(stance)을 점수로 씀",
   "regimes": {
     "금리": { "state": "하락", "prev_state": "중립", "changed": true, "score": -1.2, "enter": -1.0, "exit": 0.0 },
+    "미국금리": { "state": "중립", "prev_state": "중립", "changed": false, "score": -0.3, "enter": -1.0, "exit": 0.0 },
     "환헤지": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.004, "enter": 0.01, "exit": 0.0 },
     "위험선호": { "state": "중립", "prev_state": "중립", "changed": false, "score": 0.5, "enter": 1.0, "exit": 0.0 }
   },
