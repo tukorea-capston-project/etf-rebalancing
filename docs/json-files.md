@@ -217,7 +217,8 @@ LLM과 서버가 쓸 수 있는 **값의 목록**을 모아 둔 파일입니다.
 | `first_used_on` | 이 계좌를 처음 쓴 날 |
 | `reserve_krw` | 예비금(모의만). 실전은 `null` |
 | `holdings` | 내부 보유 기록(보유 종목과 수량). 이상 감지에서 KIS 잔고와 비교합니다 |
-| `reinvested_distributions` | 재투자한 분배금 입금 기록 |
+| `reinvested_distributions` | 처리한 분배금 입금 기록(재투자했거나 현금으로 둠, [리밸런싱](rebalancing.md) 분배금) |
+| `virtual_deposits` | 모의 적립금 가상 입금 기록([모의·실전투자](trading.md) 운용 금액과 내부 기록) |
 
 ### backtest.json — 백테스트
 

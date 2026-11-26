@@ -123,7 +123,7 @@
       { "indicator_id": "ktb_yield_change", "name": "국고채 10년 금리 변화", "axis": "금리", "transform": "변화", "direction": 1, "source": "ECOS", "llm": false },
       { "indicator_id": "term_spread", "name": "장단기 금리차(국고채 10년 − 3년)", "axis": "금리", "transform": "수준", "direction": -1, "source": "ECOS", "llm": false },
       { "indicator_id": "us_10y", "name": "미국 10년 국채 금리", "axis": "금리", "transform": "변화", "direction": 1, "source": "yfinance(^TNX)", "llm": false },
-      { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "transform": "조건_기준초과면하락을중립으로", "direction": null, "source": "ECOS(KOSPI, 국고채 10년) 계산", "llm": false },
+      { "indicator_id": "stock_bond_corr", "name": "주식·채권 상관계수", "axis": "금리", "transform": "조건_켜져있으면ETF선택때하락을중립으로_금리축상태는바꾸지않음", "direction": null, "source": "ECOS(KOSPI, 국고채 10년) 계산", "llm": false },
       { "indicator_id": "hedge_cost", "name": "환헤지 비용(한미 단기금리차)", "axis": "환헤지", "transform": "절대수준", "direction": 1, "source": "ECOS(CD 91일)+yfinance(^IRX)", "llm": false },
       { "indicator_id": "vkospi", "name": "VKOSPI", "axis": "위험선호", "transform": "수준", "direction": -1, "source": "KRX Open API", "llm": false },
       { "indicator_id": "margin_loan", "name": "신용융자 잔고", "axis": "위험선호", "transform": "변화율", "direction": 1, "source": "FreeSIS(2021년까지)+공공데이터포털 KOFIA API(crdTrFingWhl)", "llm": false },
